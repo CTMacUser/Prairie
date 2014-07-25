@@ -1,0 +1,494 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F36CC9481982AA590001EC41 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F36CC9471982AA590001EC41 /* Cocoa.framework */; };
+		F36CC9521982AA590001EC41 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9501982AA590001EC41 /* InfoPlist.strings */; };
+		F36CC9541982AA590001EC41 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC9531982AA590001EC41 /* main.m */; };
+		F36CC9581982AA590001EC41 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9561982AA590001EC41 /* Credits.rtf */; };
+		F36CC95B1982AA590001EC41 /* PrDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC95A1982AA590001EC41 /* PrDocument.m */; };
+		F36CC95E1982AA590001EC41 /* PrDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = F36CC95C1982AA590001EC41 /* PrDocument.xib */; };
+		F36CC9611982AA590001EC41 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F36CC95F1982AA590001EC41 /* MainMenu.xib */; };
+		F36CC9631982AA590001EC41 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9621982AA590001EC41 /* Images.xcassets */; };
+		F36CC96A1982AA590001EC41 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F36CC9691982AA590001EC41 /* XCTest.framework */; };
+		F36CC96B1982AA590001EC41 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F36CC9471982AA590001EC41 /* Cocoa.framework */; };
+		F36CC9731982AA590001EC41 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9711982AA590001EC41 /* InfoPlist.strings */; };
+		F36CC9751982AA590001EC41 /* PrairieTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC9741982AA590001EC41 /* PrairieTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F36CC96C1982AA590001EC41 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F36CC93C1982AA590001EC41 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F36CC9431982AA590001EC41;
+			remoteInfo = Prairie;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F36CC9441982AA590001EC41 /* Prairie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Prairie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F36CC9471982AA590001EC41 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		F36CC94A1982AA590001EC41 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F36CC94B1982AA590001EC41 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		F36CC94C1982AA590001EC41 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F36CC94F1982AA590001EC41 /* Prairie-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Prairie-Info.plist"; sourceTree = "<group>"; };
+		F36CC9511982AA590001EC41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F36CC9531982AA590001EC41 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F36CC9551982AA590001EC41 /* Prairie-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Prairie-Prefix.pch"; sourceTree = "<group>"; };
+		F36CC9571982AA590001EC41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		F36CC9591982AA590001EC41 /* PrDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrDocument.h; sourceTree = "<group>"; };
+		F36CC95A1982AA590001EC41 /* PrDocument.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrDocument.m; sourceTree = "<group>"; };
+		F36CC95D1982AA590001EC41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PrDocument.xib; sourceTree = "<group>"; };
+		F36CC9601982AA590001EC41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		F36CC9621982AA590001EC41 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		F36CC9681982AA590001EC41 /* PrairieTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PrairieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F36CC9691982AA590001EC41 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		F36CC9701982AA590001EC41 /* PrairieTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PrairieTests-Info.plist"; sourceTree = "<group>"; };
+		F36CC9721982AA590001EC41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F36CC9741982AA590001EC41 /* PrairieTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrairieTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F36CC9411982AA590001EC41 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F36CC9481982AA590001EC41 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F36CC9651982AA590001EC41 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F36CC96B1982AA590001EC41 /* Cocoa.framework in Frameworks */,
+				F36CC96A1982AA590001EC41 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F36CC93B1982AA590001EC41 = {
+			isa = PBXGroup;
+			children = (
+				F36CC94D1982AA590001EC41 /* Prairie */,
+				F36CC96E1982AA590001EC41 /* PrairieTests */,
+				F36CC9461982AA590001EC41 /* Frameworks */,
+				F36CC9451982AA590001EC41 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F36CC9451982AA590001EC41 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F36CC9441982AA590001EC41 /* Prairie.app */,
+				F36CC9681982AA590001EC41 /* PrairieTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F36CC9461982AA590001EC41 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F36CC9471982AA590001EC41 /* Cocoa.framework */,
+				F36CC9691982AA590001EC41 /* XCTest.framework */,
+				F36CC9491982AA590001EC41 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F36CC9491982AA590001EC41 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F36CC94A1982AA590001EC41 /* AppKit.framework */,
+				F36CC94B1982AA590001EC41 /* CoreData.framework */,
+				F36CC94C1982AA590001EC41 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		F36CC94D1982AA590001EC41 /* Prairie */ = {
+			isa = PBXGroup;
+			children = (
+				F36CC9591982AA590001EC41 /* PrDocument.h */,
+				F36CC95A1982AA590001EC41 /* PrDocument.m */,
+				F36CC95C1982AA590001EC41 /* PrDocument.xib */,
+				F36CC95F1982AA590001EC41 /* MainMenu.xib */,
+				F36CC9621982AA590001EC41 /* Images.xcassets */,
+				F36CC94E1982AA590001EC41 /* Supporting Files */,
+			);
+			path = Prairie;
+			sourceTree = "<group>";
+		};
+		F36CC94E1982AA590001EC41 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F36CC94F1982AA590001EC41 /* Prairie-Info.plist */,
+				F36CC9501982AA590001EC41 /* InfoPlist.strings */,
+				F36CC9531982AA590001EC41 /* main.m */,
+				F36CC9551982AA590001EC41 /* Prairie-Prefix.pch */,
+				F36CC9561982AA590001EC41 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F36CC96E1982AA590001EC41 /* PrairieTests */ = {
+			isa = PBXGroup;
+			children = (
+				F36CC9741982AA590001EC41 /* PrairieTests.m */,
+				F36CC96F1982AA590001EC41 /* Supporting Files */,
+			);
+			path = PrairieTests;
+			sourceTree = "<group>";
+		};
+		F36CC96F1982AA590001EC41 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F36CC9701982AA590001EC41 /* PrairieTests-Info.plist */,
+				F36CC9711982AA590001EC41 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F36CC9431982AA590001EC41 /* Prairie */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F36CC9781982AA590001EC41 /* Build configuration list for PBXNativeTarget "Prairie" */;
+			buildPhases = (
+				F36CC9401982AA590001EC41 /* Sources */,
+				F36CC9411982AA590001EC41 /* Frameworks */,
+				F36CC9421982AA590001EC41 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Prairie;
+			productName = Prairie;
+			productReference = F36CC9441982AA590001EC41 /* Prairie.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F36CC9671982AA590001EC41 /* PrairieTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F36CC97B1982AA590001EC41 /* Build configuration list for PBXNativeTarget "PrairieTests" */;
+			buildPhases = (
+				F36CC9641982AA590001EC41 /* Sources */,
+				F36CC9651982AA590001EC41 /* Frameworks */,
+				F36CC9661982AA590001EC41 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F36CC96D1982AA590001EC41 /* PBXTargetDependency */,
+			);
+			name = PrairieTests;
+			productName = PrairieTests;
+			productReference = F36CC9681982AA590001EC41 /* PrairieTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F36CC93C1982AA590001EC41 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = Pr;
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "Daryle Walker";
+				TargetAttributes = {
+					F36CC9671982AA590001EC41 = {
+						TestTargetID = F36CC9431982AA590001EC41;
+					};
+				};
+			};
+			buildConfigurationList = F36CC93F1982AA590001EC41 /* Build configuration list for PBXProject "Prairie" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F36CC93B1982AA590001EC41;
+			productRefGroup = F36CC9451982AA590001EC41 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F36CC9431982AA590001EC41 /* Prairie */,
+				F36CC9671982AA590001EC41 /* PrairieTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F36CC9421982AA590001EC41 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F36CC9521982AA590001EC41 /* InfoPlist.strings in Resources */,
+				F36CC9631982AA590001EC41 /* Images.xcassets in Resources */,
+				F36CC95E1982AA590001EC41 /* PrDocument.xib in Resources */,
+				F36CC9581982AA590001EC41 /* Credits.rtf in Resources */,
+				F36CC9611982AA590001EC41 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F36CC9661982AA590001EC41 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F36CC9731982AA590001EC41 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F36CC9401982AA590001EC41 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F36CC95B1982AA590001EC41 /* PrDocument.m in Sources */,
+				F36CC9541982AA590001EC41 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F36CC9641982AA590001EC41 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F36CC9751982AA590001EC41 /* PrairieTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F36CC96D1982AA590001EC41 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F36CC9431982AA590001EC41 /* Prairie */;
+			targetProxy = F36CC96C1982AA590001EC41 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		F36CC9501982AA590001EC41 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F36CC9511982AA590001EC41 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		F36CC9561982AA590001EC41 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F36CC9571982AA590001EC41 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		F36CC95C1982AA590001EC41 /* PrDocument.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F36CC95D1982AA590001EC41 /* Base */,
+			);
+			name = PrDocument.xib;
+			sourceTree = "<group>";
+		};
+		F36CC95F1982AA590001EC41 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F36CC9601982AA590001EC41 /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		F36CC9711982AA590001EC41 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F36CC9721982AA590001EC41 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F36CC9761982AA590001EC41 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F36CC9771982AA590001EC41 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F36CC9791982AA590001EC41 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Prairie/Prairie-Prefix.pch";
+				INFOPLIST_FILE = "Prairie/Prairie-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		F36CC97A1982AA590001EC41 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Prairie/Prairie-Prefix.pch";
+				INFOPLIST_FILE = "Prairie/Prairie-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		F36CC97C1982AA590001EC41 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Prairie.app/Contents/MacOS/Prairie";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Prairie/Prairie-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "PrairieTests/PrairieTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		F36CC97D1982AA590001EC41 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Prairie.app/Contents/MacOS/Prairie";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Prairie/Prairie-Prefix.pch";
+				INFOPLIST_FILE = "PrairieTests/PrairieTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F36CC93F1982AA590001EC41 /* Build configuration list for PBXProject "Prairie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F36CC9761982AA590001EC41 /* Debug */,
+				F36CC9771982AA590001EC41 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F36CC9781982AA590001EC41 /* Build configuration list for PBXNativeTarget "Prairie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F36CC9791982AA590001EC41 /* Debug */,
+				F36CC97A1982AA590001EC41 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		F36CC97B1982AA590001EC41 /* Build configuration list for PBXNativeTarget "PrairieTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F36CC97C1982AA590001EC41 /* Debug */,
+				F36CC97D1982AA590001EC41 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F36CC93C1982AA590001EC41 /* Project object */;
+}
