@@ -1,12 +1,11 @@
-//
-//  main.m
-//  Prairie
-//
-//  Created by Daryle Walker on 7/25/14.
-//  Copyright (c) 2014 Daryle Walker. All rights reserved.
-//
+/*
+ @file
+ @brief The app's program driver.
+ @copyright Daryle Walker, 2014, all rights reserved.
+ @CFBundleIdentifier io.github.ctmacuser.Prairie
+ */
 
-#import <Cocoa/Cocoa.h>
+@import Cocoa;
 
 int main(int argc, const char * argv[])
 {

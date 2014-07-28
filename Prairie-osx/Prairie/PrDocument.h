@@ -1,10 +1,9 @@
-//
-//  PrDocument.h
-//  Prairie
-//
-//  Created by Daryle Walker on 7/25/14.
-//  Copyright (c) 2014 Daryle Walker. All rights reserved.
-//
+/*!
+ @header
+ @brief Declaration of the app's Document class, directly connected to its XIB.
+ @copyright Daryle Walker, 2014, all rights reserved.
+ @CFBundleIdentifier io.github.ctmacuser.Prairie
+ */
 
 @import Cocoa;
 @import WebKit;
