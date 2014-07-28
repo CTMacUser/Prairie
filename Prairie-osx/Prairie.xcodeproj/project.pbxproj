@@ -19,6 +19,7 @@
 		F36CC96B1982AA590001EC41 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F36CC9471982AA590001EC41 /* Cocoa.framework */; };
 		F36CC9731982AA590001EC41 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9711982AA590001EC41 /* InfoPlist.strings */; };
 		F36CC9751982AA590001EC41 /* PrairieTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC9741982AA590001EC41 /* PrairieTests.m */; };
+		F3E0F0A3198617B400EABE36 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E0F0A2198617B400EABE36 /* WebKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		F36CC9701982AA590001EC41 /* PrairieTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PrairieTests-Info.plist"; sourceTree = "<group>"; };
 		F36CC9721982AA590001EC41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F36CC9741982AA590001EC41 /* PrairieTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrairieTests.m; sourceTree = "<group>"; };
+		F3E0F0A2198617B400EABE36 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F36CC9481982AA590001EC41 /* Cocoa.framework in Frameworks */,
+				F3E0F0A3198617B400EABE36 /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +102,7 @@
 			children = (
 				F36CC9471982AA590001EC41 /* Cocoa.framework */,
 				F36CC9691982AA590001EC41 /* XCTest.framework */,
+				F3E0F0A2198617B400EABE36 /* WebKit.framework */,
 				F36CC9491982AA590001EC41 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -479,6 +483,7 @@
 				F36CC97A1982AA590001EC41 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F36CC97B1982AA590001EC41 /* Build configuration list for PBXNativeTarget "PrairieTests" */ = {
 			isa = XCConfigurationList;
@@ -487,6 +492,7 @@
 				F36CC97D1982AA590001EC41 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -6,8 +6,12 @@
 //  Copyright (c) 2014 Daryle Walker. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+@import Cocoa;
+@import WebKit;
 
 @interface PrDocument : NSDocument
+
+@property (weak) IBOutlet WebView *webView;
+@property (weak) IBOutlet NSTextField *urlDisplay;
 
 @end
