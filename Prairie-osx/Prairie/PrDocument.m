@@ -8,23 +8,7 @@
 
 #import "PrDocument.h"
 
-#pragma mark Private members
-
-@interface PrDocument ()
-
-@property (nonatomic, copy) NSURL *    initialURL;
-@property (nonatomic, copy) NSData *   initialData;
-@property (nonatomic, copy) NSString * initialType;  // MIME type, not UTI
-
-@end
-
 @implementation PrDocument
-
-#pragma mark Private data
-
-@synthesize initialURL;
-@synthesize initialData;
-@synthesize initialType;
 
 #pragma mark Conventional overrides
 
@@ -46,14 +30,10 @@
 {
     [super windowControllerDidLoadNib:aController];
 
-    // Load the first page.
-    if ( self.initialURL && self.initialData ) {
-        // Opening a file, with pre-loaded information (from the "readFrom..." methods).
-        [[self.webView mainFrame] loadData:self.initialData MIMEType:self.initialType textEncodingName:nil baseURL:self.initialURL];  // Can/should the initial* properties be cleared after this point?
-    } else {
-        // Open home page. (TODO: have this be a preference; support blank page.)
-        [[self.webView mainFrame] loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.apple.com"]]];
-    }
+    // Load the initial page, either local or a default.
+    // (TODO: have the default page be a preference, including a blank page.)
+    [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:(self.fileURL ? self.fileURL : [NSURL URLWithString:@"http://www.apple.com"])]];
+    self.fileURL = nil;  // Disconnects file (if any) from infrastructure, treating loaded file as an import.
 }
 
 + (BOOL)autosavesInPlace
@@ -73,24 +53,21 @@
     // TODO: currently doesn't work right. Regular saves (and save-as) and reverts seem to be bad ideas. Export seems to work when web-archive is the format, but not public-content. The latter has no extension/type-information to pass on, so the exported file is untyped and useless. Is my assumption on the line for local variable "data" wrong? Should the app switch from Editor to Viewer? (That will require making a subclass of NSDocumentController to open windows correctly.)
 }
 
-- (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
-{
-    self.initialData = data;
-    return YES;  // misnomer: data isn't actually read until the XIB's WebView loads it; can't get errors either
-}
-
 - (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
 {
-    // The default implementation calls the NSFileWrapper version, which calls the NSData version.  The WebView takes in an NSData and NSURL, so we need two overrides to get all the information.  The URL data will always be grabbed as long as calling code only uses the URL version and never skips ahead to directly call the NSData version.
     CFStringRef const  mimeType = UTTypeCopyPreferredTagWithClass((__bridge CFStringRef) typeName, kUTTagClassMIMEType);
 
-    self.initialType = mimeType ? (__bridge NSString *)mimeType : @"application/octet-stream";
-    if ( [WebView canShowMIMEType:self.initialType] ) {
-        self.initialURL = url;
-        return [super readFromURL:url ofType:typeName error:outError];
+    if ( mimeType && [WebView canShowMIMEType:(__bridge NSString *) mimeType] ) {
+        return YES;
     }
     if ( outError ) {
-        *outError = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:NSFileReadCorruptFileError userInfo:@{NSURLErrorKey: url}];  // Is the error code appropriate?
+        NSMutableDictionary *  info = [[NSMutableDictionary alloc] init];
+
+        [info setDictionary:@{NSURLErrorKey: url, NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"The URL is of a missing or unsupported MIME type.", @"A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit.")}];
+        if ( mimeType ) {
+            [info setValue:(__bridge NSString *) mimeType forKey:WebKitErrorMIMETypeKey];
+        }
+        *outError = [NSError errorWithDomain:WebKitErrorDomain code:WebKitErrorCannotShowURL userInfo:info];
     }
     return NO;  // Cannot proceed if WebView can't process the required MIME type.
 }
