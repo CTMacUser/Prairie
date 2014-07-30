@@ -34,6 +34,9 @@
     // (TODO: have the default page be a preference, including a blank page.)
     [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:(self.fileURL ? self.fileURL : [NSURL URLWithString:@"http://www.apple.com"])]];
     self.fileURL = nil;  // Disconnects file (if any) from infrastructure, treating loaded file as an import.
+
+    // Docs suggest giving a name to group related frames. I'm using a UUID for an easily accessible unique string.
+    self.webView.groupName = [[NSUUID UUID] UUIDString];
 }
 
 + (BOOL)autosavesInPlace
@@ -76,6 +79,18 @@
 {
     // The file is loaded when the WebView finishes with it.
     return self.webView && !self.webView.isLoading;
+}
+
+#pragma mark WebUIDelegate overrides
+
+// The document object is set as the web-view's UI-delegate within the XIB.
+
+- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
+{
+    id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];
+
+    [[newDocument webView].mainFrame loadRequest:request];
+    return [newDocument webView];
 }
 
 @end

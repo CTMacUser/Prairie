@@ -40,7 +40,12 @@
                     <webView translatesAutoresizingMaskIntoConstraints="NO" id="MbC-4S-7ZT">
                         <rect key="frame" x="0.0" y="0.0" width="684" height="463"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <webPreferences key="preferences" defaultFontSize="12" defaultFixedFontSize="12"/>
+                        <webPreferences key="preferences" defaultFontSize="12" defaultFixedFontSize="12">
+                            <nil key="identifier"/>
+                        </webPreferences>
+                        <connections>
+                            <outlet property="UIDelegate" destination="-2" id="Ni5-wW-Wxa"/>
+                        </connections>
                     </webView>
                 </subviews>
                 <constraints>
@@ -56,6 +61,7 @@
             <connections>
                 <binding destination="-2" name="title" keyPath="self.webView.mainFrameTitle" id="s4G-E4-HTj"/>
                 <outlet property="delegate" destination="-2" id="0bl-1N-x8E"/>
+                <outlet property="initialFirstResponder" destination="MbC-4S-7ZT" id="BDa-36-t43"/>
             </connections>
         </window>
     </objects>
