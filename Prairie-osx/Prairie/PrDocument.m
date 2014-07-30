@@ -63,7 +63,7 @@
     if ( outError ) {
         NSMutableDictionary *  info = [[NSMutableDictionary alloc] init];
 
-        [info setDictionary:@{NSURLErrorKey: url, NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"The URL is of a missing or unsupported MIME type.", @"A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit.")}];
+        [info setDictionary:@{NSURLErrorKey: url, NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"NO_MIME_TYPE", @"A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit.")}];
         if ( mimeType ) {
             [info setValue:(__bridge NSString *) mimeType forKey:WebKitErrorMIMETypeKey];
         }

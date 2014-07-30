@@ -20,6 +20,7 @@
 		F36CC9731982AA590001EC41 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9711982AA590001EC41 /* InfoPlist.strings */; };
 		F36CC9751982AA590001EC41 /* PrairieTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC9741982AA590001EC41 /* PrairieTests.m */; };
 		F3E0F0A3198617B400EABE36 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E0F0A2198617B400EABE36 /* WebKit.framework */; };
+		F3E0F0A919887B2400EABE36 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F3E0F0AB19887B2400EABE36 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		F36CC9721982AA590001EC41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F36CC9741982AA590001EC41 /* PrairieTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrairieTests.m; sourceTree = "<group>"; };
 		F3E0F0A2198617B400EABE36 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		F3E0F0AA19887B2400EABE36 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +138,7 @@
 			children = (
 				F36CC94F1982AA590001EC41 /* Prairie-Info.plist */,
 				F36CC9501982AA590001EC41 /* InfoPlist.strings */,
+				F3E0F0AB19887B2400EABE36 /* Localizable.strings */,
 				F36CC9531982AA590001EC41 /* main.m */,
 				F36CC9551982AA590001EC41 /* Prairie-Prefix.pch */,
 				F36CC9561982AA590001EC41 /* Credits.rtf */,
@@ -239,6 +242,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F36CC9521982AA590001EC41 /* InfoPlist.strings in Resources */,
+				F3E0F0A919887B2400EABE36 /* Localizable.strings in Resources */,
 				F36CC9631982AA590001EC41 /* Images.xcassets in Resources */,
 				F36CC95E1982AA590001EC41 /* PrDocument.xib in Resources */,
 				F36CC9581982AA590001EC41 /* Credits.rtf in Resources */,
@@ -323,6 +327,14 @@
 				F36CC9721982AA590001EC41 /* en */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		F3E0F0AB19887B2400EABE36 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F3E0F0AA19887B2400EABE36 /* en */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

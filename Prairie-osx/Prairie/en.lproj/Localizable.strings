@@ -1,0 +1,11 @@
+/*!
+ @file
+
+ @brief Localized versions of in-application strings.
+
+ @copyright Daryle Walker, 2014, all rights reserved.
+ @CFBundleIdentifier io.github.ctmacuser.Prairie
+ */
+
+/* A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit. */
+"NO_MIME_TYPE" = "The URL is of a missing or unsupported MIME type.";
