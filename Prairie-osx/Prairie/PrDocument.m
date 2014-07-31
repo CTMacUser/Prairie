@@ -8,6 +8,14 @@
 
 #import "PrDocument.h"
 
+#pragma mark Private interface
+
+@interface PrDocument ()
+
+- (void)loadPage:(NSURL *)pageURL;
+
+@end
+
 @implementation PrDocument
 
 #pragma mark Conventional overrides
@@ -30,10 +38,17 @@
 {
     [super windowControllerDidLoadNib:aController];
 
-    // Load the initial page, either local or a default.
-    // (TODO: have the default page be a preference, including a blank page.)
-    [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:(self.fileURL ? self.fileURL : [NSURL URLWithString:@"http://www.apple.com"])]];
-    self.fileURL = nil;  // Disconnects file (if any) from infrastructure, treating loaded file as an import.
+    // Load the initial page,...
+    if ( self.fileURL ) {
+        // ...local ones immediately.
+        [self loadPage:self.fileURL];
+        self.fileURL = nil;  // Disconnects file from document control, treating it like an import.
+    } else {
+        // ...remote ones after a delay. The gap allows a document that'll be opened from another with a starting link time to cancel the home-page load and insert the starting link as its first one.
+        [self performSelector:@selector(loadPage:) withObject:[NSURL URLWithString:@"http://www.apple.com"] afterDelay:0.5];
+
+        // TODO: have the default page be a preference, including a blank page. There will be a risk that the preference could change between the delay call and the cancel call, meaning the cancel wouldn't happen and both the home page and the starting-link page will be tried.
+    }
 
     // Docs suggest giving a name to group related frames. I'm using a UUID for an easily accessible unique string.
     self.webView.groupName = [[NSUUID UUID] UUIDString];
@@ -89,8 +104,21 @@
 {
     id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];
 
+    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:[NSURL URLWithString:@"http://www.apple.com"]];  // make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards).
     [[newDocument webView].mainFrame loadRequest:request];
     return [newDocument webView];
+}
+
+#pragma mark Private methods
+
+/*
+    @brief Orders web-view member to load a new URL.
+    @param pageURL The URL for the resource to be loaded.
+    @details Encapsulates URL loads, packaging the URL into the NSURLRequest object that loadRequest needs. Having this code encapsulated means it can be manipulated by selector games (like adding a delay).
+ */
+- (void)loadPage:(NSURL *)pageURL
+{
+    [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:pageURL]];
 }
 
 @end
