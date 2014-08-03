@@ -359,6 +359,23 @@
                                     <action selector="runToolbarCustomizationPalette:" target="-1" id="pQI-g3-MTW"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="dNY-ue-xjL"/>
+                            <menuItem title="Stop" keyEquivalent="." id="OZI-MZ-FHa">
+                                <connections>
+                                    <action selector="stopLoading:" target="-1" id="oqi-Pn-Jg9"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Reload" keyEquivalent="r" id="6ty-WF-nhj">
+                                <connections>
+                                    <action selector="reload:" target="-1" id="nyc-6X-8fo"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Reload Deeply" alternate="YES" keyEquivalent="r" id="Ro7-Do-o4T">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="reloadFromOrigin:" target="-1" id="9jw-st-5PO"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
