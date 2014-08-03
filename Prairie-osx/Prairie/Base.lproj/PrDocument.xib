@@ -7,6 +7,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="PrDocument">
             <connections>
+                <outlet property="toolbarBackForward" destination="S7o-Yd-VKK" id="QO9-Oq-FRe"/>
                 <outlet property="urlDisplay" destination="Hz6-mo-xeY" id="GvS-Kg-ew2"/>
                 <outlet property="webView" destination="MbC-4S-7ZT" id="WCj-dk-HZM"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
@@ -45,6 +46,7 @@
                         </webPreferences>
                         <connections>
                             <outlet property="UIDelegate" destination="-2" id="Ni5-wW-Wxa"/>
+                            <outlet property="frameLoadDelegate" destination="-2" id="8WW-kP-n6y"/>
                         </connections>
                     </webView>
                 </subviews>
@@ -60,38 +62,23 @@
             </view>
             <toolbar key="toolbar" implicitIdentifier="735135F1-B05D-42BB-89D9-5B97B14322A0" autosavesConfiguration="NO" displayMode="iconOnly" sizeMode="regular" id="2bo-kz-jg9">
                 <allowedToolbarItems>
-                    <toolbarItem implicitItemIdentifier="0C28B7D6-FCA5-42E5-B85C-7B8442FA29F8" label="Back" paletteLabel="Go Back" image="NSLeftFacingTriangleTemplate" id="4tt-7j-LfI">
+                    <toolbarItem implicitItemIdentifier="F2EFCFEF-75C4-4E1C-AB70-79AD212B7030" label="Back &amp; Forward" paletteLabel="Back/Forward" id="S7o-Yd-VKK">
                         <nil key="toolTip"/>
-                        <size key="minSize" width="40" height="25"/>
-                        <size key="maxSize" width="40" height="25"/>
-                        <button key="view" verticalHuggingPriority="750" id="0V0-aJ-mpn">
-                            <rect key="frame" x="5" y="14" width="40" height="25"/>
+                        <size key="minSize" width="67" height="25"/>
+                        <size key="maxSize" width="67" height="25"/>
+                        <segmentedControl key="view" verticalHuggingPriority="750" id="UB7-xm-qr4">
+                            <rect key="frame" x="7" y="14" width="67" height="25"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <buttonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" image="NSLeftFacingTriangleTemplate" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="57W-9i-XaZ">
-                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <segmentedCell key="cell" alignment="left" style="texturedSquare" trackingMode="momentary" id="1JG-F4-3kb">
                                 <font key="font" metaFont="system"/>
-                            </buttonCell>
-                        </button>
+                                <segments>
+                                    <segment image="NSLeftFacingTriangleTemplate" width="32" enabled="NO"/>
+                                    <segment image="NSRightFacingTriangleTemplate" width="32" enabled="NO" tag="1"/>
+                                </segments>
+                            </segmentedCell>
+                        </segmentedControl>
                         <connections>
-                            <action selector="goBack:" target="MbC-4S-7ZT" id="bYG-Zd-Cwu"/>
-                            <binding destination="-2" name="enabled" keyPath="self.webView.canGoBack" id="NTg-e4-XLw"/>
-                        </connections>
-                    </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="D51E34EA-5414-45F3-A1BB-8F34AE9B7816" label="Forward" paletteLabel="Go Forward" image="NSRightFacingTriangleTemplate" id="c33-Tk-Wr7">
-                        <nil key="toolTip"/>
-                        <size key="minSize" width="40" height="25"/>
-                        <size key="maxSize" width="40" height="25"/>
-                        <button key="view" verticalHuggingPriority="750" id="igN-Mc-dwX">
-                            <rect key="frame" x="15" y="14" width="40" height="25"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <buttonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" image="NSRightFacingTriangleTemplate" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="FRM-47-Aga">
-                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                <font key="font" metaFont="system"/>
-                            </buttonCell>
-                        </button>
-                        <connections>
-                            <action selector="goForward:" target="MbC-4S-7ZT" id="HhQ-6G-3aL"/>
-                            <binding destination="-2" name="enabled" keyPath="self.webView.canGoForward" id="912-8e-lHg"/>
+                            <action selector="performBackOrForward:" target="-2" id="8gr-ng-HXg"/>
                         </connections>
                     </toolbarItem>
                     <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" id="kyN-L6-TPM">
@@ -103,9 +90,8 @@
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="Zz7-u6-wt2"/>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
-                    <toolbarItem reference="4tt-7j-LfI"/>
-                    <toolbarItem reference="c33-Tk-Wr7"/>
                     <toolbarItem reference="Zz7-u6-wt2"/>
+                    <toolbarItem reference="S7o-Yd-VKK"/>
                 </defaultToolbarItems>
             </toolbar>
             <connections>

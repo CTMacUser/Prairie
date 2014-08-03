@@ -8,6 +8,12 @@
 
 #import "PrDocument.h"
 
+
+#pragma mark Declared constants
+
+NSInteger const PrGoBackSegment    = 0;
+NSInteger const PrGoForwardSegment = 1;
+
 #pragma mark Private interface
 
 @interface PrDocument ()
@@ -109,9 +115,22 @@
     return [newDocument webView];
 }
 
+#pragma mark WebFrameLoadDelegate overrides
+
+// The document object is set as the web-view's frame-load-delegate within the XIB.
+
+- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
+{
+    // Ignore notices from sub-frames
+    if (frame == [sender mainFrame]) {
+        [(NSSegmentedControl *)self.toolbarBackForward.view setEnabled:[sender canGoBack] forSegment:PrGoBackSegment];
+        [(NSSegmentedControl *)self.toolbarBackForward.view setEnabled:[sender canGoForward] forSegment:PrGoForwardSegment];
+    }
+}
+
 #pragma mark Private methods
 
-/*
+/*!
     @brief Orders web-view member to load a new URL.
     @param pageURL The URL for the resource to be loaded.
     @details Encapsulates URL loads, packaging the URL into the NSURLRequest object that loadRequest needs. Having this code encapsulated means it can be manipulated by selector games (like adding a delay).
@@ -119,6 +138,29 @@
 - (void)loadPage:(NSURL *)pageURL
 {
     [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
+#pragma mark Action methods
+
+/*!
+    @brief Action for the combined Back/Forward control.
+    @param sender The object that sent this message.
+    @details Checks which segment was clicked, and instructs the associated WebView to go back or forward one step along its browser history.
+ */
+- (IBAction)performBackOrForward:(id)sender
+{
+    switch ([sender selectedSegment]) {
+        case PrGoBackSegment:
+            (void)[self.webView goBack];
+            break;
+            
+        case PrGoForwardSegment:
+            (void)[self.webView goForward];
+            break;
+            
+        default:
+            break;
+    }
 }
 
 @end
