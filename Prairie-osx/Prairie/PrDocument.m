@@ -119,10 +119,16 @@ NSInteger const PrGoForwardSegment = 1;
 
 // The document object is set as the web-view's frame-load-delegate within the XIB.
 
+- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
+{
+    if (frame == [sender mainFrame]) {  // Ignore notices from sub-frames.
+        sender.window.title = title;
+    }
+}
+
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
-    // Ignore notices from sub-frames
-    if (frame == [sender mainFrame]) {
+    if (frame == [sender mainFrame]) {  // Ignore notices from sub-frames.
         [(NSSegmentedControl *)self.toolbarBackForward.view setEnabled:[sender canGoBack] forSegment:PrGoBackSegment];
         [(NSSegmentedControl *)self.toolbarBackForward.view setEnabled:[sender canGoForward] forSegment:PrGoForwardSegment];
     }
