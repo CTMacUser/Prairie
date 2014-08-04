@@ -19,6 +19,7 @@ NSInteger const PrGoForwardSegment = 1;
 @interface PrDocument ()
 
 - (void)loadPage:(NSURL *)pageURL;
+- (void)showError:(NSError *)error;
 
 @end
 
@@ -119,9 +120,16 @@ NSInteger const PrGoForwardSegment = 1;
 
 // The document object is set as the web-view's frame-load-delegate within the XIB.
 
-- (void)webView:(WebView *)sender didCommitLoadForFrame:(WebFrame *)frame
+- (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {  // Ignore notices from sub-frames.
+        [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
+    }
+}
+
+- (void)webView:(WebView *)sender didCommitLoadForFrame:(WebFrame *)frame
+{
+    if (frame == sender.mainFrame) {
         sender.window.representedURL = frame.dataSource.initialRequest.URL;
     }
 }
@@ -158,6 +166,13 @@ NSInteger const PrGoForwardSegment = 1;
     }
 }
 
+- (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
+{
+    if (frame == sender.mainFrame) {
+        [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
+    }
+}
+
 #pragma mark Private methods
 
 /*!
@@ -168,6 +183,18 @@ NSInteger const PrGoForwardSegment = 1;
 - (void)loadPage:(NSURL *)pageURL
 {
     [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
+/*!
+    @brief Shows an error as an alert attached to the document window.
+    @param error The error to be displayed.
+    @details A standard routine to notify the user about a problem. Encapsulating the code means it can be manipulated by selector games (like adding a delay).
+ */
+- (void)showError:(NSError *)error
+{
+    [[NSAlert alertWithError:error] beginSheetModalForWindow:[self.windowControllers.firstObject window] completionHandler:^void (NSModalResponse returnCode) {
+        // Nothing right now.
+    }];
 }
 
 #pragma mark Action methods
