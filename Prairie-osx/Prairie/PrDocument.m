@@ -119,18 +119,42 @@ NSInteger const PrGoForwardSegment = 1;
 
 // The document object is set as the web-view's frame-load-delegate within the XIB.
 
+- (void)webView:(WebView *)sender didCommitLoadForFrame:(WebFrame *)frame
+{
+    if (frame == sender.mainFrame) {  // Ignore notices from sub-frames.
+        sender.window.representedURL = frame.dataSource.initialRequest.URL;
+    }
+}
+
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
 {
-    if (frame == [sender mainFrame]) {  // Ignore notices from sub-frames.
+    if (frame == sender.mainFrame) {
         sender.window.title = title;
+    }
+}
+
+- (void)webView:(WebView *)sender didReceiveIcon:(NSImage *)image forFrame:(WebFrame *)frame
+{
+    if (frame == sender.mainFrame) {
+        [sender.window standardWindowButton:NSWindowDocumentIconButton].image = image;
     }
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
-    if (frame == [sender mainFrame]) {  // Ignore notices from sub-frames.
-        [(NSSegmentedControl *)self.toolbarBackForward.view setEnabled:[sender canGoBack] forSegment:PrGoBackSegment];
-        [(NSSegmentedControl *)self.toolbarBackForward.view setEnabled:[sender canGoForward] forSegment:PrGoForwardSegment];
+    if (frame == sender.mainFrame) {
+        // Some callbacks don't work right for local files; tweaking is required.
+        NSURL * const  requestURL = frame.dataSource.initialRequest.URL;
+
+        if ([requestURL isFileURL]) {
+            [sender.window standardWindowButton:NSWindowDocumentIconButton].image = [[NSWorkspace sharedWorkspace] iconForFile:[requestURL path]];  // Needed since the file's icon is loaded only once, during webView:didCommitLoadForFrame:, and webView:didReceiveIcon:forFrame: is never called. So during subsequent visits through Back & Forward, the icon from the previously seen page never gets changed out.
+        }
+
+        // Enabled/disabled status of the Back and Forward toolbar buttons.
+        NSSegmentedControl * const  backForwardControl = (NSSegmentedControl *)self.toolbarBackForward.view;
+
+        [backForwardControl setEnabled:[sender canGoBack] forSegment:PrGoBackSegment];
+        [backForwardControl setEnabled:[sender canGoForward] forSegment:PrGoForwardSegment];
     }
 }
 
