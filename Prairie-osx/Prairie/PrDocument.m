@@ -7,6 +7,7 @@
  */
 
 #import "PrDocument.h"
+#import "PrairieAppDelegate.h"
 
 
 #pragma mark Declared constants
@@ -52,7 +53,7 @@ NSInteger const PrGoForwardSegment = 1;
         self.fileURL = nil;  // Disconnects file from document control, treating it like an import.
     } else {
         // ...remote ones after a delay. The gap allows a document that'll be opened from another with a starting link time to cancel the home-page load and insert the starting link as its first one.
-        [self performSelector:@selector(loadPage:) withObject:[NSURL URLWithString:@"http://www.apple.com"] afterDelay:0.5];
+        [self performSelector:@selector(loadPage:) withObject:[[NSApp delegate] defaultPage] afterDelay:0.5];
 
         // TODO: have the default page be a preference, including a blank page. There will be a risk that the preference could change between the delay call and the cancel call, meaning the cancel wouldn't happen and both the home page and the starting-link page will be tried.
     }
@@ -111,7 +112,7 @@ NSInteger const PrGoForwardSegment = 1;
 {
     id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];
 
-    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:[NSURL URLWithString:@"http://www.apple.com"]];  // make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards).
+    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:[[NSApp delegate] defaultPage]];  // Make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards). This can fail if the Home Page preference (quickly) changes between the calls.
     [[newDocument webView].mainFrame loadRequest:request];
     return [newDocument webView];
 }

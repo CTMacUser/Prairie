@@ -21,6 +21,7 @@
 		F36CC9751982AA590001EC41 /* PrairieTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC9741982AA590001EC41 /* PrairieTests.m */; };
 		F3E0F0A3198617B400EABE36 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E0F0A2198617B400EABE36 /* WebKit.framework */; };
 		F3E0F0A919887B2400EABE36 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F3E0F0AB19887B2400EABE36 /* Localizable.strings */; };
+		F3E0F0AE198FF80A00EABE36 /* PrairieAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,8 @@
 		F36CC9741982AA590001EC41 /* PrairieTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrairieTests.m; sourceTree = "<group>"; };
 		F3E0F0A2198617B400EABE36 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		F3E0F0AA19887B2400EABE36 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F3E0F0AC198FF80A00EABE36 /* PrairieAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrairieAppDelegate.h; sourceTree = "<group>"; };
+		F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrairieAppDelegate.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +130,8 @@
 				F36CC95A1982AA590001EC41 /* PrDocument.m */,
 				F36CC95C1982AA590001EC41 /* PrDocument.xib */,
 				F36CC95F1982AA590001EC41 /* MainMenu.xib */,
+				F3E0F0AC198FF80A00EABE36 /* PrairieAppDelegate.h */,
+				F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */,
 				F36CC9621982AA590001EC41 /* Images.xcassets */,
 				F36CC94E1982AA590001EC41 /* Supporting Files */,
 			);
@@ -267,6 +272,7 @@
 			files = (
 				F36CC95B1982AA590001EC41 /* PrDocument.m in Sources */,
 				F36CC9541982AA590001EC41 /* main.m in Sources */,
+				F3E0F0AE198FF80A00EABE36 /* PrairieAppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
