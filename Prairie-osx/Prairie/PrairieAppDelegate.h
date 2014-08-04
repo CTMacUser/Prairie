@@ -9,6 +9,9 @@
 @import Cocoa;
 
 
+// Keys for the preference dictionary
+extern NSString * const  PrDefaultPageKey;  // NSString, interpret as URL
+
 // Default values of various preferences
 extern NSString * const  PrDefaultPage;
 
