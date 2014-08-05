@@ -22,6 +22,8 @@ NSInteger const PrGoForwardSegment = 1;
 - (void)loadPage:(NSURL *)pageURL;
 - (void)showError:(NSError *)error;
 
+- (void)performPreciseBackOrForward:(id)sender;
+
 @end
 
 @implementation PrDocument
@@ -54,8 +56,6 @@ NSInteger const PrGoForwardSegment = 1;
     } else {
         // ...remote ones after a delay. The gap allows a document that'll be opened from another with a starting link time to cancel the home-page load and insert the starting link as its first one.
         [self performSelector:@selector(loadPage:) withObject:[[NSApp delegate] defaultPage] afterDelay:0.5];
-
-        // TODO: have the default page be a preference, including a blank page. There will be a risk that the preference could change between the delay call and the cancel call, meaning the cancel wouldn't happen and both the home page and the starting-link page will be tried.
     }
 
     // Docs suggest giving a name to group related frames. I'm using a UUID for an easily accessible unique string.
@@ -164,6 +164,33 @@ NSInteger const PrGoForwardSegment = 1;
 
         [backForwardControl setEnabled:[sender canGoBack] forSegment:PrGoBackSegment];
         [backForwardControl setEnabled:[sender canGoForward] forSegment:PrGoForwardSegment];
+
+        // Revisit menus for the Back and Forward toolbar buttons.
+        WebBackForwardList * const  backForwardList = sender.backForwardList;
+        NSMenu *                    backMenu = [[NSMenu alloc] initWithTitle:@""];
+        NSMenu *                 forwardMenu = [[NSMenu alloc] initWithTitle:@""];
+        __block NSInteger         counterTag = 0;
+        NSInteger const        maxMenuLength = [[NSApp delegate] backForwardMenuLength];
+
+        [[backForwardList backListWithLimit:(int)maxMenuLength] enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(WebHistoryItem *obj, NSUInteger idx, BOOL *stop){
+            NSMenuItem *  backMenuItem = [[NSMenuItem alloc] initWithTitle:obj.title action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
+
+            backMenuItem.tag = --counterTag;
+            backMenuItem.toolTip = obj.originalURLString;
+            backMenuItem.target = self;
+            [backMenu insertItem:backMenuItem atIndex:-counterTag - 1];
+        }];  // The history lists go from earliest to latest. The menus need to go from temporally closest to furthest. The directions are the same for the forward list, but opposing for the back list, so the back list has to be iterated backwards.
+        [backForwardControl setMenu:backMenu forSegment:PrGoBackSegment];
+        counterTag = 0;
+        [[backForwardList forwardListWithLimit:(int)maxMenuLength] enumerateObjectsUsingBlock:^(WebHistoryItem *obj, NSUInteger idx, BOOL *stop){
+            NSMenuItem *  forwardMenuItem = [[NSMenuItem alloc] initWithTitle:obj.title action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
+
+            forwardMenuItem.tag = ++counterTag;
+            forwardMenuItem.toolTip = obj.originalURLString;
+            forwardMenuItem.target = self;
+            [forwardMenu insertItem:forwardMenuItem atIndex:+counterTag - 1];
+        }];
+        [backForwardControl setMenu:forwardMenu forSegment:PrGoForwardSegment];
     }
 }
 
@@ -220,5 +247,16 @@ NSInteger const PrGoForwardSegment = 1;
             break;
     }
 }
+
+/*!
+    @brief Action for menu items within the combined Back/Forward control.
+    @param sender The object that sent this message.
+    @details Checks which menu item was clicked, and instructs the associated WebView to go to that item's index along its browser history.
+ */
+- (void)performPreciseBackOrForward:(id)sender
+{
+    (void)[self.webView goToBackForwardItem:[self.webView.backForwardList itemAtIndex:(int)[sender tag]]];
+}
+
 
 @end
