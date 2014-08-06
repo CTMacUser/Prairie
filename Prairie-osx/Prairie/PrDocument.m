@@ -15,14 +15,23 @@
 NSInteger const PrGoBackSegment    = 0;
 NSInteger const PrGoForwardSegment = 1;
 
+#pragma mark File-local constants
+
+static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with the standard sizes?
+
 #pragma mark Private interface
 
 @interface PrDocument ()
 
 - (void)loadPage:(NSURL *)pageURL;
 - (void)showError:(NSError *)error;
+- (BOOL)showingStatusBar;
+- (void)hideStatusBar;
+- (void)showStatusBar;
 
 - (void)performPreciseBackOrForward:(id)sender;
+
+@property (nonatomic, readonly) PrairieAppDelegate *appDelegate;
 
 @end
 
@@ -55,7 +64,7 @@ NSInteger const PrGoForwardSegment = 1;
         self.fileURL = nil;  // Disconnects file from document control, treating it like an import.
     } else {
         // ...remote ones after a delay. The gap allows a document that'll be opened from another with a starting link time to cancel the home-page load and insert the starting link as its first one.
-        [self performSelector:@selector(loadPage:) withObject:[[NSApp delegate] defaultPage] afterDelay:0.5];
+        [self performSelector:@selector(loadPage:) withObject:self.appDelegate.defaultPage afterDelay:0.5];
     }
 
     // Docs suggest giving a name to group related frames. I'm using a UUID for an easily accessible unique string.
@@ -104,17 +113,51 @@ NSInteger const PrGoForwardSegment = 1;
     return self.webView && !self.webView.isLoading;
 }
 
+- (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
+{
+    if ([anItem action] == @selector(hideShowStatusBar:)) {
+        [(id)anItem setState:([self showingStatusBar] ? NSOnState : NSOffState)];
+    }
+    return [super validateUserInterfaceItem:anItem];
+}
+
 #pragma mark WebUIDelegate overrides
 
 // The document object is set as the web-view's UI-delegate within the XIB.
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-    id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];
+    id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];  // Must be YES, no XIB-load (and therefore no webView) otherwise.
 
-    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:[[NSApp delegate] defaultPage]];  // Make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards). This can fail if the Home Page preference (quickly) changes between the calls.
+    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:self.appDelegate.defaultPage];  // Make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards). This can fail if the Home Page preference (quickly) changes between the calls.
     [[newDocument webView].mainFrame loadRequest:request];
     return [newDocument webView];
+}
+
+- (void)webViewShow:(WebView *)sender
+{
+    // This method is not generally needed since webView:createWebViewWithRequest: already brings its new window up front. (The implementation can't help it.) But just in case this method is needed without its predecessor....
+    [self showWindows];
+}
+
+- (void)webView:(WebView *)sender setStatusText:(NSString *)text
+{
+    self.statusLine.stringValue = text;
+}
+
+- (NSString *)webViewStatusText:(WebView *)sender
+{
+    return self.statusLine.stringValue;
+}
+
+- (BOOL)webViewIsStatusBarVisible:(WebView *)sender
+{
+    return [self showingStatusBar];
+}
+
+- (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible
+{
+    visible ? [self showStatusBar] : [self hideStatusBar];
 }
 
 #pragma mark WebFrameLoadDelegate overrides
@@ -170,7 +213,7 @@ NSInteger const PrGoForwardSegment = 1;
         NSMenu *                    backMenu = [[NSMenu alloc] initWithTitle:@""];
         NSMenu *                 forwardMenu = [[NSMenu alloc] initWithTitle:@""];
         __block NSInteger         counterTag = 0;
-        NSInteger const        maxMenuLength = [[NSApp delegate] backForwardMenuLength];
+        NSInteger const        maxMenuLength = self.appDelegate.backForwardMenuLength;
 
         [[backForwardList backListWithLimit:(int)maxMenuLength] enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(WebHistoryItem *obj, NSUInteger idx, BOOL *stop){
             NSMenuItem *  backMenuItem = [[NSMenuItem alloc] initWithTitle:obj.title action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
@@ -220,9 +263,43 @@ NSInteger const PrGoForwardSegment = 1;
  */
 - (void)showError:(NSError *)error
 {
-    [[NSAlert alertWithError:error] beginSheetModalForWindow:[self.windowControllers.firstObject window] completionHandler:^void (NSModalResponse returnCode) {
+    [[NSAlert alertWithError:error] beginSheetModalForWindow:self.windowForSheet completionHandler:^void (NSModalResponse returnCode) {
         // Nothing right now.
     }];
+}
+
+/*!
+    @brief Status Bar visibility status.
+    @return YES if the Status Bar is visible, NO otherwise.
+ */
+- (BOOL)showingStatusBar
+{
+    return !![self.windowForSheet contentBorderThicknessForEdge:NSMinYEdge];
+}
+
+/*!
+    @brief Hide the Status Bar.
+ */
+- (void)hideStatusBar
+{
+    [self.windowForSheet setContentBorderThickness:(self.bottomSpacing.constant = 0.0) forEdge:NSMinYEdge];
+}
+
+/*!
+    @brief Show the Status Bar.
+ */
+- (void)showStatusBar
+{
+    [self.windowForSheet setContentBorderThickness:(self.bottomSpacing.constant = PrStatusBarHeight) forEdge:NSMinYEdge];
+}
+
+/*!
+    @brief Getter for "appDelegate" property
+    @return The application delegate instance, converted to its actual type.
+ */
+- (PrairieAppDelegate *)appDelegate
+{
+    return [NSApp delegate];
 }
 
 #pragma mark Action methods
@@ -245,6 +322,20 @@ NSInteger const PrGoForwardSegment = 1;
             
         default:
             break;
+    }
+}
+
+/*!
+    @brief Action to show or hide the Status bar.
+    @param sender The object that sent this message.
+    @details Checks the hidden/shown status of the Status bar and switches said status (hidden to shown, or shown to hidden).
+ */
+- (IBAction)hideShowStatusBar:(id)sender
+{
+    if ([self showingStatusBar]) {
+        [self hideStatusBar];
+    } else {
+        [self showStatusBar];
     }
 }
 

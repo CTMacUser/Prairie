@@ -17,9 +17,12 @@ extern NSInteger const PrGoForwardSegment;
 @interface PrDocument : NSDocument
 
 - (IBAction)performBackOrForward:(id)sender;
+- (IBAction)hideShowStatusBar:(id)sender;
 
 @property (weak) IBOutlet WebView *webView;
 @property (weak) IBOutlet NSTextField *urlDisplay;
 @property (weak) IBOutlet NSToolbarItem *toolbarBackForward;
+@property (weak) IBOutlet NSTextField *statusLine;
+@property (weak) IBOutlet NSLayoutConstraint *bottomSpacing;
 
 @end

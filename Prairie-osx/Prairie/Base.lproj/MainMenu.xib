@@ -364,6 +364,12 @@
                                     <action selector="runToolbarCustomizationPalette:" target="-1" id="pQI-g3-MTW"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="eEf-mB-Kmi"/>
+                            <menuItem title="Status Bar" keyEquivalent="/" id="P6B-CP-PwN">
+                                <connections>
+                                    <action selector="hideShowStatusBar:" target="-1" id="oDc-rT-qsY"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="dNY-ue-xjL"/>
                             <menuItem title="Stop" keyEquivalent="." id="OZI-MZ-FHa">
                                 <connections>
