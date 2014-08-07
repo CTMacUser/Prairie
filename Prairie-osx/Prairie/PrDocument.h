@@ -17,6 +17,7 @@ extern NSInteger const PrGoForwardSegment;
 @interface PrDocument : NSDocument
 
 - (IBAction)performBackOrForward:(id)sender;
+- (IBAction)hideShowLoadingBar:(id)sender;
 - (IBAction)hideShowStatusBar:(id)sender;
 
 @property (weak) IBOutlet WebView *webView;
@@ -24,5 +25,7 @@ extern NSInteger const PrGoForwardSegment;
 @property (weak) IBOutlet NSToolbarItem *toolbarBackForward;
 @property (weak) IBOutlet NSTextField *statusLine;
 @property (weak) IBOutlet NSLayoutConstraint *bottomSpacing;
+@property (weak) IBOutlet NSLayoutConstraint *topSpacing;
+@property (weak) IBOutlet NSProgressIndicator *loadingProgress;
 
 @end

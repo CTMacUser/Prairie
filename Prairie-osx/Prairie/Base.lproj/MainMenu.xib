@@ -365,6 +365,11 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="eEf-mB-Kmi"/>
+                            <menuItem title="Loading Bar" keyEquivalent="B" id="fHg-je-4Ax">
+                                <connections>
+                                    <action selector="hideShowLoadingBar:" target="-1" id="Qcb-wA-CNs"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Status Bar" keyEquivalent="/" id="P6B-CP-PwN">
                                 <connections>
                                     <action selector="hideShowStatusBar:" target="-1" id="oDc-rT-qsY"/>

@@ -8,8 +8,10 @@
         <customObject id="-2" userLabel="File's Owner" customClass="PrDocument">
             <connections>
                 <outlet property="bottomSpacing" destination="M9x-eG-ufG" id="4St-mM-IcD"/>
+                <outlet property="loadingProgress" destination="hSA-O6-P17" id="Xpf-ta-kKQ"/>
                 <outlet property="statusLine" destination="IoY-kR-fgb" id="Rw9-3t-Ih1"/>
                 <outlet property="toolbarBackForward" destination="S7o-Yd-VKK" id="QO9-Oq-FRe"/>
+                <outlet property="topSpacing" destination="zsU-VW-Onb" id="kl7-j6-R7u"/>
                 <outlet property="urlDisplay" destination="Hz6-mo-xeY" id="GvS-Kg-ew2"/>
                 <outlet property="webView" destination="MbC-4S-7ZT" id="WCj-dk-HZM"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
@@ -28,9 +30,9 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Hz6-mo-xeY">
-                        <rect key="frame" x="20" y="471" width="644" height="22"/>
+                        <rect key="frame" x="20" y="486" width="540" height="22"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <textFieldCell key="cell" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" title="Edit or View the URL here" drawsBackground="YES" id="JDq-Ah-v2f">
+                        <textFieldCell key="cell" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" placeholderString="No URL loaded" drawsBackground="YES" id="JDq-Ah-v2f">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -41,7 +43,7 @@
                         </connections>
                     </textField>
                     <webView translatesAutoresizingMaskIntoConstraints="NO" id="MbC-4S-7ZT">
-                        <rect key="frame" x="0.0" y="22" width="684" height="441"/>
+                        <rect key="frame" x="0.0" y="22" width="684" height="459"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <webPreferences key="preferences" defaultFontSize="12" defaultFixedFontSize="12">
                             <nil key="identifier"/>
@@ -54,25 +56,36 @@
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IoY-kR-fgb">
                         <rect key="frame" x="18" y="4" width="648" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingTail" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" title="Status" usesSingleLineMode="YES" id="4MR-gb-teV">
+                        <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingTail" refusesFirstResponder="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" placeholderString="No status" usesSingleLineMode="YES" id="4MR-gb-teV">
                             <font key="font" metaFont="smallSystem"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <progressIndicator maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="hSA-O6-P17">
+                        <rect key="frame" x="568" y="487" width="96" height="20"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="18" id="1Jd-Mu-Rau"/>
+                            <constraint firstAttribute="width" constant="96" id="nj4-wK-k35"/>
+                        </constraints>
+                    </progressIndicator>
                 </subviews>
                 <constraints>
+                    <constraint firstItem="MbC-4S-7ZT" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="bottom" constant="5" id="CMg-yB-o1M"/>
+                    <constraint firstItem="Hz6-mo-xeY" firstAttribute="top" secondItem="gIp-Ho-8D9" secondAttribute="top" priority="999" constant="5" id="CVQ-xo-cWX"/>
                     <constraint firstAttribute="trailing" secondItem="IoY-kR-fgb" secondAttribute="trailing" constant="20" symbolic="YES" id="HET-b9-7R4"/>
-                    <constraint firstItem="Hz6-mo-xeY" firstAttribute="top" secondItem="gIp-Ho-8D9" secondAttribute="top" constant="20" symbolic="YES" id="JXb-kj-Z6b"/>
+                    <constraint firstAttribute="trailing" secondItem="hSA-O6-P17" secondAttribute="trailing" constant="20" id="HFj-4D-Kmu"/>
                     <constraint firstItem="MbC-4S-7ZT" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" id="Jcg-dY-OLF"/>
-                    <constraint firstAttribute="trailing" secondItem="Hz6-mo-xeY" secondAttribute="trailing" constant="20" symbolic="YES" id="Lxs-8f-Ezc"/>
                     <constraint firstAttribute="bottom" secondItem="MbC-4S-7ZT" secondAttribute="bottom" constant="22" id="M9x-eG-ufG"/>
                     <constraint firstItem="IoY-kR-fgb" firstAttribute="top" secondItem="MbC-4S-7ZT" secondAttribute="bottom" constant="4" id="QKl-7k-DKj"/>
                     <constraint firstItem="IoY-kR-fgb" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" constant="20" symbolic="YES" id="Taj-sp-uSb"/>
+                    <constraint firstItem="Hz6-mo-xeY" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" constant="20" id="W6Z-kT-Snb"/>
                     <constraint firstAttribute="bottom" secondItem="IoY-kR-fgb" secondAttribute="bottom" priority="999" constant="4" id="Xat-kI-tTZ"/>
-                    <constraint firstItem="MbC-4S-7ZT" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="bottom" constant="8" symbolic="YES" id="bTe-I4-Blj"/>
+                    <constraint firstItem="hSA-O6-P17" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="trailing" constant="8" id="bb4-Kv-R2X"/>
+                    <constraint firstItem="hSA-O6-P17" firstAttribute="centerY" secondItem="Hz6-mo-xeY" secondAttribute="centerY" id="j5r-pN-yPG"/>
                     <constraint firstAttribute="trailing" secondItem="MbC-4S-7ZT" secondAttribute="trailing" id="qao-Zq-9fF"/>
-                    <constraint firstItem="Hz6-mo-xeY" firstAttribute="leading" secondItem="gIp-Ho-8D9" secondAttribute="leading" constant="20" symbolic="YES" id="ssP-ie-sEj"/>
+                    <constraint firstItem="MbC-4S-7ZT" firstAttribute="top" secondItem="gIp-Ho-8D9" secondAttribute="top" constant="32" id="zsU-VW-Onb"/>
                 </constraints>
             </view>
             <toolbar key="toolbar" implicitIdentifier="735135F1-B05D-42BB-89D9-5B97B14322A0" autosavesConfiguration="NO" displayMode="iconOnly" sizeMode="regular" id="2bo-kz-jg9">
@@ -109,7 +122,7 @@
                     <toolbarItem reference="S7o-Yd-VKK"/>
                 </defaultToolbarItems>
             </toolbar>
-            <contentBorderThickness minY="22"/>
+            <contentBorderThickness minY="22" maxY="32"/>
             <connections>
                 <outlet property="delegate" destination="-2" id="0bl-1N-x8E"/>
                 <outlet property="initialFirstResponder" destination="MbC-4S-7ZT" id="BDa-36-t43"/>

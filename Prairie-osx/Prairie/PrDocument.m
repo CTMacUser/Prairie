@@ -17,7 +17,8 @@ NSInteger const PrGoForwardSegment = 1;
 
 #pragma mark File-local constants
 
-static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with the standard sizes?
+static CGFloat const PrLoadingBarHeight = 32.0;  // Regular; is there a header with the standard sizes?
+static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 #pragma mark Private interface
 
@@ -25,6 +26,9 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
 
 - (void)loadPage:(NSURL *)pageURL;
 - (void)showError:(NSError *)error;
+- (BOOL)showingLoadingBar;
+- (void)hideLoadingBar;
+- (void)showLoadingBar;
 - (BOOL)showingStatusBar;
 - (void)hideStatusBar;
 - (void)showStatusBar;
@@ -98,7 +102,7 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
     if ( outError ) {
         NSMutableDictionary *  info = [[NSMutableDictionary alloc] init];
 
-        [info setDictionary:@{NSURLErrorKey: url, NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"NO_MIME_TYPE", @"A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit.")}];
+        [info setDictionary:@{NSURLErrorKey: url, NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"NO_MIME_TYPE", nil)}];
         if ( mimeType ) {
             [info setValue:(__bridge NSString *) mimeType forKey:WebKitErrorMIMETypeKey];
         }
@@ -113,10 +117,16 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
     return self.webView && !self.webView.isLoading;
 }
 
+#pragma mark NSUserInterfaceValidations override
+
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
-    if ([anItem action] == @selector(hideShowStatusBar:)) {
-        [(id)anItem setState:([self showingStatusBar] ? NSOnState : NSOffState)];
+    id const  anObject = anItem;
+
+    if ([anItem action] == @selector(hideShowStatusBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
+        [anObject setTitle:([self showingStatusBar] ? NSLocalizedString(@"HIDE_STATUS_BAR", nil) : NSLocalizedString(@"SHOW_STATUS_BAR", nil))];
+    } else if ([anItem action] == @selector(hideShowLoadingBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
+        [anObject setTitle:([self showingLoadingBar] ? NSLocalizedString(@"HIDE_LOADING_BAR", nil) : NSLocalizedString(@"SHOW_LOADING_BAR", nil))];
     }
     return [super validateUserInterfaceItem:anItem];
 }
@@ -144,7 +154,7 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
 {
     if (self.appDelegate.controlStatusBarFromWS) {
         self.statusLine.stringValue = text;
-    }  // Calling the version for "super" for a "else" case caused an internal exception, as in no implementation.
+    }  // Calling the version for "super" for an "else" case caused an internal exception, as in no implementation.
 }
 
 - (NSString *)webViewStatusText:(WebView *)sender  // UNTESTED
@@ -271,6 +281,35 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
 }
 
 /*!
+ @brief Loading Bar visibility status.
+ @return YES if the Loading Bar is visible, NO otherwise.
+ */
+- (BOOL)showingLoadingBar
+{
+    return !![self.windowForSheet contentBorderThicknessForEdge:NSMaxYEdge];
+}
+
+/*!
+ @brief Hide the Loading Bar.
+ */
+- (void)hideLoadingBar
+{
+    [self.windowForSheet setContentBorderThickness:(self.topSpacing.constant = 0.0) forEdge:NSMaxYEdge];
+    [self.urlDisplay setHidden:YES];
+    [self.loadingProgress setHidden:YES];
+}
+
+/*!
+ @brief Show the Loading Bar.
+ */
+- (void)showLoadingBar
+{
+    [self.loadingProgress setHidden:NO];
+    [self.urlDisplay setHidden:NO];
+    [self.windowForSheet setContentBorderThickness:(self.topSpacing.constant = PrLoadingBarHeight) forEdge:NSMaxYEdge];
+}
+
+/*!
     @brief Status Bar visibility status.
     @return YES if the Status Bar is visible, NO otherwise.
  */
@@ -285,6 +324,7 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
 - (void)hideStatusBar
 {
     [self.windowForSheet setContentBorderThickness:(self.bottomSpacing.constant = 0.0) forEdge:NSMinYEdge];
+    [self.statusLine setHidden:YES];
 }
 
 /*!
@@ -292,6 +332,7 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
  */
 - (void)showStatusBar
 {
+    [self.statusLine setHidden:NO];
     [self.windowForSheet setContentBorderThickness:(self.bottomSpacing.constant = PrStatusBarHeight) forEdge:NSMinYEdge];
 }
 
@@ -324,6 +365,20 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
             
         default:
             break;
+    }
+}
+
+/*!
+ @brief Action to show or hide the Loading bar.
+ @param sender The object that sent this message.
+ @details Checks the hidden/shown status of the Loading bar (with the URL text and loading-progress controls) and switches said status (hidden to shown, or shown to hidden).
+ */
+- (IBAction)hideShowLoadingBar:(id)sender
+{
+    if ([self showingLoadingBar]) {
+        [self hideLoadingBar];
+    } else {
+        [self showLoadingBar];
     }
 }
 
