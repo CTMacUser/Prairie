@@ -14,9 +14,11 @@
 
 NSString * const  PrDefaultPageKey = @"DefaultPage";
 NSString * const  PrDefaultBackForwardMenuLengthKey = @"BackForwardMenuLength";
+NSString * const  PrDefaultControlStatusBarFromWSKey = @"ControlStatusBarFromWebScripting";
 
 NSString * const  PrDefaultPage = @"http://www.apple.com";
 NSInteger const   PrDefaultBackForwardMenuLength = 10;
+BOOL const        PrDefaultControlStatusBarFromWS = NO;
 
 @implementation PrairieAppDelegate
 
@@ -32,6 +34,11 @@ NSInteger const   PrDefaultBackForwardMenuLength = 10;
     return [[NSUserDefaults standardUserDefaults] integerForKey:PrDefaultBackForwardMenuLengthKey];
 }
 
+- (BOOL)controlStatusBarFromWS
+{
+    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultControlStatusBarFromWSKey];
+}
+
 #pragma mark Protocol overrides
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
@@ -39,7 +46,7 @@ NSInteger const   PrDefaultBackForwardMenuLength = 10;
     // Application-level data and setup is usually done in applicationDidFinishLaunching:, but when an app is launched with files to open/print/process (or a blank doc), their handling is done between this and the given method, so anything that the document classes need has to be done here instead.
 
     // Last-resort preference settings
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength)}];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS)}];
 }
 
 @end

@@ -134,7 +134,7 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
     return [newDocument webView];
 }
 
-- (void)webViewShow:(WebView *)sender
+- (void)webViewShow:(WebView *)sender  // UNTESTED
 {
     // This method is not generally needed since webView:createWebViewWithRequest: already brings its new window up front. (The implementation can't help it.) But just in case this method is needed without its predecessor....
     [self showWindows];
@@ -142,22 +142,24 @@ static CGFloat const PrStatusBarHeight = 22.0;  // Small; is there a header with
 
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text
 {
-    self.statusLine.stringValue = text;
+    if (self.appDelegate.controlStatusBarFromWS) {
+        self.statusLine.stringValue = text;
+    }  // Calling the version for "super" for a "else" case caused an internal exception, as in no implementation.
 }
 
-- (NSString *)webViewStatusText:(WebView *)sender
+- (NSString *)webViewStatusText:(WebView *)sender  // UNTESTED
 {
-    return self.statusLine.stringValue;
+    return self.appDelegate.controlStatusBarFromWS ? self.statusLine.stringValue : [super webViewStatusText:sender];
 }
 
-- (BOOL)webViewIsStatusBarVisible:(WebView *)sender
+- (BOOL)webViewIsStatusBarVisible:(WebView *)sender  // UNTESTED
 {
-    return [self showingStatusBar];
+    return self.appDelegate.controlStatusBarFromWS ? [self showingStatusBar] : [super webViewIsStatusBarVisible:sender];
 }
 
-- (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible
+- (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible  // UNTESTED
 {
-    visible ? [self showStatusBar] : [self hideStatusBar];
+    self.appDelegate.controlStatusBarFromWS ? visible ? [self showStatusBar] : [self hideStatusBar] : [super webView:sender setStatusBarVisible:visible];
 }
 
 #pragma mark WebFrameLoadDelegate overrides
