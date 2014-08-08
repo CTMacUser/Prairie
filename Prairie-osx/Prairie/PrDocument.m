@@ -24,6 +24,10 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 @interface PrDocument ()
 
+- (void)notifyOnProgressStarted:(NSNotification *)notification;
+- (void)notifyOnProgressChanged:(NSNotification *)notification;
+- (void)notifyOnProgressFinished:(NSNotification *)notification;
+
 - (void)loadPage:(NSURL *)pageURL;
 - (void)showError:(NSError *)error;
 - (BOOL)showingLoadingBar;
@@ -52,6 +56,11 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     return self;
 }
 
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (NSString *)windowNibName
 {
     return NSStringFromClass([self class]);
@@ -60,6 +69,11 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController
 {
     [super windowControllerDidLoadNib:aController];
+
+    // Observe notifications for web page loading progress.
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnProgressStarted:) name:WebViewProgressStartedNotification object:self.webView];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnProgressChanged:) name:WebViewProgressEstimateChangedNotification object:self.webView];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnProgressFinished:) name:WebViewProgressFinishedNotification object:self.webView];
 
     // Load the initial page,...
     if ( self.fileURL ) {
@@ -254,6 +268,42 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     if (frame == sender.mainFrame) {
         [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
     }
+}
+
+#pragma mark Notifications
+
+/*!
+    @brief Response to WebViewProgressStartedNotification.
+    @param notification The sent notification.
+    @details Updates the UI to acknowledge a download by starting the progress bar (if visible).
+ */
+- (void)notifyOnProgressStarted:(NSNotification *)notification
+{
+    self.loadingProgress.style = NSProgressIndicatorBarStyle;
+    [self.loadingProgress startAnimation:nil];
+}
+
+/*!
+    @brief Response to WebViewProgressEstimateChangedNotification.
+    @param notification The sent notification.
+    @details Updates the UI to acknowledge an in-progress download by updating the progress bar (if visible).
+ */
+- (void)notifyOnProgressChanged:(NSNotification *)notification
+{
+    [self.loadingProgress setIndeterminate:NO];
+    [self.loadingProgress setDoubleValue:self.webView.estimatedProgress];
+}
+
+/*!
+    @brief Response to WebViewProgressFinishedNotification.
+    @param notification The sent notification.
+    @details Updates the UI to acknowledge a completed download by stopping the progress bar (if visible).
+ */
+- (void)notifyOnProgressFinished:(NSNotification *)notification
+{
+    [self.loadingProgress stopAnimation:nil];
+    self.loadingProgress.style = NSProgressIndicatorSpinningStyle;  // Workaround a long-standing bug where a bar-style progress bar set to auto-disappear doesn't actually do that when the animation stops.
+    [self.loadingProgress setIndeterminate:YES];
 }
 
 #pragma mark Private methods
