@@ -22,7 +22,7 @@ extern BOOL const        PrDefaultControlStatusBarFromWS;
 
 @interface PrairieAppDelegate : NSObject <NSApplicationDelegate>
 
-@property (nonatomic, readonly, assign) NSURL *    defaultPage;
+@property (nonatomic, readonly, copy)   NSURL *    defaultPage;
 @property (nonatomic, readonly, assign) NSInteger  backForwardMenuLength;
 @property (nonatomic, readonly, assign) BOOL       controlStatusBarFromWS;
 

@@ -71,9 +71,11 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [super windowControllerDidLoadNib:aController];
 
     // Observe notifications for web page loading progress.
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnProgressStarted:) name:WebViewProgressStartedNotification object:self.webView];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnProgressChanged:) name:WebViewProgressEstimateChangedNotification object:self.webView];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnProgressFinished:) name:WebViewProgressFinishedNotification object:self.webView];
+    NSNotificationCenter * const  notifier = [NSNotificationCenter defaultCenter];
+
+    [notifier addObserver:self selector:@selector(notifyOnProgressStarted:) name:WebViewProgressStartedNotification object:self.webView];
+    [notifier addObserver:self selector:@selector(notifyOnProgressChanged:) name:WebViewProgressEstimateChangedNotification object:self.webView];
+    [notifier addObserver:self selector:@selector(notifyOnProgressFinished:) name:WebViewProgressFinishedNotification object:self.webView];
 
     // Load the initial page,...
     if ( self.fileURL ) {
@@ -108,9 +110,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
 {
-    CFStringRef const  mimeType = UTTypeCopyPreferredTagWithClass((__bridge CFStringRef) typeName, kUTTagClassMIMEType);
+    NSString * const  mimeType = (__bridge_transfer NSString *)UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)typeName, kUTTagClassMIMEType);
 
-    if ( mimeType && [WebView canShowMIMEType:(__bridge NSString *) mimeType] ) {
+    if ( mimeType && [WebView canShowMIMEType:mimeType] ) {
         return YES;
     }
     if ( outError ) {
@@ -118,7 +120,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
         [info setDictionary:@{NSURLErrorKey: url, NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"NO_MIME_TYPE", nil)}];
         if ( mimeType ) {
-            [info setValue:(__bridge NSString *) mimeType forKey:WebKitErrorMIMETypeKey];
+            [info setValue:mimeType forKey:WebKitErrorMIMETypeKey];
         }
         *outError = [NSError errorWithDomain:WebKitErrorDomain code:WebKitErrorCannotShowURL userInfo:info];
     }
