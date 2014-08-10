@@ -139,9 +139,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 {
     id const  anObject = anItem;
 
-    if ([anItem action] == @selector(hideShowStatusBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
+    if ([anItem action] == @selector(toggleStatusBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
         [anObject setTitle:([self showingStatusBar] ? NSLocalizedString(@"HIDE_STATUS_BAR", nil) : NSLocalizedString(@"SHOW_STATUS_BAR", nil))];
-    } else if ([anItem action] == @selector(hideShowLoadingBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
+    } else if ([anItem action] == @selector(toggleLoadingBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
         [anObject setTitle:([self showingLoadingBar] ? NSLocalizedString(@"HIDE_LOADING_BAR", nil) : NSLocalizedString(@"SHOW_LOADING_BAR", nil))];
     }
     return [super validateUserInterfaceItem:anItem];
@@ -459,7 +459,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  @param sender The object that sent this message.
  @details Checks the hidden/shown status of the Loading bar (with the URL text and loading-progress controls) and switches said status (hidden to shown, or shown to hidden).
  */
-- (IBAction)hideShowLoadingBar:(id)sender
+- (IBAction)toggleLoadingBar:(id)sender
 {
     if ([self showingLoadingBar]) {
         [self hideLoadingBar];
@@ -473,7 +473,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     @param sender The object that sent this message.
     @details Checks the hidden/shown status of the Status bar and switches said status (hidden to shown, or shown to hidden).
  */
-- (IBAction)hideShowStatusBar:(id)sender
+- (IBAction)toggleStatusBar:(id)sender
 {
     if ([self showingStatusBar]) {
         [self hideStatusBar];
