@@ -246,6 +246,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
         if ([requestURL isFileURL]) {
             [sender.window standardWindowButton:NSWindowDocumentIconButton].image = [[NSWorkspace sharedWorkspace] iconForFile:[requestURL path]];  // Needed since the file's icon is loaded only once, during webView:didCommitLoadForFrame:, and webView:didReceiveIcon:forFrame: is never called. So during subsequent visits through Back & Forward, the icon from the previously seen page never gets changed out.
         }
+        if (!frame.dataSource.pageTitle) {
+            sender.window.title = requestURL.lastPathComponent;
+        }
 
         // Enabled/disabled status of the Back and Forward toolbar buttons.
         NSSegmentedControl * const  backForwardControl = (NSSegmentedControl *)self.toolbarBackForward.view;
@@ -261,7 +264,14 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
         NSInteger const        maxMenuLength = self.appDelegate.backForwardMenuLength;
 
         [[backForwardList backListWithLimit:(int)maxMenuLength] enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(WebHistoryItem *obj, NSUInteger idx, BOOL *stop){
-            NSMenuItem *  backMenuItem = [[NSMenuItem alloc] initWithTitle:obj.title action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
+            NSString *  itemTitle = obj.title;
+
+            if (!itemTitle) {
+                // Some (file) URLs don't generate a WebView-compatible title.
+                itemTitle = [[NSURL URLWithString:obj.URLString] lastPathComponent];
+            }
+
+            NSMenuItem *  backMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
 
             backMenuItem.tag = --counterTag;
             backMenuItem.toolTip = obj.originalURLString;
@@ -271,7 +281,14 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
         [backForwardControl setMenu:backMenu forSegment:PrGoBackSegment];
         counterTag = 0;
         [[backForwardList forwardListWithLimit:(int)maxMenuLength] enumerateObjectsUsingBlock:^(WebHistoryItem *obj, NSUInteger idx, BOOL *stop){
-            NSMenuItem *  forwardMenuItem = [[NSMenuItem alloc] initWithTitle:obj.title action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
+            NSString *  itemTitle = obj.title;
+            
+            if (!itemTitle) {
+                // Some (file) URLs don't generate a WebView-compatible title.
+                itemTitle = [[NSURL URLWithString:obj.URLString] lastPathComponent];
+            }
+            
+            NSMenuItem *  forwardMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
 
             forwardMenuItem.tag = ++counterTag;
             forwardMenuItem.toolTip = obj.originalURLString;
@@ -473,6 +490,22 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)performPreciseBackOrForward:(id)sender
 {
     (void)[self.webView goToBackForwardItem:[self.webView.backForwardList itemAtIndex:(int)[sender tag]]];
+}
+
+- (IBAction)openDocument:(id)sender
+{
+    NSOpenPanel * const  panel = [NSOpenPanel openPanel];
+
+    [panel beginSheetModalForWindow:self.windowForSheet completionHandler:^(NSInteger result){
+        switch (result) {
+            case NSFileHandlingPanelOKButton:
+                [self loadPage:panel.URLs.firstObject];
+                break;
+                
+            default:
+                break;
+        }
+    }];
 }
 
 
