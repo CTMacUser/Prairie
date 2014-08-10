@@ -223,6 +223,11 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {
+        self.urlDisplay.stringValue = sender.mainFrameURL;
+        if ([sender acceptsFirstResponder]) {
+            (void)[self.windowForSheet makeFirstResponder:sender];
+        }
+
         // Some callbacks don't work right for local files; tweaking is required.
         NSURL * const  requestURL = frame.dataSource.initialRequest.URL;
 

@@ -39,7 +39,6 @@
                         </textFieldCell>
                         <connections>
                             <action selector="takeStringURLFrom:" target="MbC-4S-7ZT" id="udP-b5-gG8"/>
-                            <binding destination="-2" name="value" keyPath="self.webView.mainFrameURL" id="gqQ-2Q-Gfh"/>
                         </connections>
                     </textField>
                     <webView translatesAutoresizingMaskIntoConstraints="NO" id="MbC-4S-7ZT">
