@@ -420,6 +420,11 @@
                                     <action selector="goForward:" target="-1" id="zZS-2C-qic"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Home" keyEquivalent="H" id="h0p-02-0XB">
+                                <connections>
+                                    <action selector="goHome:" target="-1" id="5tp-EF-HlJ"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

@@ -532,4 +532,14 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     (void)[self.windowForSheet makeFirstResponder:self.urlDisplay];
 }
 
+/*!
+    @brief Action to visit the designated home page.
+    @param sender The object that sent this message.
+    @details Triggers the user's Default Page to be visited.
+ */
+- (IBAction)goHome:(id)sender
+{
+    [self loadPage:self.appDelegate.defaultPage];
+}
+
 @end

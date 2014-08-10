@@ -62,4 +62,14 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
     return [[PrDocument createPagelessDocument] openLocation:sender];
 }
 
+/*!
+    @brief Action to visit the designated home page.
+    @param sender The object that sent this message.
+    @details Called only if there's no browser windows. So create one first, then proceed as normal.
+ */
+- (IBAction)goHome:(id)sender
+{
+    return [[PrDocument createPagelessDocument] goHome:sender];
+}
+
 @end

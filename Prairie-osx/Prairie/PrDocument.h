@@ -20,6 +20,7 @@ extern NSInteger const PrGoForwardSegment;
 - (IBAction)toggleLoadingBar:(id)sender;
 - (IBAction)toggleStatusBar:(id)sender;
 - (IBAction)openLocation:(id)sender;
+- (IBAction)goHome:(id)sender;
 
 + (instancetype)createPagelessDocument;
 
