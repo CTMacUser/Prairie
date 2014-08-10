@@ -73,6 +73,12 @@
                                     <action selector="openDocument:" target="-1" id="bVn-NM-KNZ"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Open in New Window…" tag="1" alternate="YES" keyEquivalent="o" id="beA-1l-UJ8">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="openDocument:" target="-1" id="p9u-89-haH"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Open Recent" id="tXI-mr-wws">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Open Recent" systemMenu="recentDocuments" id="oas-Oc-fiZ">
