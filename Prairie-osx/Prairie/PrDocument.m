@@ -178,6 +178,18 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     return self.appDelegate.controlStatusBarFromWS ? self.statusLine.stringValue : [super webViewStatusText:sender];
 }
 
+- (BOOL)webViewAreToolbarsVisible:(WebView *)sender  // UNTESTED
+{
+    // TODO: add preference control to block these two methods (ControlToolbarsFromWS)
+    return [sender.window.toolbar isVisible] || [self showingLoadingBar];
+}
+
+- (void)webView:(WebView *)sender setToolbarsVisible:(BOOL)visible  // UNTESTED
+{
+    [sender.window.toolbar setVisible:visible];
+    visible ? [self showLoadingBar] : [self hideLoadingBar];
+}
+
 - (BOOL)webViewIsStatusBarVisible:(WebView *)sender  // UNTESTED
 {
     return self.appDelegate.controlStatusBarFromWS ? [self showingStatusBar] : [super webViewIsStatusBarVisible:sender];
