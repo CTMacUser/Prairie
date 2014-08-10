@@ -19,6 +19,9 @@ extern NSInteger const PrGoForwardSegment;
 - (IBAction)performBackOrForward:(id)sender;
 - (IBAction)toggleLoadingBar:(id)sender;
 - (IBAction)toggleStatusBar:(id)sender;
+- (IBAction)openLocation:(id)sender;
+
++ (instancetype)createPagelessDocument;
 
 @property (weak) IBOutlet WebView *webView;
 @property (weak) IBOutlet NSTextField *urlDisplay;

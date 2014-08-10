@@ -8,6 +8,7 @@
  */
 
 #import "PrairieAppDelegate.h"
+#import "PrDocument.h"
 
 
 #pragma mark Declared constants
@@ -47,6 +48,18 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
 
     // Last-resort preference settings
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS)}];
+}
+
+#pragma mark Action methods
+
+/*!
+    @brief Action to start entering an URL for browsing.
+    @param sender The object that sent this message.
+    @details Called only if there's no browser windows. So create one first, then proceed as normal.
+ */
+- (IBAction)openLocation:(id)sender
+{
+    return [[PrDocument createPagelessDocument] openLocation:sender];
 }
 
 @end

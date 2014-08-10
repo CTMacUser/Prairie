@@ -92,6 +92,11 @@
                                     </items>
                                 </menu>
                             </menuItem>
+                            <menuItem title="Open Location…" keyEquivalent="l" id="dPB-BW-OQc">
+                                <connections>
+                                    <action selector="openLocation:" target="-1" id="6rC-Wb-0OQ"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
                             <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                 <connections>

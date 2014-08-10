@@ -153,16 +153,14 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-    id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];  // Must be YES, no XIB-load (and therefore no webView) otherwise.
+    id const  newDocument = [[self class] createPagelessDocument];
 
-    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:self.appDelegate.defaultPage];  // Make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards). This can fail if the Home Page preference (quickly) changes between the calls.
     [[newDocument webView].mainFrame loadRequest:request];
     return [newDocument webView];
 }
 
-- (void)webViewShow:(WebView *)sender  // UNTESTED
+- (void)webViewShow:(WebView *)sender
 {
-    // This method is not generally needed since webView:createWebViewWithRequest: already brings its new window up front. (The implementation can't help it.) But just in case this method is needed without its predecessor....
     [self showWindows];
 }
 
@@ -342,6 +340,16 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [self.loadingProgress setIndeterminate:YES];
 }
 
+#pragma mark Public methods (besides actions)
+
++ (instancetype)createPagelessDocument
+{
+    id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];  // Must be YES, no XIB-load (and therefore no webView) otherwise.
+    
+    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:[[NSApp delegate] defaultPage]];  // Make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards). This can fail if the Home Page preference (quickly) changes between the calls.
+    return newDocument;
+}
+
 #pragma mark Private methods
 
 /*!
@@ -513,5 +521,15 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     }];
 }
 
+/*!
+    @brief Action to start entering an URL for browsing.
+    @param sender The object that sent this message.
+    @details Exposes the window's URL entry field, if needed, and highlights it for text entry.
+ */
+- (IBAction)openLocation:(id)sender
+{
+    [self showLoadingBar];
+    (void)[self.windowForSheet makeFirstResponder:self.urlDisplay];
+}
 
 @end
