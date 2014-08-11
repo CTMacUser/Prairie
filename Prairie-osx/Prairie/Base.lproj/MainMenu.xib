@@ -392,12 +392,12 @@
                                     <action selector="stopLoading:" target="-1" id="oqi-Pn-Jg9"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Reload" keyEquivalent="r" id="6ty-WF-nhj">
+                            <menuItem title="Reload Page" keyEquivalent="r" id="6ty-WF-nhj">
                                 <connections>
                                     <action selector="reload:" target="-1" id="nyc-6X-8fo"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Reload Deeply" alternate="YES" keyEquivalent="r" id="Ro7-Do-o4T">
+                            <menuItem title="Reload Page without Cache" alternate="YES" keyEquivalent="r" id="Ro7-Do-o4T">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="reloadFromOrigin:" target="-1" id="9jw-st-5PO"/>
