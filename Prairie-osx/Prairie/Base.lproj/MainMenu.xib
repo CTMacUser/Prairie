@@ -403,6 +403,25 @@
                                     <action selector="reloadFromOrigin:" target="-1" id="9jw-st-5PO"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="Eky-Xf-gph"/>
+                            <menuItem title="Actual Size" keyEquivalent="0" id="Oyp-jG-Pij">
+                                <connections>
+                                    <action selector="makeTextStandardSize:" target="-1" id="I6m-DM-8oA"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Zoom In" keyEquivalent="+" id="lyc-l9-ahl">
+                                <connections>
+                                    <action selector="makeTextLarger:" target="-1" id="pIw-5w-z3T"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Zoom Out" keyEquivalent="-" id="7Xf-yu-7GQ">
+                                <connections>
+                                    <action selector="makeTextSmaller:" target="-1" id="qtu-Hx-6E7"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Zoom Text Only" state="on" enabled="NO" id="Gjg-n3-nbg">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
