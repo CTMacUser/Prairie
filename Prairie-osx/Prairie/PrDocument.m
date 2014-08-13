@@ -30,10 +30,10 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (void)loadPage:(NSURL *)pageURL;
 - (void)showError:(NSError *)error;
-- (BOOL)showingLoadingBar;
+- (BOOL)isLoadingBarVisible;
 - (void)hideLoadingBar;
 - (void)showLoadingBar;
-- (BOOL)showingStatusBar;
+- (BOOL)isStatusBarVisible;
 - (void)hideStatusBar;
 - (void)showStatusBar;
 
@@ -140,9 +140,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     id const  anObject = anItem;
 
     if ([anItem action] == @selector(toggleStatusBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
-        [anObject setTitle:([self showingStatusBar] ? NSLocalizedString(@"HIDE_STATUS_BAR", nil) : NSLocalizedString(@"SHOW_STATUS_BAR", nil))];
+        [anObject setTitle:([self isStatusBarVisible] ? NSLocalizedString(@"HIDE_STATUS_BAR", nil) : NSLocalizedString(@"SHOW_STATUS_BAR", nil))];
     } else if ([anItem action] == @selector(toggleLoadingBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
-        [anObject setTitle:([self showingLoadingBar] ? NSLocalizedString(@"HIDE_LOADING_BAR", nil) : NSLocalizedString(@"SHOW_LOADING_BAR", nil))];
+        [anObject setTitle:([self isLoadingBarVisible] ? NSLocalizedString(@"HIDE_LOADING_BAR", nil) : NSLocalizedString(@"SHOW_LOADING_BAR", nil))];
     }
     return [super validateUserInterfaceItem:anItem];
 }
@@ -179,7 +179,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (BOOL)webViewAreToolbarsVisible:(WebView *)sender  // UNTESTED
 {
     // TODO: add preference control to block these two methods (ControlToolbarsFromWS)
-    return [sender.window.toolbar isVisible] || [self showingLoadingBar];
+    return [sender.window.toolbar isVisible] || [self isLoadingBarVisible];
 }
 
 - (void)webView:(WebView *)sender setToolbarsVisible:(BOOL)visible  // UNTESTED
@@ -190,7 +190,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (BOOL)webViewIsStatusBarVisible:(WebView *)sender  // UNTESTED
 {
-    return self.appDelegate.controlStatusBarFromWS ? [self showingStatusBar] : [super webViewIsStatusBarVisible:sender];
+    return self.appDelegate.controlStatusBarFromWS ? [self isStatusBarVisible] : [super webViewIsStatusBarVisible:sender];
 }
 
 - (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible  // UNTESTED
@@ -378,7 +378,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  @brief Loading Bar visibility status.
  @return YES if the Loading Bar is visible, NO otherwise.
  */
-- (BOOL)showingLoadingBar
+- (BOOL)isLoadingBarVisible
 {
     return !![self.windowForSheet contentBorderThicknessForEdge:NSMaxYEdge];
 }
@@ -407,7 +407,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     @brief Status Bar visibility status.
     @return YES if the Status Bar is visible, NO otherwise.
  */
-- (BOOL)showingStatusBar
+- (BOOL)isStatusBarVisible
 {
     return !![self.windowForSheet contentBorderThicknessForEdge:NSMinYEdge];
 }
@@ -469,7 +469,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  */
 - (IBAction)toggleLoadingBar:(id)sender
 {
-    if ([self showingLoadingBar]) {
+    if ([self isLoadingBarVisible]) {
         [self hideLoadingBar];
     } else {
         [self showLoadingBar];
@@ -483,7 +483,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  */
 - (IBAction)toggleStatusBar:(id)sender
 {
-    if ([self showingStatusBar]) {
+    if ([self isStatusBarVisible]) {
         [self hideStatusBar];
     } else {
         [self showStatusBar];
