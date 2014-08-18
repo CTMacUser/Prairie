@@ -7,25 +7,17 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-			<key>NSExportableTypes</key>
-			<array>
-				<string>com.apple.webarchive</string>
-				<string>public.content</string>
-			</array>
-			<key>CFBundleTypeIconFile</key>
-			<string></string>
 			<key>CFBundleTypeName</key>
-			<string>public.content</string>
+			<string>All Files</string>
 			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
 			<string>Alternate</string>
 			<key>LSItemContentTypes</key>
 			<array>
+				<string>public.data</string>
 				<string>public.content</string>
 			</array>
-			<key>NSDocumentClass</key>
-			<string>PrDocument</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>

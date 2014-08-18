@@ -20,7 +20,12 @@ extern NSInteger const   PrDefaultBackForwardMenuLength;
 extern BOOL const        PrDefaultControlStatusBarFromWS;
 
 
-@interface PrairieAppDelegate : NSObject <NSApplicationDelegate>
+@interface PrairieAppDelegate : NSObject <NSApplicationDelegate, NSOpenSavePanelDelegate>
+
+- (id)createBrowser;
+
+- (IBAction)newDocument:(id)sender;
+- (IBAction)openDocument:(id)sender;
 
 - (IBAction)openLocation:(id)sender;
 - (IBAction)goHome:(id)sender;
@@ -28,5 +33,7 @@ extern BOOL const        PrDefaultControlStatusBarFromWS;
 @property (nonatomic, readonly, copy)   NSURL *    defaultPage;
 @property (nonatomic, readonly, assign) NSInteger  backForwardMenuLength;
 @property (nonatomic, readonly, assign) BOOL       controlStatusBarFromWS;
+
+@property (nonatomic, readonly) NSSet *  windowControllers;
 
 @end

@@ -1,12 +1,12 @@
 /*!
  @file
- @brief Definition of the app's Document class, directly connected to its XIB.
+ @brief Definition of the controller class for browser windows.
  @details The document encloses a web browser experience.
  @copyright Daryle Walker, 2014, all rights reserved.
  @CFBundleIdentifier io.github.ctmacuser.Prairie
  */
 
-#import "PrDocument.h"
+#import "PrBrowserController.h"
 #import "PrairieAppDelegate.h"
 
 
@@ -22,13 +22,12 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 #pragma mark Private interface
 
-@interface PrDocument ()
+@interface PrBrowserController ()
 
 - (void)notifyOnProgressStarted:(NSNotification *)notification;
 - (void)notifyOnProgressChanged:(NSNotification *)notification;
 - (void)notifyOnProgressFinished:(NSNotification *)notification;
 
-- (void)loadPage:(NSURL *)pageURL;
 - (void)showError:(NSError *)error;
 - (BOOL)isLoadingBarVisible;
 - (void)hideLoadingBar;
@@ -43,13 +42,13 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 @end
 
-@implementation PrDocument
+@implementation PrBrowserController
 
 #pragma mark Conventional overrides
 
 - (id)init
 {
-    self = [super init];
+    self = [super initWithWindowNibName:[NSStringFromClass([self class]) stringByReplacingOccurrencesOfString:@"Controller" withString:@""]];
     if (self) {
         // Add your subclass-specific initialization here.
     }
@@ -61,14 +60,8 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (NSString *)windowNibName
-{
-    return NSStringFromClass([self class]);
-}
-
-- (void)windowControllerDidLoadNib:(NSWindowController *)aController
-{
-    [super windowControllerDidLoadNib:aController];
+- (void)windowDidLoad {
+    [super windowDidLoad];
 
     // Observe notifications for web page loading progress.
     NSNotificationCenter * const  notifier = [NSNotificationCenter defaultCenter];
@@ -77,74 +70,25 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [notifier addObserver:self selector:@selector(notifyOnProgressChanged:) name:WebViewProgressEstimateChangedNotification object:self.webView];
     [notifier addObserver:self selector:@selector(notifyOnProgressFinished:) name:WebViewProgressFinishedNotification object:self.webView];
 
-    // Load the initial page,...
-    if ( self.fileURL ) {
-        // ...local ones immediately.
-        [self loadPage:self.fileURL];
-        self.fileURL = nil;  // Disconnects file from document control, treating it like an import.
-    } else {
-        // ...remote ones after a delay. The gap allows a document that'll be opened from another with a starting link time to cancel the home-page load and insert the starting link as its first one.
-        [self performSelector:@selector(loadPage:) withObject:self.appDelegate.defaultPage afterDelay:0.5];
-    }
-
     // Docs suggest giving a name to group related frames. I'm using a UUID for an easily accessible unique string.
     self.webView.groupName = [[NSUUID UUID] UUIDString];
 }
 
-+ (BOOL)autosavesInPlace
-{
-    return NO;  // viewer-only app
-}
+#pragma mark NSMenuValidation override
 
-- (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
-{
-    WebDataSource * const  source = self.webView.mainFrame.dataSource;
-    NSData * const         data = [typeName isEqualToString:(__bridge NSString *)kUTTypeWebArchive] ? source.webArchive.data : source.data;  // Assumes typeName is the actual UTI for current web object when the object isn't a web-archive.
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    SEL const  action = [menuItem action];
 
-    if ( !data && outError ) {
-        *outError = [[NSError alloc] initWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];  // Is the error code appropriate?
-    }
-    return data;
-    // TODO: currently doesn't work right. Regular saves (and save-as) and reverts seem to be bad ideas. Export seems to work when web-archive is the format, but not public-content. The latter has no extension/type-information to pass on, so the exported file is untyped and useless. Is my assumption on the line for local variable "data" wrong? Should the app switch from Editor to Viewer? (That will require making a subclass of NSDocumentController to open windows correctly.)
-}
-
-- (BOOL)readFromURL:(NSURL *)url ofType:(NSString *)typeName error:(NSError *__autoreleasing *)outError
-{
-    NSString * const  mimeType = (__bridge_transfer NSString *)UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)typeName, kUTTagClassMIMEType);
-
-    if ( mimeType && [WebView canShowMIMEType:mimeType] ) {
-        return YES;
-    }
-    if ( outError ) {
-        NSMutableDictionary *  info = [[NSMutableDictionary alloc] init];
-
-        [info setDictionary:@{NSURLErrorKey: url, NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"NO_MIME_TYPE", nil)}];
-        if ( mimeType ) {
-            [info setValue:mimeType forKey:WebKitErrorMIMETypeKey];
+    if (action == @selector(toggleStatusBar:)) {
+        menuItem.title = [self isStatusBarVisible] ? NSLocalizedString(@"HIDE_STATUS_BAR", nil) : NSLocalizedString(@"SHOW_STATUS_BAR", nil);
+    } else if (action == @selector(toggleLoadingBar:)) {
+        menuItem.title = [self isLoadingBarVisible] ? NSLocalizedString(@"HIDE_LOADING_BAR", nil) : NSLocalizedString(@"SHOW_LOADING_BAR", nil);
+    } else if (action == @selector(saveDocumentTo:)) {
+        if (!self.webView.mainFrame.dataSource.data) {  // Also triggers when dataSource is nil.
+            return NO;
         }
-        *outError = [NSError errorWithDomain:WebKitErrorDomain code:WebKitErrorCannotShowURL userInfo:info];
     }
-    return NO;  // Cannot proceed if WebView can't process the required MIME type.
-}
-
-- (BOOL)isEntireFileLoaded
-{
-    // The file is loaded when the WebView finishes with it.
-    return self.webView && !self.webView.isLoading;
-}
-
-#pragma mark NSUserInterfaceValidations override
-
-- (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
-{
-    id const  anObject = anItem;
-
-    if ([anItem action] == @selector(toggleStatusBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
-        [anObject setTitle:([self isStatusBarVisible] ? NSLocalizedString(@"HIDE_STATUS_BAR", nil) : NSLocalizedString(@"SHOW_STATUS_BAR", nil))];
-    } else if ([anItem action] == @selector(toggleLoadingBar:) && [anObject isKindOfClass:[NSMenuItem class]]) {
-        [anObject setTitle:([self isLoadingBarVisible] ? NSLocalizedString(@"HIDE_LOADING_BAR", nil) : NSLocalizedString(@"SHOW_LOADING_BAR", nil))];
-    }
-    return [super validateUserInterfaceItem:anItem];
+    return YES;
 }
 
 #pragma mark WebUIDelegate overrides
@@ -153,15 +97,15 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-    id const  newDocument = [[self class] createPagelessDocument];
+    id const  browser = [self.appDelegate createBrowser];
 
-    [[newDocument webView].mainFrame loadRequest:request];
-    return [newDocument webView];
+    [[browser webView].mainFrame loadRequest:request];
+    return [browser webView];
 }
 
 - (void)webViewShow:(WebView *)sender
 {
-    [self showWindows];
+    [self showWindow:nil];
 }
 
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text
@@ -235,7 +179,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     if (frame == sender.mainFrame) {
         self.urlDisplay.stringValue = sender.mainFrameURL;
         if ([sender acceptsFirstResponder]) {
-            (void)[self.windowForSheet makeFirstResponder:sender];
+            (void)[self.window makeFirstResponder:sender];
         }
 
         // Some callbacks don't work right for local files; tweaking is required.
@@ -342,16 +286,6 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 #pragma mark Public methods (besides actions)
 
-+ (instancetype)createPagelessDocument
-{
-    id  newDocument = [[NSDocumentController sharedDocumentController] openUntitledDocumentAndDisplay:YES error:nil];  // Must be YES, no XIB-load (and therefore no webView) otherwise.
-    
-    [NSObject cancelPreviousPerformRequestsWithTarget:newDocument selector:@selector(loadPage:) object:[[NSApp delegate] defaultPage]];  // Make sure the argument for "object:" matches what was entered in "windowControllerDidLoadNib:" (by "isEqual:" standards). This can fail if the Home Page preference (quickly) changes between the calls.
-    return newDocument;
-}
-
-#pragma mark Private methods
-
 /*!
     @brief Orders web-view member to load a new URL.
     @param pageURL The URL for the resource to be loaded.
@@ -362,6 +296,8 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:pageURL]];
 }
 
+#pragma mark Private methods
+
 /*!
     @brief Shows an error as an alert attached to the document window.
     @param error The error to be displayed.
@@ -369,38 +305,38 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  */
 - (void)showError:(NSError *)error
 {
-    [[NSAlert alertWithError:error] beginSheetModalForWindow:self.windowForSheet completionHandler:^void (NSModalResponse returnCode) {
+    [[NSAlert alertWithError:error] beginSheetModalForWindow:self.window completionHandler:^void (NSModalResponse returnCode) {
         // Nothing right now.
     }];
 }
 
 /*!
- @brief Loading Bar visibility status.
- @return YES if the Loading Bar is visible, NO otherwise.
+    @brief Loading Bar visibility status.
+    @return YES if the Loading Bar is visible, NO otherwise.
  */
 - (BOOL)isLoadingBarVisible
 {
-    return !![self.windowForSheet contentBorderThicknessForEdge:NSMaxYEdge];
+    return !![self.window contentBorderThicknessForEdge:NSMaxYEdge];
 }
 
 /*!
- @brief Hide the Loading Bar.
+    @brief Hide the Loading Bar.
  */
 - (void)hideLoadingBar
 {
-    [self.windowForSheet setContentBorderThickness:(self.topSpacing.constant = 0.0) forEdge:NSMaxYEdge];
+    [self.window setContentBorderThickness:(self.topSpacing.constant = 0.0) forEdge:NSMaxYEdge];
     [self.urlDisplay setHidden:YES];
     [self.loadingProgress setHidden:YES];
 }
 
 /*!
- @brief Show the Loading Bar.
+    @brief Show the Loading Bar.
  */
 - (void)showLoadingBar
 {
     [self.loadingProgress setHidden:NO];
     [self.urlDisplay setHidden:NO];
-    [self.windowForSheet setContentBorderThickness:(self.topSpacing.constant = PrLoadingBarHeight) forEdge:NSMaxYEdge];
+    [self.window setContentBorderThickness:(self.topSpacing.constant = PrLoadingBarHeight) forEdge:NSMaxYEdge];
 }
 
 /*!
@@ -409,7 +345,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  */
 - (BOOL)isStatusBarVisible
 {
-    return !![self.windowForSheet contentBorderThicknessForEdge:NSMinYEdge];
+    return !![self.window contentBorderThicknessForEdge:NSMinYEdge];
 }
 
 /*!
@@ -417,7 +353,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  */
 - (void)hideStatusBar
 {
-    [self.windowForSheet setContentBorderThickness:(self.bottomSpacing.constant = 0.0) forEdge:NSMinYEdge];
+    [self.window setContentBorderThickness:(self.bottomSpacing.constant = 0.0) forEdge:NSMinYEdge];
     [self.statusLine setHidden:YES];
 }
 
@@ -427,8 +363,10 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)showStatusBar
 {
     [self.statusLine setHidden:NO];
-    [self.windowForSheet setContentBorderThickness:(self.bottomSpacing.constant = PrStatusBarHeight) forEdge:NSMinYEdge];
+    [self.window setContentBorderThickness:(self.bottomSpacing.constant = PrStatusBarHeight) forEdge:NSMinYEdge];
 }
+
+#pragma mark Property getters & setters
 
 /*!
     @brief Getter for "appDelegate" property
@@ -463,9 +401,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 }
 
 /*!
- @brief Action to show or hide the Loading bar.
- @param sender The object that sent this message.
- @details Checks the hidden/shown status of the Loading bar (with the URL text and loading-progress controls) and switches said status (hidden to shown, or shown to hidden).
+    @brief Action to show or hide the Loading bar.
+    @param sender The object that sent this message.
+    @details Checks the hidden/shown status of the Loading bar (with the URL text and loading-progress controls) and switches said status (hidden to shown, or shown to hidden).
  */
 - (IBAction)toggleLoadingBar:(id)sender
 {
@@ -500,16 +438,21 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     (void)[self.webView goToBackForwardItem:[self.webView.backForwardList itemAtIndex:(int)[sender tag]]];
 }
 
+/*!
+    @brief Action to open a (file) URL as the next page for this browser window.
+    @param sender The object that sent this message.
+ */
 - (IBAction)openDocument:(id)sender
 {
     if ([sender isKindOfClass:[NSMenuItem class]] && [sender tag]) {
         // Have the "Open in New Window…" command instead of the regular "Open…" one. Just do what would happen if this class didn't intercept openDocument:.
-        return [[NSDocumentController sharedDocumentController] openDocument:sender];
+        return [self.appDelegate openDocument:sender];
     }
 
     NSOpenPanel * const  panel = [NSOpenPanel openPanel];
 
-    [panel beginSheetModalForWindow:self.windowForSheet completionHandler:^(NSInteger result){
+    panel.delegate = self.appDelegate;  // This action has the same filtering criteria that the app-delegate's version has, so reuse the panel-delegate, which happens to be the app-delegate itself.
+    [panel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
         switch (result) {
             case NSFileHandlingPanelOKButton:
                 [self loadPage:panel.URLs.firstObject];
@@ -517,6 +460,32 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
                 
             default:
                 break;
+        }
+    }];  // This time, don't turn on multiple files, since there's only one presentation surface.
+}
+
+/*!
+    @brief Action to save a copy of the currently displayed resource.
+    @param sender The object that sent this message.
+ */
+- (IBAction)saveDocumentTo:(id)sender
+{
+    NSSavePanel * const       panel = [NSSavePanel savePanel];
+    WebDataSource * const    source = self.webView.mainFrame.dataSource;
+    NSURLResponse * const  response = source.response;
+    NSArray * const       fileTypes = (__bridge_transfer NSArray *)UTTypeCreateAllIdentifiersForTag(kUTTagClassMIMEType, (__bridge CFStringRef)response.MIMEType, NULL);
+
+    panel.allowedFileTypes = [fileTypes arrayByAddingObject:(__bridge NSString *)kUTTypeWebArchive];
+    panel.nameFieldStringValue = response.suggestedFilename;
+    panel.canSelectHiddenExtension = YES;
+
+    [panel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
+        if (result == NSFileHandlingPanelOKButton) {
+            NSError  *error = nil;
+
+            if (![([fileTypes firstObjectCommonWithArray:(__bridge_transfer NSArray *)UTTypeCreateAllIdentifiersForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)panel.URL.pathExtension, NULL)] ? source.data : source.webArchive.data) writeToURL:panel.URL options:NSDataWritingAtomic error:&error]) {
+                [self performSelector:@selector(showError:) withObject:error afterDelay:0.0];
+            }
         }
     }];
 }
@@ -529,7 +498,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (IBAction)openLocation:(id)sender
 {
     [self showLoadingBar];
-    (void)[self.windowForSheet makeFirstResponder:self.urlDisplay];
+    (void)[self.window makeFirstResponder:self.urlDisplay];
 }
 
 /*!

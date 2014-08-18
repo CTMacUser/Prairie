@@ -1,6 +1,6 @@
 /*!
  @header
- @brief Declaration of the app's Document class, directly connected to its XIB.
+ @brief Declaration of the controller class for browser windows.
  @copyright Daryle Walker, 2014, all rights reserved.
  @CFBundleIdentifier io.github.ctmacuser.Prairie
  */
@@ -14,15 +14,16 @@ extern NSInteger const PrGoBackSegment;
 extern NSInteger const PrGoForwardSegment;
 
 
-@interface PrDocument : NSDocument
+@interface PrBrowserController : NSWindowController
 
 - (IBAction)performBackOrForward:(id)sender;
 - (IBAction)toggleLoadingBar:(id)sender;
 - (IBAction)toggleStatusBar:(id)sender;
 - (IBAction)openLocation:(id)sender;
 - (IBAction)goHome:(id)sender;
+- (IBAction)saveDocumentTo:(id)sender;
 
-+ (instancetype)createPagelessDocument;
+- (void)loadPage:(NSURL *)pageURL;
 
 @property (weak) IBOutlet WebView *webView;
 @property (weak) IBOutlet NSTextField *urlDisplay;

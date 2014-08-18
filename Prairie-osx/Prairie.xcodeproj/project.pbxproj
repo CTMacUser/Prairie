@@ -11,8 +11,8 @@
 		F36CC9521982AA590001EC41 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9501982AA590001EC41 /* InfoPlist.strings */; };
 		F36CC9541982AA590001EC41 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC9531982AA590001EC41 /* main.m */; };
 		F36CC9581982AA590001EC41 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9561982AA590001EC41 /* Credits.rtf */; };
-		F36CC95B1982AA590001EC41 /* PrDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC95A1982AA590001EC41 /* PrDocument.m */; };
-		F36CC95E1982AA590001EC41 /* PrDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = F36CC95C1982AA590001EC41 /* PrDocument.xib */; };
+		F36CC95B1982AA590001EC41 /* PrBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = F36CC95A1982AA590001EC41 /* PrBrowserController.m */; };
+		F36CC95E1982AA590001EC41 /* PrBrowser.xib in Resources */ = {isa = PBXBuildFile; fileRef = F36CC95C1982AA590001EC41 /* PrBrowser.xib */; };
 		F36CC9611982AA590001EC41 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F36CC95F1982AA590001EC41 /* MainMenu.xib */; };
 		F36CC9631982AA590001EC41 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F36CC9621982AA590001EC41 /* Images.xcassets */; };
 		F36CC96A1982AA590001EC41 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F36CC9691982AA590001EC41 /* XCTest.framework */; };
@@ -45,9 +45,9 @@
 		F36CC9531982AA590001EC41 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F36CC9551982AA590001EC41 /* Prairie-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Prairie-Prefix.pch"; sourceTree = "<group>"; };
 		F36CC9571982AA590001EC41 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		F36CC9591982AA590001EC41 /* PrDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrDocument.h; sourceTree = "<group>"; };
-		F36CC95A1982AA590001EC41 /* PrDocument.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrDocument.m; sourceTree = "<group>"; };
-		F36CC95D1982AA590001EC41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PrDocument.xib; sourceTree = "<group>"; };
+		F36CC9591982AA590001EC41 /* PrBrowserController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrBrowserController.h; sourceTree = "<group>"; };
+		F36CC95A1982AA590001EC41 /* PrBrowserController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrBrowserController.m; sourceTree = "<group>"; };
+		F36CC95D1982AA590001EC41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PrBrowser.xib; sourceTree = "<group>"; };
 		F36CC9601982AA590001EC41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		F36CC9621982AA590001EC41 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F36CC9681982AA590001EC41 /* PrairieTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PrairieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -126,9 +126,9 @@
 		F36CC94D1982AA590001EC41 /* Prairie */ = {
 			isa = PBXGroup;
 			children = (
-				F36CC9591982AA590001EC41 /* PrDocument.h */,
-				F36CC95A1982AA590001EC41 /* PrDocument.m */,
-				F36CC95C1982AA590001EC41 /* PrDocument.xib */,
+				F36CC9591982AA590001EC41 /* PrBrowserController.h */,
+				F36CC95A1982AA590001EC41 /* PrBrowserController.m */,
+				F36CC95C1982AA590001EC41 /* PrBrowser.xib */,
 				F36CC95F1982AA590001EC41 /* MainMenu.xib */,
 				F3E0F0AC198FF80A00EABE36 /* PrairieAppDelegate.h */,
 				F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */,
@@ -249,7 +249,7 @@
 				F36CC9521982AA590001EC41 /* InfoPlist.strings in Resources */,
 				F3E0F0A919887B2400EABE36 /* Localizable.strings in Resources */,
 				F36CC9631982AA590001EC41 /* Images.xcassets in Resources */,
-				F36CC95E1982AA590001EC41 /* PrDocument.xib in Resources */,
+				F36CC95E1982AA590001EC41 /* PrBrowser.xib in Resources */,
 				F36CC9581982AA590001EC41 /* Credits.rtf in Resources */,
 				F36CC9611982AA590001EC41 /* MainMenu.xib in Resources */,
 			);
@@ -270,7 +270,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F36CC95B1982AA590001EC41 /* PrDocument.m in Sources */,
+				F36CC95B1982AA590001EC41 /* PrBrowserController.m in Sources */,
 				F36CC9541982AA590001EC41 /* main.m in Sources */,
 				F3E0F0AE198FF80A00EABE36 /* PrairieAppDelegate.m in Sources */,
 			);
@@ -311,12 +311,12 @@
 			name = Credits.rtf;
 			sourceTree = "<group>";
 		};
-		F36CC95C1982AA590001EC41 /* PrDocument.xib */ = {
+		F36CC95C1982AA590001EC41 /* PrBrowser.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				F36CC95D1982AA590001EC41 /* Base */,
 			);
-			name = PrDocument.xib;
+			name = PrBrowser.xib;
 			sourceTree = "<group>";
 		};
 		F36CC95F1982AA590001EC41 /* MainMenu.xib */ = {

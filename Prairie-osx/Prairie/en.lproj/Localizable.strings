@@ -7,10 +7,12 @@
  @CFBundleIdentifier io.github.ctmacuser.Prairie
  */
 
-/** PrDocument.m **/
+/** PrairieAppDelegate.m **/
 
 /* A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit. */
-"NO_MIME_TYPE" = "The URL is of a missing or unsupported MIME type.";
+"NO_MIME_TYPE" = "At least one URL does not a corresponding MIME type.";
+
+/** PrBrowserController.m **/
 
 /* Menu item to hide a browser-window's Loading Bar when it's currently visible. */
 "HIDE_LOADING_BAR" = "Hide Loading Bar";
