@@ -22,6 +22,7 @@ extern NSInteger const PrGoForwardSegment;
 - (IBAction)openLocation:(id)sender;
 - (IBAction)goHome:(id)sender;
 - (IBAction)saveDocumentTo:(id)sender;
+- (IBAction)printDocument:(id)sender;
 
 - (void)loadPage:(NSURL *)pageURL;
 

@@ -28,6 +28,8 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)notifyOnProgressChanged:(NSNotification *)notification;
 - (void)notifyOnProgressFinished:(NSNotification *)notification;
 
+- (void)printOperationDidRun:(NSPrintOperation *)printOperation success:(BOOL)success contextInfo:(void *)contextInfo;
+
 - (void)showError:(NSError *)error;
 - (BOOL)isLoadingBarVisible;
 - (void)hideLoadingBar;
@@ -284,6 +286,18 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [self.loadingProgress setIndeterminate:YES];
 }
 
+#pragma mark Printing delegate
+
+/*!
+    @brief Print job completion handler.
+    @param printOperation The finished print operation.
+    @param success Whether or not the print operation finished successfully.
+    @param contextInfo Any extra developer-defined data. (None used right now.)
+ */
+- (void)printOperationDidRun:(NSPrintOperation *)printOperation success:(BOOL)success contextInfo:(void *)contextInfo {
+    // Nothing to do, yet.
+}
+
 #pragma mark Public methods (besides actions)
 
 /*!
@@ -488,6 +502,14 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
             }
         }
     }];
+}
+
+/*!
+    @brief Action to print the currently displayed resource.
+    @param sender The object that sent this message.
+ */
+- (IBAction)printDocument:(id)sender {
+    [[self.webView.mainFrame.frameView printOperationWithPrintInfo:[NSPrintInfo sharedPrintInfo]] runOperationModalForWindow:self.window delegate:self didRunSelector:@selector(printOperationDidRun:success:contextInfo:) contextInfo:NULL];
 }
 
 /*!
