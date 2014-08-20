@@ -207,7 +207,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
         __block NSInteger         counterTag = 0;
         NSInteger const        maxMenuLength = self.appDelegate.backForwardMenuLength;
 
-        [[backForwardList backListWithLimit:(int)maxMenuLength] enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(WebHistoryItem *obj, NSUInteger idx, BOOL *stop){
+        for (WebHistoryItem *obj in [backForwardList backListWithLimit:(int)maxMenuLength].reverseObjectEnumerator) {
             NSString *  itemTitle = obj.title;
 
             if (!itemTitle) {
@@ -221,24 +221,24 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
             backMenuItem.toolTip = obj.originalURLString;
             backMenuItem.target = self;
             [backMenu insertItem:backMenuItem atIndex:-counterTag - 1];
-        }];  // The history lists go from earliest to latest. The menus need to go from temporally closest to furthest. The directions are the same for the forward list, but opposing for the back list, so the back list has to be iterated backwards.
+        }  // The history lists go from earliest to latest. The menus need to go from temporally closest to furthest. Those directions are the same for the forward list, but opposing for the back list, so the back list has to be iterated backwards.
         [backForwardControl setMenu:backMenu forSegment:PrGoBackSegment];
         counterTag = 0;
-        [[backForwardList forwardListWithLimit:(int)maxMenuLength] enumerateObjectsUsingBlock:^(WebHistoryItem *obj, NSUInteger idx, BOOL *stop){
+        for (WebHistoryItem *obj in [backForwardList forwardListWithLimit:(int)maxMenuLength]) {
             NSString *  itemTitle = obj.title;
-            
+
             if (!itemTitle) {
                 // Some (file) URLs don't generate a WebView-compatible title.
                 itemTitle = [[NSURL URLWithString:obj.URLString] lastPathComponent];
             }
-            
+
             NSMenuItem *  forwardMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
 
             forwardMenuItem.tag = ++counterTag;
             forwardMenuItem.toolTip = obj.originalURLString;
             forwardMenuItem.target = self;
             [forwardMenu insertItem:forwardMenuItem atIndex:+counterTag - 1];
-        }];
+        }
         [backForwardControl setMenu:forwardMenu forSegment:PrGoForwardSegment];
     }
 }
