@@ -99,12 +99,19 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
 
 #pragma mark NSApplicationDelegate overrides
 
-- (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename {
-    PrBrowserController * const  browser = [self createBrowser];
+- (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
+    for (NSString *filename in filenames) {
+        PrBrowserController * const  browser = [self createBrowser];
 
-    [browser showWindow:sender];
-    [browser loadPage:[NSURL fileURLWithPath:[filename stringByExpandingTildeInPath]]];
-    return !!browser;
+        if (browser) {
+            [browser showWindow:sender];
+            [browser loadPage:[NSURL fileURLWithPath:[filename stringByExpandingTildeInPath]]];
+        } else {
+            [sender replyToOpenOrPrint:NSApplicationDelegateReplyFailure];
+            return;
+        }
+    }
+    [sender replyToOpenOrPrint:NSApplicationDelegateReplySuccess];
 }
 
 - (BOOL)applicationOpenUntitledFile:(NSApplication *)sender {
@@ -174,12 +181,12 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
     panel.delegate = self;
     [panel beginWithCompletionHandler:^(NSInteger result) {
         if (result == NSFileHandlingPanelOKButton) {
-            for (NSURL *file in panel.URLs) {
-                PrBrowserController * const  browser = [self createBrowser];
+            NSMutableArray * const  paths = [NSMutableArray arrayWithCapacity:panel.URLs.count];
 
-                [browser showWindow:sender];
-                [browser loadPage:file];
+            for (NSURL *file in panel.URLs) {
+                [paths addObject:file.path];
             }
+            [self application:NSApp openFiles:paths];  // Yes, this function will convert the paths back to URLs! Could have avoided the for-loop by using panel.filenames, but it's deprecated.
         }
     }];
 }
