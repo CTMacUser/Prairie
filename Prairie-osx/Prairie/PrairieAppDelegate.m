@@ -16,10 +16,12 @@
 NSString * const  PrDefaultPageKey = @"DefaultPage";
 NSString * const  PrDefaultBackForwardMenuLengthKey = @"BackForwardMenuLength";
 NSString * const  PrDefaultControlStatusBarFromWSKey = @"ControlStatusBarFromWebScripting";
+NSString * const  PrDefaultOpenUntitledToDefaultPageKey = @"OpenUntitledToDefaultPage";
 
 NSString * const  PrDefaultPage = @"http://www.apple.com";
 NSInteger const   PrDefaultBackForwardMenuLength = 10;
 BOOL const        PrDefaultControlStatusBarFromWS = NO;
+BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 
 #pragma mark Private interface
 
@@ -61,6 +63,10 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
 - (BOOL)controlStatusBarFromWS
 {
     return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultControlStatusBarFromWSKey];
+}
+
+- (BOOL)openUntitledToDefaultPage {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultOpenUntitledToDefaultPageKey];
 }
 
 @synthesize windowControllers = _windowControllers;
@@ -118,8 +124,12 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
     PrBrowserController * const  browser = [self createBrowser];
 
     [browser showWindow:sender];
-    [browser goHome:sender];  // Maybe add a preference to call openLocation: instead.
-    return !!browser;
+    if (self.openUntitledToDefaultPage) {
+        [browser goHome:sender];
+    } else {
+        [browser openLocation:sender];
+    }
+    return !!browser;  // Can't use [self (goHome/openLocation):sender] because those wouldn't give me the created PrBrowserController instance, which is needed for the return value. The result ignores the possibility that the home page could fail to load, since the window stays up.
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
@@ -127,7 +137,7 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
     // If there's a new window, file open, or file print on app launch, then those will be done after this method but before applicationDidFinishLaunching:, so anything setup required for any created windows needs to be done here.
 
     // Last-resort preference settings
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS)}];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS), PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage)}];
 }
 
 #pragma mark NSOpenSavePanelDelegate overrides

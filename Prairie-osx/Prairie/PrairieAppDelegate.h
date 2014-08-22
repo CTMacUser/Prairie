@@ -13,11 +13,13 @@
 extern NSString * const  PrDefaultPageKey;  // NSString, interpret as URL
 extern NSString * const  PrDefaultBackForwardMenuLengthKey;  // NSInteger (probably as NSNumber), must be positive
 extern NSString * const  PrDefaultControlStatusBarFromWSKey;  // BOOL (probably as NSNumber)
+extern NSString * const  PrDefaultOpenUntitledToDefaultPageKey;  // BOOL (probably as NSNumber)
 
 // Default values of various preferences
 extern NSString * const  PrDefaultPage;
 extern NSInteger const   PrDefaultBackForwardMenuLength;
 extern BOOL const        PrDefaultControlStatusBarFromWS;
+extern BOOL const        PrDefaultOpenUntitledToDefaultPage;
 
 
 @interface PrairieAppDelegate : NSObject <NSApplicationDelegate, NSOpenSavePanelDelegate>
@@ -33,6 +35,7 @@ extern BOOL const        PrDefaultControlStatusBarFromWS;
 @property (nonatomic, readonly, copy)   NSURL *    defaultPage;
 @property (nonatomic, readonly, assign) NSInteger  backForwardMenuLength;
 @property (nonatomic, readonly, assign) BOOL       controlStatusBarFromWS;
+@property (nonatomic, readonly, assign) BOOL       openUntitledToDefaultPage;
 
 @property (nonatomic, readonly) NSSet *  windowControllers;
 
