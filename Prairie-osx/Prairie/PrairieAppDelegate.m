@@ -9,6 +9,7 @@
 
 #import "PrairieAppDelegate.h"
 #import "PrBrowserController.h"
+#import "PrBulkFileOperation.h"
 
 
 #pragma mark Declared constants
@@ -106,18 +107,9 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 #pragma mark NSApplicationDelegate overrides
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
-    for (NSString *filename in filenames) {
-        PrBrowserController * const  browser = [self createBrowser];
-
-        if (browser) {
-            [browser showWindow:sender];
-            [browser loadPage:[NSURL fileURLWithPath:[filename stringByExpandingTildeInPath]]];
-        } else {
-            [sender replyToOpenOrPrint:NSApplicationDelegateReplyFailure];
-            return;
-        }
+    if (![PrBulkFileOperation openFiles:filenames application:sender]) {
+        [sender replyToOpenOrPrint:NSApplicationDelegateReplyFailure];
     }
-    [sender replyToOpenOrPrint:NSApplicationDelegateReplySuccess];
 }
 
 - (BOOL)applicationOpenUntitledFile:(NSApplication *)sender {

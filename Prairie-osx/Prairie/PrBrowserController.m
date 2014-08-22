@@ -12,6 +12,12 @@
 
 #pragma mark Declared constants
 
+NSString * const  PrBrowserLoadFailedNotification = @"PrBrowserLoadFailedNotification";
+NSString * const  PrBrowserLoadPassedNotification = @"PrBrowserLoadPassedNotification";
+
+NSString * const  PrBrowserURLKey = @"PrBrowserURLKey";
+NSString * const  PrBrowserLoadFailedWasProvisionalKey = @"PrBrowserLoadFailedWasProvisionalKey";
+
 NSInteger const PrGoBackSegment    = 0;
 NSInteger const PrGoForwardSegment = 1;
 
@@ -151,6 +157,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {  // Ignore notices from sub-frames.
+        [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(YES)}];
         [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
     }
 }
@@ -193,6 +200,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
         if (!frame.dataSource.pageTitle) {
             sender.window.title = requestURL.lastPathComponent;
         }
+
+        // Announce that the URL was loaded. (Doing this before setting self.urlDisplay.stringValue crashed it.)
+        [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadPassedNotification object:self userInfo:@{PrBrowserURLKey: requestURL}];
 
         // Enabled/disabled status of the Back and Forward toolbar buttons.
         NSSegmentedControl * const  backForwardControl = (NSSegmentedControl *)self.toolbarBackForward.view;
@@ -246,6 +256,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(NO)}];
         [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
     }
 }
