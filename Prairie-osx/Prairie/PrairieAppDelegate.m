@@ -11,6 +11,8 @@
 #import "PrBrowserController.h"
 #import "PrBulkFileOperation.h"
 
+@import CoreServices;
+
 
 #pragma mark Declared constants
 
@@ -183,12 +185,14 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
     panel.delegate = self;
     [panel beginWithCompletionHandler:^(NSInteger result) {
         if (result == NSFileHandlingPanelOKButton) {
-            NSMutableArray * const  paths = [NSMutableArray arrayWithCapacity:panel.URLs.count];
+            NSAppleEventDescriptor * const   fileList = [NSAppleEventDescriptor listDescriptor];
+            NSAppleEventDescriptor * const  openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:nil returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
 
             for (NSURL *file in panel.URLs) {
-                [paths addObject:file.path];
+                [fileList insertDescriptor:[NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:[[file absoluteString] dataUsingEncoding:NSUTF8StringEncoding]] atIndex:0];
             }
-            [self application:NSApp openFiles:paths];  // Yes, this function will convert the paths back to URLs! Could have avoided the for-loop by using panel.filenames, but it's deprecated.
+            [openEvent setParamDescriptor:fileList forKeyword:keyDirectObject];
+            [[NSAppleEventManager sharedAppleEventManager] dispatchRawAppleEvent:[openEvent aeDesc] withRawReply:(AppleEvent *)[[NSAppleEventDescriptor nullDescriptor] aeDesc] handlerRefCon:(SRefCon)0];
         }
     }];
 }
