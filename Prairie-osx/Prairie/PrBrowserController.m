@@ -197,6 +197,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
         if ([requestURL isFileURL]) {
             [sender.window standardWindowButton:NSWindowDocumentIconButton].image = [[NSWorkspace sharedWorkspace] iconForFile:[requestURL path]];  // Needed since the file's icon is loaded only once, during webView:didCommitLoadForFrame:, and webView:didReceiveIcon:forFrame: is never called. So during subsequent visits through Back & Forward, the icon from the previously seen page never gets changed out.
+            if ([sender.window isVisible]) {  // Don't put secretly-opened files on the list.
+                [[NSDocumentController sharedDocumentController] noteNewRecentDocumentURL:requestURL];
+            }
         }
         if (!frame.dataSource.pageTitle) {
             sender.window.title = requestURL.lastPathComponent;
