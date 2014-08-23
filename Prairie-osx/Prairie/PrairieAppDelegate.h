@@ -22,7 +22,7 @@ extern BOOL const        PrDefaultControlStatusBarFromWS;
 extern BOOL const        PrDefaultOpenUntitledToDefaultPage;
 
 
-@interface PrairieAppDelegate : NSObject <NSApplicationDelegate, NSOpenSavePanelDelegate>
+@interface PrairieAppDelegate : NSObject <NSApplicationDelegate>
 
 - (id)createBrowser;
 

@@ -8,6 +8,7 @@
 
 #import "PrBrowserController.h"
 #import "PrairieAppDelegate.h"
+#import "PrDocumentController.h"
 
 
 #pragma mark Declared constants
@@ -469,14 +470,16 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  */
 - (IBAction)openDocument:(id)sender
 {
+    PrDocumentController * const  controller = [NSDocumentController sharedDocumentController];
+
     if ([sender isKindOfClass:[NSMenuItem class]] && [sender tag]) {
         // Have the "Open in New Window…" command instead of the regular "Open…" one. Just do what would happen if this class didn't intercept openDocument:.
-        return [[NSDocumentController sharedDocumentController] openDocument:sender];
+        return [controller openDocument:sender];
     }
 
     NSOpenPanel * const  panel = [NSOpenPanel openPanel];
 
-    panel.delegate = self.appDelegate;  // This action has the same filtering criteria that the app-delegate's version has, so reuse the panel-delegate, which happens to be the app-delegate itself.
+    panel.delegate = controller.openPanelDelegate;
     [panel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
         switch (result) {
             case NSFileHandlingPanelOKButton:

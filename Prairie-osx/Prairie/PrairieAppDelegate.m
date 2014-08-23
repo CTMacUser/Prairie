@@ -132,24 +132,6 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS), PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage)}];
 }
 
-#pragma mark NSOpenSavePanelDelegate overrides
-
-- (BOOL)panel:(id)sender validateURL:(NSURL *)url error:(NSError *__autoreleasing *)outError {
-    id  utiType;
-
-    if ([url getResourceValue:&utiType forKey:NSURLTypeIdentifierKey error:outError]) {
-        NSString * const  mimeType = (__bridge_transfer NSString *)UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)(NSString *)utiType, kUTTagClassMIMEType);
-
-        if (mimeType) {
-            return [WebView canShowMIMEType:mimeType];
-        }
-        if ( outError ) {
-            *outError = [NSError errorWithDomain:WebKitErrorDomain code:WebKitErrorCannotShowMIMEType userInfo:@{NSURLErrorKey: url, WebKitErrorMIMETypeKey: [NSNull null], NSLocalizedFailureReasonErrorKey: NSLocalizedString(@"NO_MIME_TYPE", nil)}];
-        }
-    }
-    return NO;
-}
-
 #pragma mark Notifications
 
 /*!

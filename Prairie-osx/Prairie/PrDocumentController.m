@@ -8,23 +8,41 @@
  */
 
 #import "PrDocumentController.h"
+#import "PrWebViewShowMIMEValidator.h"
 
 @import CoreServices;
 
 
+#pragma mark Private interface
+
+@interface PrDocumentController ()
+
+@property (nonatomic) PrWebViewShowMIMEValidator *  openPanelDelegate;  // Redeclarations must go from readonly to readwrite.
+
+@end
+
 @implementation PrDocumentController
+
+#pragma mark Initialization
+
+- (instancetype)init {
+    if (self = [super init]) {
+        _openPanelDelegate = [[PrWebViewShowMIMEValidator alloc] init];
+    }
+    return self;
+}
 
 #pragma mark Conventional overrides
 
 - (IBAction)newDocument:(id)sender {
-    [[NSApp delegate] applicationOpenUntitledFile:NSApp];
+    (void)[[NSApp delegate] applicationOpenUntitledFile:NSApp];
 }
 
 - (IBAction)openDocument:(id)sender {
     NSOpenPanel * const  panel = [NSOpenPanel openPanel];
 
     panel.allowsMultipleSelection = YES;
-    panel.delegate = [NSApp delegate];  // The app delegate doubles as an Open/Save filter.
+    panel.delegate = self.openPanelDelegate;
     [panel beginWithCompletionHandler:^(NSInteger result) {
         if (result == NSFileHandlingPanelOKButton) {
             NSAppleEventDescriptor * const   fileList = [NSAppleEventDescriptor listDescriptor];

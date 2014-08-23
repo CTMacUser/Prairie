@@ -8,6 +8,9 @@
 
 @import Cocoa;
 
+
 @interface PrDocumentController : NSDocumentController
+
+@property (nonatomic, readonly) id<NSOpenSavePanelDelegate>  openPanelDelegate;
 
 @end

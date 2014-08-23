@@ -23,6 +23,7 @@
 		F3A8ADD319A4F8DE00CAE801 /* PrBulkFileOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F3A8ADD219A4F8DE00CAE801 /* PrBulkFileOperation.m */; };
 		F3A8ADD519A6A98B00CAE801 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3A8ADD419A6A98B00CAE801 /* CoreServices.framework */; };
 		F3A8ADD819A85B6E00CAE801 /* PrDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = F3A8ADD719A85B6E00CAE801 /* PrDocumentController.m */; };
+		F3A8ADDB19A876F000CAE801 /* PrWebViewShowMIMEValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = F3A8ADDA19A876F000CAE801 /* PrWebViewShowMIMEValidator.m */; };
 		F3E0F0A3198617B400EABE36 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E0F0A2198617B400EABE36 /* WebKit.framework */; };
 		F3E0F0A919887B2400EABE36 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F3E0F0AB19887B2400EABE36 /* Localizable.strings */; };
 		F3E0F0AE198FF80A00EABE36 /* PrairieAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */; };
@@ -66,6 +67,8 @@
 		F3A8ADD419A6A98B00CAE801 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		F3A8ADD619A85B6E00CAE801 /* PrDocumentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrDocumentController.h; sourceTree = "<group>"; };
 		F3A8ADD719A85B6E00CAE801 /* PrDocumentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrDocumentController.m; sourceTree = "<group>"; };
+		F3A8ADD919A876F000CAE801 /* PrWebViewShowMIMEValidator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrWebViewShowMIMEValidator.h; sourceTree = "<group>"; };
+		F3A8ADDA19A876F000CAE801 /* PrWebViewShowMIMEValidator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrWebViewShowMIMEValidator.m; sourceTree = "<group>"; };
 		F3E0F0A2198617B400EABE36 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		F3E0F0AA19887B2400EABE36 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F3E0F0AC198FF80A00EABE36 /* PrairieAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrairieAppDelegate.h; sourceTree = "<group>"; };
@@ -139,6 +142,8 @@
 		F36CC94D1982AA590001EC41 /* Prairie */ = {
 			isa = PBXGroup;
 			children = (
+				F3A8ADCE19A2C36800CAE801 /* PrApplication.h */,
+				F3A8ADCF19A2C36800CAE801 /* PrApplication.m */,
 				F36CC9591982AA590001EC41 /* PrBrowserController.h */,
 				F36CC95A1982AA590001EC41 /* PrBrowserController.m */,
 				F36CC95C1982AA590001EC41 /* PrBrowser.xib */,
@@ -146,10 +151,10 @@
 				F3A8ADD219A4F8DE00CAE801 /* PrBulkFileOperation.m */,
 				F3A8ADD619A85B6E00CAE801 /* PrDocumentController.h */,
 				F3A8ADD719A85B6E00CAE801 /* PrDocumentController.m */,
+				F3A8ADD919A876F000CAE801 /* PrWebViewShowMIMEValidator.h */,
+				F3A8ADDA19A876F000CAE801 /* PrWebViewShowMIMEValidator.m */,
 				F36CC95F1982AA590001EC41 /* MainMenu.xib */,
 				F3E0F0AC198FF80A00EABE36 /* PrairieAppDelegate.h */,
-				F3A8ADCE19A2C36800CAE801 /* PrApplication.h */,
-				F3A8ADCF19A2C36800CAE801 /* PrApplication.m */,
 				F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */,
 				F36CC9621982AA590001EC41 /* Images.xcassets */,
 				F36CC94E1982AA590001EC41 /* Supporting Files */,
@@ -290,6 +295,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F3A8ADD819A85B6E00CAE801 /* PrDocumentController.m in Sources */,
+				F3A8ADDB19A876F000CAE801 /* PrWebViewShowMIMEValidator.m in Sources */,
 				F3A8ADD319A4F8DE00CAE801 /* PrBulkFileOperation.m in Sources */,
 				F3A8ADD019A2C36800CAE801 /* PrApplication.m in Sources */,
 				F36CC95B1982AA590001EC41 /* PrBrowserController.m in Sources */,

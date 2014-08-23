@@ -7,10 +7,10 @@
  @CFBundleIdentifier io.github.ctmacuser.Prairie
  */
 
-/** PrairieAppDelegate.m **/
+/** PrWebViewShowMIMEValidator.m **/
 
 /* A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit. */
-"NO_MIME_TYPE" = "At least one URL does not a corresponding MIME type.";
+"NO_MIME_TYPE" = "At least one item's MIME type cannot be determined.";
 
 /** PrBrowserController.m **/
 
