@@ -11,8 +11,6 @@
 #import "PrBrowserController.h"
 #import "PrBulkFileOperation.h"
 
-@import CoreServices;
-
 
 #pragma mark Declared constants
 
@@ -165,37 +163,6 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 }
 
 #pragma mark Action methods
-
-/*!
-    @brief Action to create a new browser window.
-    @param sender The object that sent this message.
- */
-- (IBAction)newDocument:(id)sender {
-    [self applicationOpenUntitledFile:NSApp];
-}
-
-/*!
-    @brief Action to open a (file) URL in a new browser window.
-    @param sender The object that sent this message.
- */
-- (IBAction)openDocument:(id)sender {
-    NSOpenPanel * const  panel = [NSOpenPanel openPanel];
-
-    panel.allowsMultipleSelection = YES;
-    panel.delegate = self;
-    [panel beginWithCompletionHandler:^(NSInteger result) {
-        if (result == NSFileHandlingPanelOKButton) {
-            NSAppleEventDescriptor * const   fileList = [NSAppleEventDescriptor listDescriptor];
-            NSAppleEventDescriptor * const  openEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEOpenDocuments targetDescriptor:nil returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
-
-            for (NSURL *file in panel.URLs) {
-                [fileList insertDescriptor:[NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:[[file absoluteString] dataUsingEncoding:NSUTF8StringEncoding]] atIndex:0];
-            }
-            [openEvent setParamDescriptor:fileList forKeyword:keyDirectObject];
-            [[NSAppleEventManager sharedAppleEventManager] dispatchRawAppleEvent:[openEvent aeDesc] withRawReply:(AppleEvent *)[[NSAppleEventDescriptor nullDescriptor] aeDesc] handlerRefCon:(SRefCon)0];
-        }
-    }];
-}
 
 /*!
     @brief Action to start entering an URL for browsing.

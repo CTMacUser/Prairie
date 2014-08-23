@@ -26,9 +26,6 @@ extern BOOL const        PrDefaultOpenUntitledToDefaultPage;
 
 - (id)createBrowser;
 
-- (IBAction)newDocument:(id)sender;
-- (IBAction)openDocument:(id)sender;
-
 - (IBAction)openLocation:(id)sender;
 - (IBAction)goHome:(id)sender;
 

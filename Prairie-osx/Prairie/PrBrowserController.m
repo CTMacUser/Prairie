@@ -471,7 +471,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 {
     if ([sender isKindOfClass:[NSMenuItem class]] && [sender tag]) {
         // Have the "Open in New Window…" command instead of the regular "Open…" one. Just do what would happen if this class didn't intercept openDocument:.
-        return [self.appDelegate openDocument:sender];
+        return [[NSDocumentController sharedDocumentController] openDocument:sender];
     }
 
     NSOpenPanel * const  panel = [NSOpenPanel openPanel];
