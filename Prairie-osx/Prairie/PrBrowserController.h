@@ -24,7 +24,7 @@ extern NSInteger const PrGoBackSegment;
 extern NSInteger const PrGoForwardSegment;
 
 
-@interface PrBrowserController : NSWindowController
+@interface PrBrowserController : NSWindowController <NSWindowDelegate>
 
 - (IBAction)performBackOrForward:(id)sender;
 - (IBAction)toggleLoadingBar:(id)sender;
