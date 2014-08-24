@@ -11,9 +11,12 @@
 @interface PrBulkFileOperation : NSOperation
 
 +(instancetype)openFiles:(NSArray *)paths application:(NSApplication *)app;
++(instancetype)printFiles:(NSArray *)paths application:(NSApplication *)app settings:(NSDictionary *)info panel:(BOOL)showPrintPanel;
 
 @property (readonly) NSArray *        files;  // Elements are NSURL*
 @property (readonly) NSApplication *  application;
+@property (readonly) NSPrintInfo *    printSettings;  // May be nil
+@property (readonly, assign) BOOL     displayPrintPanel;  // Ignored if printSettings is nil
 
 @property (readonly) NSUInteger  handledCount;  // KVO-compliant
 

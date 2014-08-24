@@ -112,6 +112,10 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
     }
 }
 
+- (NSApplicationPrintReply)application:(NSApplication *)application printFiles:(NSArray *)fileNames withSettings:(NSDictionary *)printSettings showPrintPanels:(BOOL)showPrintPanels {
+    return [PrBulkFileOperation printFiles:fileNames application:application settings:printSettings panel:showPrintPanels] ? NSPrintingReplyLater : NSPrintingFailure;
+}
+
 - (BOOL)applicationOpenUntitledFile:(NSApplication *)sender {
     PrBrowserController * const  browser = [self createBrowser];
 
