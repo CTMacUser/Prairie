@@ -15,6 +15,8 @@
 
 NSString * const  PrBrowserLoadFailedNotification = @"PrBrowserLoadFailedNotification";
 NSString * const  PrBrowserLoadPassedNotification = @"PrBrowserLoadPassedNotification";
+NSString * const  PrBrowserPrintFailedNotification = @"PrBrowserPrintFailedNotification";
+NSString * const  PrBrowserPrintPassedNotification = @"PrBrowserPrintPassedNotification";
 
 NSString * const  PrBrowserURLKey = @"PrBrowserURLKey";
 NSString * const  PrBrowserLoadFailedWasProvisionalKey = @"PrBrowserLoadFailedWasProvisionalKey";
@@ -307,10 +309,12 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     @brief Print job completion handler.
     @param printOperation The finished print operation.
     @param success Whether or not the print operation finished successfully.
-    @param contextInfo Any extra developer-defined data. (None used right now.)
+    @param contextInfo Any extra developer-defined data, like the source URL.
  */
 - (void)printOperationDidRun:(NSPrintOperation *)printOperation success:(BOOL)success contextInfo:(void *)contextInfo {
-    // Nothing to do, yet.
+    NSURL * const  loadedURL = (__bridge_transfer NSURL *)contextInfo;
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:(success ? PrBrowserPrintPassedNotification : PrBrowserPrintFailedNotification) object:self userInfo:@{PrBrowserURLKey: loadedURL}];
 }
 
 #pragma mark Public methods (besides actions)
@@ -319,10 +323,29 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     @brief Orders web-view member to load a new URL.
     @param pageURL The URL for the resource to be loaded.
     @details Encapsulates URL loads, packaging the URL into the NSURLRequest object that loadRequest needs. Having this code encapsulated means it can be manipulated by selector games (like adding a delay).
+
+    Will send either a PrBrowserLoadFailedNotification or PrBrowserLoadPassedNotification when the page loading ends. The notification object is this window controller instance. The user dictionary has entries with the desired URL and, if the load failed, a Boolean indicating if the load ended during the provisional or committed phase.
  */
 - (void)loadPage:(NSURL *)pageURL
 {
     [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
+/*!
+    @brief Print the current page.
+    @param info Information on the print job.
+    @param configure YES to show the Print panel, NO otherwise.
+    @param progress YES to show the progress panel, NO otherwise.
+
+    Will send either a PrBrowserPrintFailedNotification or PrBrowserPrintPassedNotification when the print job ends. The notification object is this window controller instance. The user dictionary has an entry with the desired URL.
+ */
+- (void)printWithInfo:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress {
+    NSPrintOperation * const  op = [self.webView.mainFrame.frameView printOperationWithPrintInfo:info];
+    NSURL * const      loadedURL = self.webView.mainFrame.dataSource.initialRequest.URL;
+
+    op.showsPrintPanel = configure;
+    op.showsProgressPanel = progress;
+    [op runOperationModalForWindow:self.window delegate:self didRunSelector:@selector(printOperationDidRun:success:contextInfo:) contextInfo:(__bridge_retained void *)loadedURL];
 }
 
 #pragma mark Private methods
@@ -526,7 +549,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     @param sender The object that sent this message.
  */
 - (IBAction)printDocument:(id)sender {
-    [[self.webView.mainFrame.frameView printOperationWithPrintInfo:[NSPrintInfo sharedPrintInfo]] runOperationModalForWindow:self.window delegate:self didRunSelector:@selector(printOperationDidRun:success:contextInfo:) contextInfo:NULL];
+    [self printWithInfo:[NSPrintInfo sharedPrintInfo] showPrint:YES showProgress:YES];
 }
 
 /*!

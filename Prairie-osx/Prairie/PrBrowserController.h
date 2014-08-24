@@ -13,6 +13,8 @@
 // The object is the posting PrBrowserController instance. Use the PrBrowserURLKey to get the URL of the referenced resource. Use the PrBrowserLoadFailedWasProvisionalKey to check if the failure happened at the data source's provisional (YES) or committed (NO) stage.
 extern NSString * const  PrBrowserLoadFailedNotification;  // The browser failed to load the resource.
 extern NSString * const  PrBrowserLoadPassedNotification;  // The browser successfully loaded the resource.
+extern NSString * const  PrBrowserPrintFailedNotification;  // The browser failed to print the page.
+extern NSString * const  PrBrowserPrintPassedNotification;  // The browser successfully printed the page.
 
 extern NSString * const  PrBrowserURLKey;  // NSURL*
 extern NSString * const  PrBrowserLoadFailedWasProvisionalKey;  // BOOL (probably as NSNumber)
@@ -33,6 +35,7 @@ extern NSInteger const PrGoForwardSegment;
 - (IBAction)printDocument:(id)sender;
 
 - (void)loadPage:(NSURL *)pageURL;
+- (void)printWithInfo:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;
 
 @property (weak) IBOutlet WebView *webView;
 @property (weak) IBOutlet NSTextField *urlDisplay;
