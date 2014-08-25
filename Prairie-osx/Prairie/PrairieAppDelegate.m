@@ -10,6 +10,10 @@
 #import "PrairieAppDelegate.h"
 #import "PrBrowserController.h"
 #import "PrBulkFileOperation.h"
+#import "PrGetURLOperation.h"
+
+@import ApplicationServices;
+@import CoreServices;
 
 
 #pragma mark Declared constants
@@ -29,6 +33,8 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 @interface PrairieAppDelegate () {
     NSMutableSet *  _windowControllers;
 }
+
+- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event replyEvent:(NSAppleEventDescriptor *)reply;
 
 @property (nonatomic, readonly) NSMutableSet *  mutableWindowControllers;
 
@@ -134,6 +140,9 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 
     // Last-resort preference settings
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS), PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage)}];
+
+    // Open remote URLs
+    [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:replyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
 }
 
 #pragma mark Notifications
@@ -146,6 +155,19 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 - (void)notifyOnWindowClose:(NSNotification *)notification {
     [self.mutableWindowControllers removeObject:[notification.object windowController]];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:notification.object];
+}
+
+#pragma mark Apple event handlers
+
+/*!
+    @brief Handler for the Get-URL Apple event.
+    @param event The event with the command.
+    @param reply The event to post any response (unless it's of typeNull).
+ */
+- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event replyEvent:(NSAppleEventDescriptor *)reply {
+    if (![PrGetURLOperation handleEvent:event replyEvent:reply] && (reply.descriptorType != typeNull)) {
+        [reply setParamDescriptor:[NSAppleEventDescriptor descriptorWithInt32:unimpErr] forKeyword:keyErrorNumber];
+    }
 }
 
 #pragma mark Action methods
