@@ -113,7 +113,7 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 #pragma mark NSApplicationDelegate overrides
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
-    if (![PrBulkFileOperation openFiles:filenames application:sender]) {
+    if (![PrBulkFileOperation openFiles:filenames application:sender searchingFor:[[[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] paramDescriptorForKeyword:keyAESearchText] stringValue]]) {
         [sender replyToOpenOrPrint:NSApplicationDelegateReplyFailure];
     }
 }

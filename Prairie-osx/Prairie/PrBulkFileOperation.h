@@ -10,11 +10,12 @@
 
 @interface PrBulkFileOperation : NSOperation
 
-+(instancetype)openFiles:(NSArray *)paths application:(NSApplication *)app;
++(instancetype)openFiles:(NSArray *)paths application:(NSApplication *)app searchingFor:(NSString *)search;
 +(instancetype)printFiles:(NSArray *)paths application:(NSApplication *)app settings:(NSDictionary *)info panel:(BOOL)showPrintPanel;
 
 @property (readonly) NSArray *        files;  // Elements are NSURL*
 @property (readonly) NSApplication *  application;
+@property (readonly) NSString *       search;  // May be nil
 @property (readonly) NSPrintInfo *    printSettings;  // May be nil
 @property (readonly, assign) BOOL     displayPrintPanel;  // Ignored if printSettings is nil
 

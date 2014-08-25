@@ -27,7 +27,7 @@
 
 @property NSMutableDictionary *  fileFromBrowser;
 
-- (instancetype)initWithFiles:(NSArray *)paths application:(NSApplication *)app printSettings:(NSDictionary *)info printPanel:(BOOL)showPanel;
+- (instancetype)initWithFiles:(NSArray *)paths application:(NSApplication *)app printing:(BOOL)print searchOrSettings:(id)info printPanel:(BOOL)showPanel;
 
 - (PrBrowserController *)createBrowserForFile:(NSURL *)file visible:(BOOL)visibility;
 - (void)connectNotificationsForBrowser:(PrBrowserController *)browser;
@@ -50,13 +50,14 @@
     @brief Factory method for the application delegate to open file(s).
     @param paths The files to be opened. Elements are NSString objects, each representing its file's path.
     @param app The application object that wants the files opened.
+    @param search The text to search for after the file is opened. Don't search by passing nil.
     @details Calls the initializer, creates a browser window for each file, sets up connections between the instance and each browser, and adds the instance to [NSOperationQueue mainQueue], which calls [app replyToOpenOrPrint:X], where X is the completion status.
 
     Call from the application delegate's application:openFiles: method.
     @return The instance doing the actions, or nil if initialization failed.
  */
-+(instancetype)openFiles:(NSArray *)paths application:(NSApplication *)app {
-    PrBulkFileOperation * const  actor = [[self alloc] initWithFiles:paths application:app printSettings:nil printPanel:NO];
++(instancetype)openFiles:(NSArray *)paths application:(NSApplication *)app searchingFor:(NSString *)search {
+    PrBulkFileOperation * const  actor = [[self alloc] initWithFiles:paths application:app printing:NO searchOrSettings:search printPanel:NO];
 
     if (actor) {
         for (NSURL *file in actor.files) {
@@ -80,7 +81,7 @@
 
  */
 +(instancetype)printFiles:(NSArray *)paths application:(NSApplication *)app settings:(NSDictionary *)info panel:(BOOL)showPrintPanel {
-    PrBulkFileOperation * const  actor = [[self alloc] initWithFiles:paths application:app printSettings:info printPanel:showPrintPanel];
+    PrBulkFileOperation * const  actor = [[self alloc] initWithFiles:paths application:app printing:YES searchOrSettings:info printPanel:showPrintPanel];
     
     if (actor) {
         for (NSURL *file in actor.files) {
@@ -97,12 +98,13 @@
     @brief Designated initializer
     @param paths The files to be opened. Elements are NSString objects each representing its file's path.
     @param app The application object that wants the files opened.
-    @param info The print job parameters. Set to nil for non-printing opens.
+    @param print YES to print after opening the file, NO to conduct a text search instead.
+    @param info Either a dictionary of print job parameters when print is YES, or the search string when print is NO. May be nil for search strings.
     @param showPanel YES to show the Print panel before printing, NO otherwise, ignored for non-printing opens.
     @details Only records the arguments into self's properties, converting the file paths into URLs and the dictionary into a print-job parameter block. Does not initiate the opening procedure.
     @return The generated instance, or nil if something failed.
  */
-- (instancetype)initWithFiles:(NSArray *)paths application:(NSApplication *)app printSettings:(NSDictionary *)info printPanel:(BOOL)showPanel {
+- (instancetype)initWithFiles:(NSArray *)paths application:(NSApplication *)app printing:(BOOL)print searchOrSettings:(id)info printPanel:(BOOL)showPanel {
     if (self = [super init]) {
         NSMutableArray * const  urls = [[NSMutableArray alloc] initWithCapacity:paths.count];
 
@@ -119,12 +121,16 @@
             return nil;
         }
         _application = app;
-        if (info) {
+        _printSettings = nil;
+        _search = nil;
+        if (print) {
             if (!(_printSettings = [[NSPrintInfo alloc] initWithDictionary:info])) {
                 return nil;
             }
         } else {
-            _printSettings = nil;
+            if (info && !(_search = [info copy])) {
+                return nil;
+            }
         }
         _displayPrintPanel = showPanel;
     }
@@ -286,7 +292,7 @@
 /*!
     @brief Response to PrBrowserLoadPassedNotification.
     @param notification The sent notification.
-    @details Considers the loading of its file to have succeeded. If printing, does more setup and sends out the print request. Does the appropriate amount of common cleanup.
+    @details Considers the loading of its file to have succeeded. If printing, does more setup and sends out the print request. If searching, starts the search. Does the appropriate amount of common cleanup.
  */
 - (void)notifyOnBrowserLoadSucceed:(NSNotification *)notification {
     id const  browser = notification.object;
@@ -299,6 +305,9 @@
         [notifier addObserver:self selector:@selector(notifyOnBrowserPrintSucceed:) name:PrBrowserPrintPassedNotification object:browser];
         [browser printWithInfo:self.printSettings showPrint:self.displayPrintPanel showProgress:YES];
     } else {
+        if (self.search) {
+            (void)[[browser webView] searchFor:self.search direction:YES caseSensitive:NO wrap:YES];
+        }
         [self commonNotifyOnBrowser:notification status:self.mutableSuccessfulFiles browserController:browser];
     }
 }
