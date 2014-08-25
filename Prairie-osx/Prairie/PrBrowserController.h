@@ -10,7 +10,7 @@
 
 
 // Notifications
-// The object is the posting PrBrowserController instance. Use the PrBrowserURLKey to get the URL of the referenced resource. Use the PrBrowserLoadFailedWasProvisionalKey to check if the failure happened at the data source's provisional (YES) or committed (NO) stage.
+// The object is the posting PrBrowserController instance. Use the PrBrowserURLKey to get the URL of the referenced resource. Use the PrBrowserLoadFailedWasProvisionalKey to check if the failure happened at the data source's provisional (YES) or committed (NO) stage. Use the PrBrowserErrorKey to check the actual error encountered.
 extern NSString * const  PrBrowserLoadFailedNotification;  // The browser failed to load the resource.
 extern NSString * const  PrBrowserLoadPassedNotification;  // The browser successfully loaded the resource.
 extern NSString * const  PrBrowserPrintFailedNotification;  // The browser failed to print the page.
@@ -18,6 +18,7 @@ extern NSString * const  PrBrowserPrintPassedNotification;  // The browser succe
 
 extern NSString * const  PrBrowserURLKey;  // NSURL*
 extern NSString * const  PrBrowserLoadFailedWasProvisionalKey;  // BOOL (probably as NSNumber)
+extern NSString * const  PrBrowserErrorKey;  // NSError*
 
 // Indices for each part of the toolbarBackForward segmented control
 extern NSInteger const PrGoBackSegment;

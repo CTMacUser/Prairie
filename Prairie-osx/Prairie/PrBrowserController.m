@@ -20,6 +20,7 @@ NSString * const  PrBrowserPrintPassedNotification = @"PrBrowserPrintPassedNotif
 
 NSString * const  PrBrowserURLKey = @"PrBrowserURLKey";
 NSString * const  PrBrowserLoadFailedWasProvisionalKey = @"PrBrowserLoadFailedWasProvisionalKey";
+NSString * const  PrBrowserErrorKey = @"PrBrowserErrorKey";
 
 NSInteger const PrGoBackSegment    = 0;
 NSInteger const PrGoForwardSegment = 1;
@@ -160,7 +161,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {  // Ignore notices from sub-frames.
-        [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(YES)}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(YES), PrBrowserErrorKey: error}];
         [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
     }
 }
@@ -262,7 +263,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(NO)}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(NO), PrBrowserErrorKey: error}];
         [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
     }
 }
