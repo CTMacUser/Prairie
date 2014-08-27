@@ -9,7 +9,7 @@
 
 #import "PrairieAppDelegate.h"
 #import "PrBrowserController.h"
-#import "PrBulkFileOperation.h"
+#import "PrOpeningFileManager.h"
 #import "PrGetURLOperation.h"
 
 @import ApplicationServices;
@@ -28,15 +28,21 @@ NSInteger const   PrDefaultBackForwardMenuLength = 10;
 BOOL const        PrDefaultControlStatusBarFromWS = NO;
 BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 
+#pragma mark File-local constants
+
+static NSString * const  keyPathFinished = @"finished";  // from PrOpeningFileManager
+
 #pragma mark Private interface
 
 @interface PrairieAppDelegate () {
     NSMutableSet *  _windowControllers;
 }
 
+- (void)notifyOnWindowClose:(NSNotification *)notification;
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event replyEvent:(NSAppleEventDescriptor *)reply;
 
 @property (nonatomic, readonly) NSMutableSet *  mutableWindowControllers;
+@property (nonatomic, readonly) NSMutableSet *  openFilers;
 
 @end
 
@@ -47,6 +53,7 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 - (instancetype)init {
     if (self = [super init]) {
         _windowControllers = [[NSMutableSet alloc] init];
+        _openFilers = [[NSMutableSet alloc] init];
     }
     return self;
 }
@@ -113,13 +120,32 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 #pragma mark NSApplicationDelegate overrides
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
-    if (![PrBulkFileOperation openFiles:filenames application:sender searchingFor:[[[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] paramDescriptorForKeyword:keyAESearchText] stringValue]]) {
+    PrOpeningFileManager * const  opener = [[PrOpeningFileManager alloc] initWithFiles:filenames application:sender];
+
+    if (opener) {
+        [self.openFilers addObject:opener];
+        [opener addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:NULL];
+        opener.search = [[[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] paramDescriptorForKeyword:keyAESearchText] stringValue];
+        [opener performSelector:@selector(start) withObject:nil afterDelay:0.0];
+    } else {
         [sender replyToOpenOrPrint:NSApplicationDelegateReplyFailure];
     }
 }
 
 - (NSApplicationPrintReply)application:(NSApplication *)application printFiles:(NSArray *)fileNames withSettings:(NSDictionary *)printSettings showPrintPanels:(BOOL)showPrintPanels {
-    return [PrBulkFileOperation printFiles:fileNames application:application settings:printSettings panel:showPrintPanels] ? NSPrintingReplyLater : NSPrintingFailure;
+    PrOpeningFileManager * const  printer = [[PrOpeningFileManager alloc] initWithFiles:fileNames application:application];
+    NSPrintInfo * const    printSettings2 = [[NSPrintInfo alloc] initWithDictionary:printSettings];
+
+    if (printer && printSettings2) {
+        [self.openFilers addObject:printer];
+        [printer addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:NULL];
+        printer.settings = printSettings2;
+        printer.showPrintPanel = showPrintPanels;
+        [printer performSelector:@selector(start) withObject:nil afterDelay:0.0];
+        return NSPrintingReplyLater;
+    } else {
+        return NSPrintingFailure;
+    }
 }
 
 - (BOOL)applicationOpenUntitledFile:(NSApplication *)sender {
@@ -155,6 +181,17 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 - (void)notifyOnWindowClose:(NSNotification *)notification {
     [self.mutableWindowControllers removeObject:[notification.object windowController]];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:notification.object];
+}
+
+#pragma mark NSKeyValueObserving override
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    id const  newFinished = change[NSKeyValueChangeNewKey];
+
+    if ([self.openFilers containsObject:object] && [keyPath isEqualToString:keyPathFinished] && (newFinished && [newFinished isKindOfClass:[NSNumber class]] && [newFinished boolValue])) {
+        [object removeObserver:self forKeyPath:keyPathFinished context:context];
+        [self.openFilers removeObject:object];
+    }
 }
 
 #pragma mark Apple event handlers
