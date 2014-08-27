@@ -121,6 +121,12 @@
                                     <action selector="printDocument:" target="-1" id="V8Z-we-QDj"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Print from New Window…" alternate="YES" keyEquivalent="p" id="8Ba-Fb-zy9">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="printMore:" target="-1" id="PeY-a4-Czn"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

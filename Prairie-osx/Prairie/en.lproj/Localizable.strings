@@ -25,3 +25,11 @@
 
 /* Menu item to show a browser-window's Status Bar when it's currently not visible */
 "SHOW_STATUS_BAR" = "Show Status Bar";
+
+/** PrDocumentController.m **/
+
+/* Button title to approve Open panel for printing files */
+"PRINT_BUTTON" = "Print";
+
+/* Title of the Open panel for printing files */
+"PRINT_DIALOG_TITLE" = "Print";

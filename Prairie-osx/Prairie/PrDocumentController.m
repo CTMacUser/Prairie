@@ -10,6 +10,7 @@
 #import "PrDocumentController.h"
 #import "PrWebViewShowMIMEValidator.h"
 
+@import ApplicationServices;
 @import CoreServices;
 
 
@@ -66,6 +67,31 @@
         return YES;
     }
     return [super validateUserInterfaceItem:anItem];
+}
+
+#pragma mark Action methods
+
+// See header for details.
+- (IBAction)printMore:(id)sender {
+    NSOpenPanel * const  panel = [NSOpenPanel openPanel];
+    
+    panel.allowsMultipleSelection = YES;
+    panel.delegate = self.openPanelDelegate;
+    panel.prompt = NSLocalizedString(@"PRINT_BUTTON", nil);
+    panel.title = NSLocalizedString(@"PRINT_DIALOG_TITLE", nil);
+    [panel beginWithCompletionHandler:^(NSInteger result) {
+        if (result == NSFileHandlingPanelOKButton) {
+            NSAppleEventDescriptor * const    fileList = [NSAppleEventDescriptor listDescriptor];
+            NSAppleEventDescriptor * const  printEvent = [NSAppleEventDescriptor appleEventWithEventClass:kCoreEventClass eventID:kAEPrintDocuments targetDescriptor:nil returnID:kAutoGenerateReturnID transactionID:kAnyTransactionID];
+            
+            for (NSURL *file in panel.URLs) {
+                [fileList insertDescriptor:[NSAppleEventDescriptor descriptorWithDescriptorType:typeFileURL data:[[file absoluteString] dataUsingEncoding:NSUTF8StringEncoding]] atIndex:0];
+            }
+            [printEvent setParamDescriptor:fileList forKeyword:keyDirectObject];
+            [printEvent setParamDescriptor:[NSAppleEventDescriptor descriptorWithBoolean:YES] forKeyword:kPMShowPrintDialogAEType];
+            [[NSAppleEventManager sharedAppleEventManager] dispatchRawAppleEvent:[printEvent aeDesc] withRawReply:(AppleEvent *)[[NSAppleEventDescriptor nullDescriptor] aeDesc] handlerRefCon:(SRefCon)0];
+        }
+    }];
 }
 
 @end
