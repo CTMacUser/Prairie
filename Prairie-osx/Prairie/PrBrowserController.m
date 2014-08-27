@@ -84,6 +84,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
     // Docs suggest giving a name to group related frames. I'm using a UUID for an easily accessible unique string.
     self.webView.groupName = [[NSUUID UUID] UUIDString];
+
+    // Personalize user-agent.
+    self.webView.applicationNameForUserAgent = [[NSProcessInfo processInfo] processName];
 }
 
 #pragma mark NSMenuValidation override
