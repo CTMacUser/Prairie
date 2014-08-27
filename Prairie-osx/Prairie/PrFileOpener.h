@@ -9,7 +9,7 @@
 @import Cocoa;
 
 
-@interface PrOpeningFileManager : NSObject
+@interface PrFileOpener : NSObject
 
 /*!
     @brief Designated initializer.

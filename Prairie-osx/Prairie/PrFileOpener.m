@@ -7,14 +7,14 @@
     @CFBundleIdentifier io.github.ctmacuser.Prairie
  */
 
-#import "PrOpeningFileManager.h"
+#import "PrFileOpener.h"
 #import "PrairieAppDelegate.h"
 #import "PrBrowserController.h"
 
 
 #pragma mark Private interface
 
-@interface PrOpeningFileManager ()
+@interface PrFileOpener ()
 
 - (void)notifyFromWindow:(NSNotification *)note;
 - (void)notifyOnLoadFail:(NSNotification *)note;
@@ -33,7 +33,7 @@
 
 @end
 
-@implementation PrOpeningFileManager
+@implementation PrFileOpener
 
 #pragma mark Initialization
 

@@ -9,7 +9,7 @@
 
 #import "PrairieAppDelegate.h"
 #import "PrBrowserController.h"
-#import "PrOpeningFileManager.h"
+#import "PrFileOpener.h"
 #import "PrGetURLHandler.h"
 
 @import ApplicationServices;
@@ -30,7 +30,7 @@ BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 
 #pragma mark File-local constants
 
-static NSString * const  keyPathFinished = @"finished";  // from PrOpeningFileManager
+static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
 
 #pragma mark Private interface
 
@@ -120,7 +120,7 @@ static NSString * const  keyPathFinished = @"finished";  // from PrOpeningFileMa
 #pragma mark NSApplicationDelegate overrides
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames {
-    PrOpeningFileManager * const  opener = [[PrOpeningFileManager alloc] initWithFiles:filenames application:sender];
+    PrFileOpener * const  opener = [[PrFileOpener alloc] initWithFiles:filenames application:sender];
 
     if (opener) {
         [self.openFilers addObject:opener];
@@ -133,8 +133,8 @@ static NSString * const  keyPathFinished = @"finished";  // from PrOpeningFileMa
 }
 
 - (NSApplicationPrintReply)application:(NSApplication *)application printFiles:(NSArray *)fileNames withSettings:(NSDictionary *)printSettings showPrintPanels:(BOOL)showPrintPanels {
-    PrOpeningFileManager * const  printer = [[PrOpeningFileManager alloc] initWithFiles:fileNames application:application];
-    NSPrintInfo * const    printSettings2 = [[NSPrintInfo alloc] initWithDictionary:printSettings];
+    PrFileOpener * const  printer = [[PrFileOpener alloc] initWithFiles:fileNames application:application];
+    NSPrintInfo * const   printSettings2 = [[NSPrintInfo alloc] initWithDictionary:printSettings];
 
     if (printer && printSettings2) {
         [self.openFilers addObject:printer];
