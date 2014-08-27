@@ -10,7 +10,7 @@
 #import "PrairieAppDelegate.h"
 #import "PrBrowserController.h"
 #import "PrOpeningFileManager.h"
-#import "PrGetURLOperation.h"
+#import "PrGetURLHandler.h"
 
 @import ApplicationServices;
 @import CoreServices;
@@ -202,7 +202,13 @@ static NSString * const  keyPathFinished = @"finished";  // from PrOpeningFileMa
     @param reply The event to post any response (unless it's of typeNull).
  */
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event replyEvent:(NSAppleEventDescriptor *)reply {
-    if (![PrGetURLOperation handleEvent:event replyEvent:reply] && (reply.descriptorType != typeNull)) {
+    PrGetURLHandler * const  handler = [[PrGetURLHandler alloc] init];
+
+    if (handler) {
+        [self.openFilers addObject:handler];
+        [handler addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:NULL];
+        [handler performSelector:@selector(start) withObject:nil afterDelay:0.0];
+    } else if (reply.descriptorType != typeNull) {
         [reply setParamDescriptor:[NSAppleEventDescriptor descriptorWithInt32:unimpErr] forKeyword:keyErrorNumber];
     }
 }

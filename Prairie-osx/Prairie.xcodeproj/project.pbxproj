@@ -24,8 +24,8 @@
 		F3A8ADD819A85B6E00CAE801 /* PrDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = F3A8ADD719A85B6E00CAE801 /* PrDocumentController.m */; };
 		F3A8ADDB19A876F000CAE801 /* PrWebViewShowMIMEValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = F3A8ADDA19A876F000CAE801 /* PrWebViewShowMIMEValidator.m */; };
 		F3B5D43B19AC6DE300F5E009 /* PrOpeningFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F3B5D43A19AC6DE300F5E009 /* PrOpeningFileManager.m */; };
+		F3B5D43E19AD7C6E00F5E009 /* PrGetURLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = F3B5D43D19AD7C6E00F5E009 /* PrGetURLHandler.m */; };
 		F3C0D1A419AAF96E00DD229D /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3C0D1A319AAF96E00DD229D /* ApplicationServices.framework */; };
-		F3C0D1A719AB339A00DD229D /* PrGetURLOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C0D1A619AB339A00DD229D /* PrGetURLOperation.m */; };
 		F3E0F0A3198617B400EABE36 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E0F0A2198617B400EABE36 /* WebKit.framework */; };
 		F3E0F0A919887B2400EABE36 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F3E0F0AB19887B2400EABE36 /* Localizable.strings */; };
 		F3E0F0AE198FF80A00EABE36 /* PrairieAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */; };
@@ -71,9 +71,9 @@
 		F3A8ADDA19A876F000CAE801 /* PrWebViewShowMIMEValidator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrWebViewShowMIMEValidator.m; sourceTree = "<group>"; };
 		F3B5D43919AC6DE300F5E009 /* PrOpeningFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrOpeningFileManager.h; sourceTree = "<group>"; };
 		F3B5D43A19AC6DE300F5E009 /* PrOpeningFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrOpeningFileManager.m; sourceTree = "<group>"; };
+		F3B5D43C19AD7C6E00F5E009 /* PrGetURLHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrGetURLHandler.h; sourceTree = "<group>"; };
+		F3B5D43D19AD7C6E00F5E009 /* PrGetURLHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrGetURLHandler.m; sourceTree = "<group>"; };
 		F3C0D1A319AAF96E00DD229D /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
-		F3C0D1A519AB339A00DD229D /* PrGetURLOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrGetURLOperation.h; sourceTree = "<group>"; };
-		F3C0D1A619AB339A00DD229D /* PrGetURLOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrGetURLOperation.m; sourceTree = "<group>"; };
 		F3E0F0A2198617B400EABE36 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		F3E0F0AA19887B2400EABE36 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F3E0F0AC198FF80A00EABE36 /* PrairieAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrairieAppDelegate.h; sourceTree = "<group>"; };
@@ -156,8 +156,8 @@
 				F36CC95C1982AA590001EC41 /* PrBrowser.xib */,
 				F3A8ADD619A85B6E00CAE801 /* PrDocumentController.h */,
 				F3A8ADD719A85B6E00CAE801 /* PrDocumentController.m */,
-				F3C0D1A519AB339A00DD229D /* PrGetURLOperation.h */,
-				F3C0D1A619AB339A00DD229D /* PrGetURLOperation.m */,
+				F3B5D43C19AD7C6E00F5E009 /* PrGetURLHandler.h */,
+				F3B5D43D19AD7C6E00F5E009 /* PrGetURLHandler.m */,
 				F3B5D43919AC6DE300F5E009 /* PrOpeningFileManager.h */,
 				F3B5D43A19AC6DE300F5E009 /* PrOpeningFileManager.m */,
 				F3A8ADD919A876F000CAE801 /* PrWebViewShowMIMEValidator.h */,
@@ -306,7 +306,7 @@
 				F3A8ADD819A85B6E00CAE801 /* PrDocumentController.m in Sources */,
 				F3A8ADDB19A876F000CAE801 /* PrWebViewShowMIMEValidator.m in Sources */,
 				F3A8ADD019A2C36800CAE801 /* PrApplication.m in Sources */,
-				F3C0D1A719AB339A00DD229D /* PrGetURLOperation.m in Sources */,
+				F3B5D43E19AD7C6E00F5E009 /* PrGetURLHandler.m in Sources */,
 				F36CC95B1982AA590001EC41 /* PrBrowserController.m in Sources */,
 				F36CC9541982AA590001EC41 /* main.m in Sources */,
 				F3B5D43B19AC6DE300F5E009 /* PrOpeningFileManager.m in Sources */,
