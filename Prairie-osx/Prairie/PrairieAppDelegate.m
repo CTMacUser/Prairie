@@ -179,7 +179,14 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
     // If there's a new window, file open, or file print on app launch, then those will be done after this method but before applicationDidFinishLaunching:, so anything setup required for any created windows needs to be done here.
 
     // Last-resort preference settings
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS), PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage), PrDefaultUseValidateHistoryMenuItemKey: @(PrDefaultUseValidateHistoryMenuItem)}];
+    [[NSUserDefaults standardUserDefaults]
+     registerDefaults:@{
+                        PrDefaultPageKey: PrDefaultPage,
+                        PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength),
+                        PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS),
+                        PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage),
+                        PrDefaultUseValidateHistoryMenuItemKey: @(PrDefaultUseValidateHistoryMenuItem)
+                        }];
 
     // Open remote URLs
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:replyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
