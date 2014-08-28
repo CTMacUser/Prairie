@@ -434,6 +434,20 @@
                                     <action selector="goHome:" target="-1" id="5tp-EF-HlJ"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="dWb-14-USF"/>
+                            <menuItem title="History" id="dTD-wR-c8f">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="validateHistory:" target="-1" id="8WF-Oa-lvw"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="pbg-ta-kqU"/>
+                            <menuItem title="Clear History…" id="3wv-IS-6L9">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="clearHistory:" target="-1" id="yvv-wZ-HaV"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

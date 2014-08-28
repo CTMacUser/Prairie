@@ -14,12 +14,16 @@ extern NSString * const  PrDefaultPageKey;  // NSString, interpret as URL
 extern NSString * const  PrDefaultBackForwardMenuLengthKey;  // NSInteger (probably as NSNumber), must be positive
 extern NSString * const  PrDefaultControlStatusBarFromWSKey;  // BOOL (probably as NSNumber)
 extern NSString * const  PrDefaultOpenUntitledToDefaultPageKey;  // BOOL (probably as NSNumber)
+//! Preference key for "useValidateHistoryMenuItem".
+extern NSString * const  PrDefaultUseValidateHistoryMenuItemKey;
 
 // Default values of various preferences
 extern NSString * const  PrDefaultPage;
 extern NSInteger const   PrDefaultBackForwardMenuLength;
 extern BOOL const        PrDefaultControlStatusBarFromWS;
 extern BOOL const        PrDefaultOpenUntitledToDefaultPage;
+//! Default value for "useValidateHistoryMenuItem".
+extern BOOL const        PrDefaultUseValidateHistoryMenuItem;
 
 
 @interface PrairieAppDelegate : NSObject <NSApplicationDelegate>
@@ -28,11 +32,15 @@ extern BOOL const        PrDefaultOpenUntitledToDefaultPage;
 
 - (IBAction)openLocation:(id)sender;
 - (IBAction)goHome:(id)sender;
+- (IBAction)validateHistory:(id)sender;
+- (IBAction)clearHistory:(id)sender;
 
 @property (nonatomic, readonly, copy)   NSURL *    defaultPage;
 @property (nonatomic, readonly, assign) NSInteger  backForwardMenuLength;
 @property (nonatomic, readonly, assign) BOOL       controlStatusBarFromWS;
 @property (nonatomic, readonly, assign) BOOL       openUntitledToDefaultPage;
+//! Enables the "History" menu item, or keeps it just a header. If enabled, uses the "validateHistory:" action.
+@property (nonatomic, readonly, assign) BOOL       useValidateHistoryMenuItem;
 
 @property (nonatomic, readonly) NSSet *  windowControllers;
 

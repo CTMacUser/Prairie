@@ -7,6 +7,11 @@
  @CFBundleIdentifier io.github.ctmacuser.Prairie
  */
 
+/** General **/
+
+/* The title of Cancel buttons. It MUST be the System's equivalent of "Cancel" for the destination language, so the automatic Escape-key handling will work. */
+"CANCEL" = "Cancel";
+
 /** PrWebViewShowMIMEValidator.m **/
 
 /* A notice that the file was not loaded because it is of a MIME type that cannot be handled by WebKit. */
@@ -33,3 +38,26 @@
 
 /* Title of the Open panel for printing files */
 "PRINT_DIALOG_TITLE" = "Print";
+
+/** PrairieAppDelegate.m **/
+
+/* Presentation text on WebHistory item count. First argument is current number of items, second is the maximum number of items supported. */
+"HISTORY_COUNT_MSG_ITEMS" = "Number of web-history items: %1$lu.\n(Maximum: %2$lu.)";
+
+/* Presentation text on WebHistory day count. First argument is current number of days with items, second is the maximum number of days supported. */
+"HISTORY_COUNT_MSG_DAYS" = "Number of days with web history: %1$lu.\n(Maximum: %2$lu.)";
+
+/* Menu item to indicate there are no items in the shared WebHistory. */
+"HISTORY_STORE_EMPTY" = "No History";
+
+/* Menu item to indicate there is at least one item in the shared WebHistory. */
+"HISTORY_STORE_NONEMPTY" = "History";
+
+/* Presentation text for confiming the clearing of WebHistory. */
+"CLEAR_HISTORY_CONFIRM_MSG" = "Are you sure you want to clear history?";
+
+/* Presentational text for explaining the scope of confirming the clearing of WebHistory. */
+"CLEAR_HISTORY_INFO_MSG" = "You can't undo this action.";
+
+/* Button title to approve Alert to clear WebHistory */
+"CLEAR_BUTTON" = "Clear";

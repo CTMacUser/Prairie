@@ -14,6 +14,7 @@
 
 @import ApplicationServices;
 @import CoreServices;
+@import WebKit;
 
 
 #pragma mark Declared constants
@@ -22,11 +23,13 @@ NSString * const  PrDefaultPageKey = @"DefaultPage";
 NSString * const  PrDefaultBackForwardMenuLengthKey = @"BackForwardMenuLength";
 NSString * const  PrDefaultControlStatusBarFromWSKey = @"ControlStatusBarFromWebScripting";
 NSString * const  PrDefaultOpenUntitledToDefaultPageKey = @"OpenUntitledToDefaultPage";
+NSString * const  PrDefaultUseValidateHistoryMenuItemKey = @"UseValidateHistoryMenuItem";
 
 NSString * const  PrDefaultPage = @"http://www.apple.com";
 NSInteger const   PrDefaultBackForwardMenuLength = 10;
 BOOL const        PrDefaultControlStatusBarFromWS = NO;
 BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
+BOOL const        PrDefaultUseValidateHistoryMenuItem = NO;
 
 #pragma mark File-local constants
 
@@ -52,8 +55,15 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
 
 - (instancetype)init {
     if (self = [super init]) {
+        WebHistory * const  history = [[WebHistory alloc] init];
+
         _windowControllers = [[NSMutableSet alloc] init];
         _openFilers = [[NSMutableSet alloc] init];
+        if (history && _windowControllers && _openFilers) {
+            [WebHistory setOptionalSharedHistory:history];
+        } else {
+            return nil;
+        }
     }
     return self;
 }
@@ -81,6 +91,10 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
 
 - (BOOL)openUntitledToDefaultPage {
     return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultOpenUntitledToDefaultPageKey];
+}
+
+- (BOOL)useValidateHistoryMenuItem {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultUseValidateHistoryMenuItemKey];
 }
 
 @synthesize windowControllers = _windowControllers;
@@ -165,7 +179,7 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
     // If there's a new window, file open, or file print on app launch, then those will be done after this method but before applicationDidFinishLaunching:, so anything setup required for any created windows needs to be done here.
 
     // Last-resort preference settings
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS), PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage)}];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{PrDefaultPageKey: PrDefaultPage, PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength), PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS), PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage), PrDefaultUseValidateHistoryMenuItemKey: @(PrDefaultUseValidateHistoryMenuItem)}];
 
     // Open remote URLs
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:replyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
@@ -213,6 +227,18 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
     }
 }
 
+#pragma mark NSMenuValidation override
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    SEL const  action = [menuItem action];
+    
+    if (action == @selector(validateHistory:)) {
+        menuItem.title = [WebHistory optionalSharedHistory].orderedLastVisitedDays.count ? NSLocalizedString(@"HISTORY_STORE_NONEMPTY", nil) : NSLocalizedString(@"HISTORY_STORE_EMPTY", nil);
+        return self.useValidateHistoryMenuItem;
+    }
+    return YES;
+}
+
 #pragma mark Action methods
 
 /*!
@@ -239,6 +265,56 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
     
     [browser showWindow:sender];
     [browser goHome:sender];
+}
+
+/*!
+    @brief Action to display web-history statistics.
+    @param sender The object that sent this message.
+    @details Mainly a placeholder to track the History title menu item.
+ */
+- (IBAction)validateHistory:(id)sender {
+    // Check how many items are there.
+    WebHistory * const  history = [WebHistory optionalSharedHistory];
+    NSUInteger         dayCount = 0u, itemCount = 0u;
+
+    for (NSCalendarDate *day in history.orderedLastVisitedDays) {
+        ++dayCount;
+        itemCount += [history orderedItemsLastVisitedOnDay:day].count;
+    }
+
+    // Build the alert.
+    NSAlert * const  alert = [[NSAlert alloc] init];
+
+    alert.alertStyle = NSInformationalAlertStyle;
+    alert.messageText = [NSString stringWithFormat:NSLocalizedString(@"HISTORY_COUNT_MSG_ITEMS", nil), (unsigned long)itemCount, (unsigned long)history.historyItemLimit];
+    alert.informativeText = [NSString stringWithFormat:NSLocalizedString(@"HISTORY_COUNT_MSG_DAYS", nil), (unsigned long)dayCount, (unsigned long)history.historyAgeInDaysLimit];
+    (void)[alert runModal];
+}
+
+/*!
+    @brief Action to purge the web-history store.
+    @param sender The object that sent this message.
+ */
+- (IBAction)clearHistory:(id)sender {
+    NSAlert * const  alert = [[NSAlert alloc] init];
+
+    alert.alertStyle = NSWarningAlertStyle;
+    alert.messageText = NSLocalizedString(@"CLEAR_HISTORY_CONFIRM_MSG", nil);
+    alert.informativeText = NSLocalizedString(@"CLEAR_HISTORY_INFO_MSG", nil);
+
+    (void)[alert addButtonWithTitle:NSLocalizedString(@"CLEAR_BUTTON", nil)];  // This and the next statement are order-dependent.
+    (void)[alert addButtonWithTitle:NSLocalizedString(@"CANCEL", nil)];
+    [alert.buttons[0] setKeyEquivalent:@""];  // Do not enable a destructive action with Return!
+
+    switch ([alert runModal]) {
+        case NSAlertFirstButtonReturn:
+            [[WebHistory optionalSharedHistory] removeAllItems];
+            break;
+
+        case NSAlertSecondButtonReturn:
+        default:
+            break;
+    }
 }
 
 @end
