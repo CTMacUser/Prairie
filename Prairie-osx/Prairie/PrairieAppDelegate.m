@@ -251,6 +251,29 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     [self preserveHistory];
 }
 
+#pragma mark NSKeyValueObserving override
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    id const  newFinished = change[NSKeyValueChangeNewKey];
+
+    if ([self.openFilers containsObject:object] && [keyPath isEqualToString:keyPathFinished] && (newFinished && [newFinished isKindOfClass:[NSNumber class]] && [newFinished boolValue])) {
+        [object removeObserver:self forKeyPath:keyPathFinished context:context];
+        [self.openFilers removeObject:object];
+    }
+}
+
+#pragma mark NSMenuValidation override
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
+    SEL const  action = [menuItem action];
+    
+    if (action == @selector(validateHistory:)) {
+        menuItem.title = [WebHistory optionalSharedHistory].orderedLastVisitedDays.count ? NSLocalizedString(@"HISTORY_STORE_NONEMPTY", nil) : NSLocalizedString(@"HISTORY_STORE_EMPTY", nil);
+        return self.useValidateHistoryMenuItem;
+    }
+    return YES;
+}
+
 #pragma mark Private methods
 
 // See private interface for details.
@@ -335,17 +358,6 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:notification.object];
 }
 
-#pragma mark NSKeyValueObserving override
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    id const  newFinished = change[NSKeyValueChangeNewKey];
-
-    if ([self.openFilers containsObject:object] && [keyPath isEqualToString:keyPathFinished] && (newFinished && [newFinished isKindOfClass:[NSNumber class]] && [newFinished boolValue])) {
-        [object removeObserver:self forKeyPath:keyPathFinished context:context];
-        [self.openFilers removeObject:object];
-    }
-}
-
 #pragma mark Apple event handlers
 
 /*!
@@ -363,18 +375,6 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     } else if (reply.descriptorType != typeNull) {
         [reply setParamDescriptor:[NSAppleEventDescriptor descriptorWithInt32:unimpErr] forKeyword:keyErrorNumber];
     }
-}
-
-#pragma mark NSMenuValidation override
-
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem {
-    SEL const  action = [menuItem action];
-    
-    if (action == @selector(validateHistory:)) {
-        menuItem.title = [WebHistory optionalSharedHistory].orderedLastVisitedDays.count ? NSLocalizedString(@"HISTORY_STORE_NONEMPTY", nil) : NSLocalizedString(@"HISTORY_STORE_EMPTY", nil);
-        return self.useValidateHistoryMenuItem;
-    }
-    return YES;
 }
 
 #pragma mark Action methods
