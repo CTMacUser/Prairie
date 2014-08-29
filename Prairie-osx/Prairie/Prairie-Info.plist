@@ -60,5 +60,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>PrApplication</string>
+	<key>AppleDockMenu</key>
+	<string>DockMenu</string>
 </dict>
 </plist>
