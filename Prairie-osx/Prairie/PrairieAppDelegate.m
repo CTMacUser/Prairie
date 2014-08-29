@@ -24,16 +24,25 @@ NSString * const  PrDefaultBackForwardMenuLengthKey = @"BackForwardMenuLength";
 NSString * const  PrDefaultControlStatusBarFromWSKey = @"ControlStatusBarFromWebScripting";
 NSString * const  PrDefaultOpenUntitledToDefaultPageKey = @"OpenUntitledToDefaultPage";
 NSString * const  PrDefaultUseValidateHistoryMenuItemKey = @"UseValidateHistoryMenuItem";
+NSString * const  PrDefaultLoadSaveHistoryKey = @"LoadSaveHistory";
 
 NSString * const  PrDefaultPage = @"http://www.apple.com";
 NSInteger const   PrDefaultBackForwardMenuLength = 10;
 BOOL const        PrDefaultControlStatusBarFromWS = NO;
 BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 BOOL const        PrDefaultUseValidateHistoryMenuItem = NO;
+BOOL const        PrDefaultLoadSaveHistory = YES;
 
 #pragma mark File-local constants
 
 static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
+
+static NSString * const    PrHistoryFilenameV1 = @"History";
+#define PrHistoryFilename  PrHistoryFilenameV1  // Can't point to another NSString and stay a compile-time constant.
+
+// Keys of the preference dictionary for non-user entries.
+//! Preference key for "historyFileBookmark".
+static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark";
 
 #pragma mark Private interface
 
@@ -41,11 +50,30 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
     NSMutableSet *  _windowControllers;
 }
 
+/*!
+    @brief Load the user's History file.
+    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise, loads the cached WebHistory store from a file location stored as bookmark data in another property. The "readHistory" property is changed to YES if the store is read. Updates bookmark data as needed.
+ */
+- (void)recallHistory;
+/*!
+    @brief Save the user's History file.
+    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise saves the WebHistory store to a cache file, whose location is either stored as bookmark data in another property or will be stored there once the file is created at a default URL. If the cached file has not been read yet (i.e., the "readHistory" property is NO), attempt reading it in and, if successful, merge the stores before writing.
+
+    The merged-histories scenario can occur if the "loadSaveHistory" property changes from NO to YES within a session.
+ */
+- (void)preserveHistory;
+
 - (void)notifyOnWindowClose:(NSNotification *)notification;
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event replyEvent:(NSAppleEventDescriptor *)reply;
 
 @property (nonatomic, readonly) NSMutableSet *  mutableWindowControllers;
 @property (nonatomic, readonly) NSMutableSet *  openFilers;
+@property (nonatomic, assign)   BOOL            readHistory;  // Whether or not History file has been read.
+@property (nonatomic, readonly, copy) NSURL *   defaultHistoryFileURL;  // Default location for the History file.
+
+// Non-user (i.e. private) preferences
+//! Bookmark for the History file. Valid when the WebHistory store gets saved at least once.
+@property (nonatomic) NSData *  historyFileBookmark;
 
 @end
 
@@ -64,6 +92,7 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
         } else {
             return nil;
         }
+        _readHistory = NO;
     }
     return self;
 }
@@ -97,6 +126,14 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
     return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultUseValidateHistoryMenuItemKey];
 }
 
+- (BOOL)loadSaveHistory {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultLoadSaveHistoryKey];
+}
+
+- (NSURL *)applicationSupportDirectory {
+    return [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:[NSRunningApplication currentApplication].bundleIdentifier isDirectory:YES];
+}
+
 @synthesize windowControllers = _windowControllers;
 
 - (void)addWindowControllersObject:(PrBrowserController *)controller {
@@ -109,6 +146,18 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
 
 - (NSMutableSet *)mutableWindowControllers {
     return [self mutableSetValueForKey:@"windowControllers"];  // Change the string if the corresponding property is renamed.
+}
+
+- (NSURL *)defaultHistoryFileURL {
+    return [self.applicationSupportDirectory URLByAppendingPathComponent:PrHistoryFilename];
+}
+
+- (NSData *)historyFileBookmark {
+    return [[NSUserDefaults standardUserDefaults] dataForKey:PrDefaultHistoryFileBookmarkKey];
+}
+
+- (void)setHistoryFileBookmark:(NSData *)historyFileBookmark {
+    [[NSUserDefaults standardUserDefaults] setObject:historyFileBookmark forKey:PrDefaultHistoryFileBookmarkKey];
 }
 
 #pragma mark Public methods (besides actions)
@@ -185,11 +234,93 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
                         PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength),
                         PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS),
                         PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage),
-                        PrDefaultUseValidateHistoryMenuItemKey: @(PrDefaultUseValidateHistoryMenuItem)
+                        PrDefaultUseValidateHistoryMenuItemKey: @(PrDefaultUseValidateHistoryMenuItem),
+                        PrDefaultLoadSaveHistoryKey: @(PrDefaultLoadSaveHistory)
                         }];
 
     // Open remote URLs
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:replyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
+
+    // Use app-global web-history.
+    (void)[[NSFileManager defaultManager] createDirectoryAtURL:self.applicationSupportDirectory withIntermediateDirectories:YES attributes:nil error:nil];  // WebHistory's -saveToURL:error: won't create intermediate directories.
+    [self recallHistory];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)notification {
+    // Use app-global web-history.
+    [self preserveHistory];
+}
+
+#pragma mark Private methods
+
+// See private interface for details.
+- (void)recallHistory {
+    if (!self.loadSaveHistory) return;  // Respect the preference for having an external copy.
+
+    BOOL          stale = NO;
+    NSError *     error = nil;
+    NSURL *  historyURL = [NSURL URLByResolvingBookmarkData:self.historyFileBookmark options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
+
+    if (historyURL) {
+        if (stale) {
+            NSData * const  newBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
+
+            if (newBookmark) {
+                self.historyFileBookmark = newBookmark;
+            }
+        }
+        if ([[WebHistory optionalSharedHistory] loadFromURL:historyURL error:&error]) {
+            self.readHistory = YES;
+        }
+    }
+}
+
+// See private interface for details.
+- (void)preserveHistory {
+    if (!self.loadSaveHistory) return;  // Respect the preference for having an external copy.
+
+    // Make a last effort to read and merge the old History before splattering it with the new.
+    WebHistory  *currentHistory = [WebHistory optionalSharedHistory], *oldHistory = [[WebHistory alloc] init];
+
+    if (!self.readHistory && oldHistory) {
+        [WebHistory setOptionalSharedHistory:oldHistory];
+        [self recallHistory];
+        if (self.readHistory) {
+            for (NSCalendarDate *day in currentHistory.orderedLastVisitedDays.reverseObjectEnumerator) {
+                [oldHistory addItems:[currentHistory orderedItemsLastVisitedOnDay:day]];
+            }
+            // When History menus are implemented, add command to redo (uninstall & rebuild) them here.
+            // When History update notifications are implemented, add command to reconnect them here.
+        } else {
+            [WebHistory setOptionalSharedHistory:currentHistory];
+            oldHistory = nil;
+        }
+    }
+
+    // Write out the data.
+    BOOL       stale = NO;
+    NSError *  error = nil;
+    NSURL *    historyURL = [NSURL URLByResolvingBookmarkData:self.historyFileBookmark options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
+
+    if (historyURL) {
+        if (stale) {
+            NSData * const  newBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
+            
+            if (newBookmark) {
+                self.historyFileBookmark = newBookmark;
+            }
+        }
+        stale = NO;  // repurpose to indicate bookmark data does not need to be (re)calculated.
+    } else {
+        historyURL = self.defaultHistoryFileURL;
+        stale = YES;  // repurpose to indicate bookmark data needs to be (re)calculated.
+    }
+
+    if ([[WebHistory optionalSharedHistory] saveToURL:historyURL error:&error]) {
+        if (stale) {
+            self.historyFileBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];  // If creating bookmark fails, try again next session.
+        }
+    }
 }
 
 #pragma mark Notifications

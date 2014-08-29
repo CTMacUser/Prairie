@@ -16,6 +16,8 @@ extern NSString * const  PrDefaultControlStatusBarFromWSKey;  // BOOL (probably 
 extern NSString * const  PrDefaultOpenUntitledToDefaultPageKey;  // BOOL (probably as NSNumber)
 //! Preference key for "useValidateHistoryMenuItem".
 extern NSString * const  PrDefaultUseValidateHistoryMenuItemKey;
+//! Preference key for "loadSaveHistory".
+extern NSString * const  PrDefaultLoadSaveHistoryKey;
 
 // Default values of various preferences
 extern NSString * const  PrDefaultPage;
@@ -24,6 +26,8 @@ extern BOOL const        PrDefaultControlStatusBarFromWS;
 extern BOOL const        PrDefaultOpenUntitledToDefaultPage;
 //! Default value for "useValidateHistoryMenuItem".
 extern BOOL const        PrDefaultUseValidateHistoryMenuItem;
+//! Default value for "loadSaveHistory".
+extern BOOL const        PrDefaultLoadSaveHistory;
 
 
 @interface PrairieAppDelegate : NSObject <NSApplicationDelegate>
@@ -35,12 +39,18 @@ extern BOOL const        PrDefaultUseValidateHistoryMenuItem;
 - (IBAction)validateHistory:(id)sender;
 - (IBAction)clearHistory:(id)sender;
 
+// Preferences
 @property (nonatomic, readonly, copy)   NSURL *    defaultPage;
 @property (nonatomic, readonly, assign) NSInteger  backForwardMenuLength;
 @property (nonatomic, readonly, assign) BOOL       controlStatusBarFromWS;
 @property (nonatomic, readonly, assign) BOOL       openUntitledToDefaultPage;
 //! Enables the "History" menu item, or keeps it just a header. If enabled, uses the "validateHistory:" action.
 @property (nonatomic, readonly, assign) BOOL       useValidateHistoryMenuItem;
+//! Whether or not to read the History file on app-launch and/or write it on app-termination.
+@property (nonatomic, readonly, assign) BOOL       loadSaveHistory;
+
+//! Location of this app's Application Support Directory. Does not check if it actually exists.
+@property (nonatomic, readonly, copy) NSURL *  applicationSupportDirectory;
 
 @property (nonatomic, readonly) NSSet *  windowControllers;
 
