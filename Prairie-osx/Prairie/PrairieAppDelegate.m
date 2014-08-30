@@ -52,14 +52,12 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
 /*!
     @brief Load the user's History file.
-    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise, loads the cached WebHistory store from a file location stored as bookmark data in another property. The "readHistory" property is changed to YES if the store is read. Updates bookmark data as needed.
+    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise, loads the cached WebHistory store from a file location stored as bookmark data in another property. Updates bookmark data as needed.
  */
 - (void)recallHistory;
 /*!
     @brief Save the user's History file.
-    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise saves the WebHistory store to a cache file, whose location is either stored as bookmark data in another property or will be stored there once the file is created at a default URL. If the cached file has not been read yet (i.e., the "readHistory" property is NO), attempt reading it in and, if successful, merge the stores before writing.
-
-    The merged-histories scenario can occur if the "loadSaveHistory" property changes from NO to YES within a session.
+    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise saves the WebHistory store to a cache file, whose location is either stored as bookmark data in another property or will be stored there once the file is created at a default URL.
  */
 - (void)preserveHistory;
 
@@ -68,7 +66,6 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
 @property (nonatomic, readonly) NSMutableSet *  mutableWindowControllers;
 @property (nonatomic, readonly) NSMutableSet *  openFilers;
-@property (nonatomic, assign)   BOOL            readHistory;  // Whether or not History file has been read.
 @property (nonatomic, readonly, copy) NSURL *   defaultHistoryFileURL;  // Default location for the History file.
 
 // Non-user (i.e. private) preferences
@@ -92,7 +89,6 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
         } else {
             return nil;
         }
-        _readHistory = NO;
     }
     return self;
 }
@@ -292,9 +288,8 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
                 self.historyFileBookmark = newBookmark;
             }
         }
-        if ([[WebHistory optionalSharedHistory] loadFromURL:historyURL error:&error]) {
-            self.readHistory = YES;
-        }
+
+        (void)[[WebHistory optionalSharedHistory] loadFromURL:historyURL error:&error];
     }
 }
 
@@ -302,25 +297,6 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 - (void)preserveHistory {
     if (!self.loadSaveHistory) return;  // Respect the preference for having an external copy.
 
-    // Make a last effort to read and merge the old History before splattering it with the new.
-    WebHistory  *currentHistory = [WebHistory optionalSharedHistory], *oldHistory = [[WebHistory alloc] init];
-
-    if (!self.readHistory && oldHistory) {
-        [WebHistory setOptionalSharedHistory:oldHistory];
-        [self recallHistory];
-        if (self.readHistory) {
-            for (NSCalendarDate *day in currentHistory.orderedLastVisitedDays.reverseObjectEnumerator) {
-                [oldHistory addItems:[currentHistory orderedItemsLastVisitedOnDay:day]];
-            }
-            // When History menus are implemented, add command to redo (uninstall & rebuild) them here.
-            // When History update notifications are implemented, add command to reconnect them here.
-        } else {
-            [WebHistory setOptionalSharedHistory:currentHistory];
-            oldHistory = nil;
-        }
-    }
-
-    // Write out the data.
     BOOL       stale = NO;
     NSError *  error = nil;
     NSURL *    historyURL = [NSURL URLByResolvingBookmarkData:self.historyFileBookmark options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
