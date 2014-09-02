@@ -34,6 +34,12 @@ extern NSInteger const PrGoForwardSegment;
 - (IBAction)goHome:(id)sender;
 - (IBAction)saveDocumentTo:(id)sender;
 - (IBAction)printDocument:(id)sender;
+/*!
+    @brief Action to go to a previously-visited page.
+    @param sender The object that sent this message.
+    @details Triggers the corresponding menu item's WebHistoryItem to be visited.
+ */
+- (IBAction)revisitHistory:(id)sender;
 
 - (void)loadPage:(NSURL *)pageURL;
 - (void)printWithInfo:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;

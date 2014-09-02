@@ -11,6 +11,7 @@
 #import "PrBrowserController.h"
 #import "PrFileOpener.h"
 #import "PrGetURLHandler.h"
+#import "PrHistoricMenus.h"
 
 @import ApplicationServices;
 @import CoreServices;
@@ -60,13 +61,21 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     @details If the "loadSaveHistory" property is NO, does nothing. Otherwise saves the WebHistory store to a cache file, whose location is either stored as bookmark data in another property or will be stored there once the file is created at a default URL.
  */
 - (void)preserveHistory;
+/*!
+    @brief Add and update the WebHistory-day menus.
+    @param change A KVO-oriented description of the changes to the history menus.
+    @details Adds the menu items after the "History" header.
+ */
+- (void)rebuildHistoryMenusDueToChange:(NSDictionary *)change;
 
 - (void)notifyOnWindowClose:(NSNotification *)notification;
+
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event replyEvent:(NSAppleEventDescriptor *)reply;
 
-@property (nonatomic, readonly) NSMutableSet *  mutableWindowControllers;
-@property (nonatomic, readonly) NSMutableSet *  openFilers;
-@property (nonatomic, readonly, copy) NSURL *   defaultHistoryFileURL;  // Default location for the History file.
+@property (nonatomic, readonly) NSMutableSet *     mutableWindowControllers;  // Mutable reference to windowControllers.
+@property (nonatomic, readonly) NSMutableSet *     openFilers;  // Holds processors so ARC won't claim them early.
+@property (nonatomic, readonly, copy) NSURL *      defaultHistoryFileURL;  // Default location for the History file.
+@property (nonatomic, readonly) PrHistoricMenus *  menuHistorian;  // Handles History menu updates.
 
 // Non-user (i.e. private) preferences
 //! Bookmark for the History file. Valid when the WebHistory store gets saved at least once.
@@ -84,7 +93,8 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
         _windowControllers = [[NSMutableSet alloc] init];
         _openFilers = [[NSMutableSet alloc] init];
-        if (history && _windowControllers && _openFilers) {
+        _menuHistorian = [[PrHistoricMenus alloc] initWithHistory:history];
+        if (history && _windowControllers && _openFilers && _menuHistorian) {
             [WebHistory setOptionalSharedHistory:history];
         } else {
             return nil;
@@ -239,12 +249,14 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
     // Use app-global web-history.
     (void)[[NSFileManager defaultManager] createDirectoryAtURL:self.applicationSupportDirectory withIntermediateDirectories:YES attributes:nil error:nil];  // WebHistory's -saveToURL:error: won't create intermediate directories.
-    [self recallHistory];
+    [self.menuHistorian addObserver:self forKeyPath:PrKeyPathDayMenuItems options:NSKeyValueObservingOptionNew context:NULL];
+    [self recallHistory];  // Must happen after the previous line.
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
     // Use app-global web-history.
-    [self preserveHistory];
+    [self preserveHistory];  // May happen before the next line.
+    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathDayMenuItems];
 }
 
 #pragma mark NSKeyValueObserving override
@@ -255,6 +267,8 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     if ([self.openFilers containsObject:object] && [keyPath isEqualToString:keyPathFinished] && (newFinished && [newFinished isKindOfClass:[NSNumber class]] && [newFinished boolValue])) {
         [object removeObserver:self forKeyPath:keyPathFinished context:context];
         [self.openFilers removeObject:object];
+    } else if ((self.menuHistorian == object) && [keyPath isEqualToString:PrKeyPathDayMenuItems]) {
+        [self rebuildHistoryMenusDueToChange:change];
     }
 }
 
@@ -270,7 +284,7 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     return YES;
 }
 
-#pragma mark Private methods
+#pragma mark Private methods, history management
 
 // See private interface for details.
 - (void)recallHistory {
@@ -319,6 +333,27 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
         if (stale) {
             self.historyFileBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];  // If creating bookmark fails, try again next session.
         }
+    }
+}
+
+// See private interface for details.
+- (void)rebuildHistoryMenusDueToChange:(NSDictionary *)change {
+    NSMenu * const          browseMenu = self.historyHeader.menu;
+    NSKeyValueChange const  changeType = (NSKeyValueChange)[change[NSKeyValueChangeKindKey] unsignedIntegerValue];
+    NSInteger       beyondHistoryIndex = [browseMenu indexOfItem:self.historyHeader] + 1;
+
+    switch (changeType) {
+        default:
+        case NSKeyValueChangeSetting:
+            // Do wholesale replacement; get rid of the current menu items and install the new ones.
+            while (![browseMenu itemAtIndex:beyondHistoryIndex].isSeparatorItem) {
+                [browseMenu removeItemAtIndex:beyondHistoryIndex];
+            }
+            for (NSMenuItem *item in self.menuHistorian.dayMenuItems) {
+                [browseMenu insertItem:item atIndex:beyondHistoryIndex++];
+            }
+            beyondHistoryIndex = [browseMenu indexOfItem:self.historyHeader] + 1;
+            break;
     }
 }
 
@@ -429,6 +464,14 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
         default:
             break;
     }
+}
+
+// See header for details.
+- (IBAction)revisitHistory:(id)sender {
+    PrBrowserController * const  browser = [self createBrowser];
+    
+    [browser showWindow:sender];
+    [browser revisitHistory:sender];
 }
 
 @end

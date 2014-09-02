@@ -38,6 +38,15 @@ extern BOOL const        PrDefaultLoadSaveHistory;
 - (IBAction)goHome:(id)sender;
 - (IBAction)validateHistory:(id)sender;
 - (IBAction)clearHistory:(id)sender;
+/*!
+    @brief Action to go to a previously-visited page.
+    @param sender The object that sent this message.
+    @details Called only if there's no browser windows. So create one first, then proceed as normal.
+ */
+- (IBAction)revisitHistory:(id)sender;
+
+//! The "History" (or "No History") menu item that preceeds the WebHistory day menu items.
+@property (weak) IBOutlet NSMenuItem *historyHeader;
 
 // Preferences
 @property (nonatomic, readonly, copy)   NSURL *    defaultPage;

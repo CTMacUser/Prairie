@@ -577,4 +577,17 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [self loadPage:self.appDelegate.defaultPage];
 }
 
+// See header for details.
+- (IBAction)revisitHistory:(id)sender {
+    // Sanity check.
+    if (![sender isKindOfClass:[NSMenuItem class]]) return;
+    if (![[sender representedObject] isKindOfClass:[WebHistoryItem class]]) return;
+
+    // Revisit the page with the current WebView.
+    NSMenuItem * const         menuItem = sender;
+    WebHistoryItem * const  historyItem = menuItem.representedObject;
+
+    [self loadPage:[NSURL URLWithString:historyItem.URLString]];
+}
+
 @end
