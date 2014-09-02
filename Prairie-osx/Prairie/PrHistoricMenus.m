@@ -51,6 +51,12 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
     @details Releases all web-history day menu items.
  */
 - (void)notifyOnHistoryRemoveAllItems:(NSNotification *)note;
+/*!
+    @brief Response to WebHistoryItemChangedNotification.
+    @param note The sent notification.
+    @details If needed, updates the title of the menu item mapped to the notifying web-history item.
+ */
+- (void)notifyOnHistoryItemChanges:(NSNotification *)note;
 
 // Redeclare read/write properties that are read-only for users.
 @property (nonatomic, assign) BOOL  needsSaving;
@@ -88,6 +94,7 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
         [notifier addObserver:self selector:@selector(notifyOnHistoryAddItems:) name:WebHistoryItemsAddedNotification object:history];
         [notifier addObserver:self selector:@selector(notifyOnHistoryRemoveItems:) name:WebHistoryItemsRemovedNotification object:history];
         [notifier addObserver:self selector:@selector(notifyOnHistoryRemoveAllItems:) name:WebHistoryAllItemsRemovedNotification object:history];
+        [notifier addObserver:self selector:@selector(notifyOnHistoryItemChanges:) name:WebHistoryItemChangedNotification object:nil];
 
         _dayFormatter.dateStyle = NSDateFormatterFullStyle;
         _dayFormatter.timeStyle = NSDateFormatterNoStyle;
@@ -184,6 +191,42 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
         [self didChangeValueForKey:PrKeyPathDayMenuItems];
         self.needsSaving = YES;
     }
+}
+
+// See private interface for details.
+- (void)notifyOnHistoryItemChanges:(NSNotification *)note {
+    if (!self.dayMenuItems || !self.dayMenuItems.count) return;
+
+    // Check if any history menu item titles would actually change.
+    NSMenu * const               firstDaySubmenu = [self.dayMenuItems.firstObject submenu];
+    NSInteger               historyMenuItemCount = firstDaySubmenu.numberOfItems;
+    NSMutableIndexSet * const  menuItemsToChange = [[NSMutableIndexSet alloc] init];
+    NSMutableArray * const      newHistoryTitles = [[NSMutableArray alloc] initWithCapacity:(NSUInteger)historyMenuItemCount];
+
+    if (!menuItemsToChange || !newHistoryTitles) return;
+    for (NSInteger i = 0; i < historyMenuItemCount; ++i) {
+        NSMenuItem * const  historyMenuItem = [firstDaySubmenu itemAtIndex:i];
+        WebHistoryItem * const  historyItem = historyMenuItem.representedObject;
+        NSString *             desiredTitle = historyItem.title;
+
+        if (!desiredTitle) {
+            desiredTitle = historyItem.URLString;
+        }
+        if (![historyMenuItem.title isEqualToString:desiredTitle]) {
+            [menuItemsToChange addIndex:(NSUInteger)i];
+            [newHistoryTitles addObject:desiredTitle];
+        }
+    }
+    if (!menuItemsToChange.count) return;
+
+    // Change the titles, which are nested attributes of the first element of 'dayMenuItems'.
+    NSEnumerator * const  historyTitleEnumerator = [newHistoryTitles objectEnumerator];
+    NSIndexSet * const       dayMenuItemToChange = [NSIndexSet indexSetWithIndex:0u];
+
+    if (!historyTitleEnumerator || !dayMenuItemToChange) return;
+    [menuItemsToChange enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        [firstDaySubmenu itemAtIndex:(NSInteger)idx].title = [historyTitleEnumerator nextObject];
+    }];  // There originally was a will/did-change message pair surrounding this message, but it didn't fit since there's no KVO change-type for mutating an element (not the same as replacing an element). Since the change is on current menu items, they'll be automatically updated.
 }
 
 @end
