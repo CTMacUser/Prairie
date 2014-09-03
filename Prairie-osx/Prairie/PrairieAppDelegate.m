@@ -339,8 +339,9 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 // See private interface for details.
 - (void)rebuildHistoryMenusDueToChange:(NSDictionary *)change {
     NSMenu * const          browseMenu = self.historyHeader.menu;
-    NSKeyValueChange const  changeType = (NSKeyValueChange)[change[NSKeyValueChangeKindKey] unsignedIntegerValue];
     NSInteger       beyondHistoryIndex = [browseMenu indexOfItem:self.historyHeader] + 1;
+    NSKeyValueChange const  changeType = (NSKeyValueChange)[change[NSKeyValueChangeKindKey] unsignedIntegerValue];
+    NSIndexSet * const  indexesChanged = change[NSKeyValueChangeIndexesKey];  // May be nil, depending on 'changeType'.
 
     switch (changeType) {
         default:
@@ -354,6 +355,12 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
             }
             beyondHistoryIndex = [browseMenu indexOfItem:self.historyHeader] + 1;
             break;
+
+        case NSKeyValueChangeRemoval:
+            // Purge the menus of the deleted indexes.
+            [indexesChanged enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop) {
+                [browseMenu removeItemAtIndex:(beyondHistoryIndex + (NSInteger)idx)];
+            }];
     }
 }
 

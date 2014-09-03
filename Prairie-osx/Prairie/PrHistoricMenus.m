@@ -124,11 +124,12 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
 
 // See private interface for details.
 - (void)notifyOnHistoryLoad:(NSNotification *)note {
-    NSMutableArray * const       newDayMenuItems = [[NSMutableArray alloc] initWithCapacity:self.history.orderedLastVisitedDays.count];
-    NSMutableDictionary * const  newMapDaysToMenuItems = [[NSMutableDictionary alloc] initWithCapacity:self.history.orderedLastVisitedDays.count];
+    NSArray * const              historyDays = self.history.orderedLastVisitedDays;
+    NSMutableArray * const       newDayMenuItems = [[NSMutableArray alloc] initWithCapacity:historyDays.count];
+    NSMutableDictionary * const  newMapDaysToMenuItems = [[NSMutableDictionary alloc] initWithCapacity:historyDays.count];
     NSMutableDictionary * const  newHistoryItemToDay = [[NSMutableDictionary alloc] init];
 
-    for (NSCalendarDate *day in self.history.orderedLastVisitedDays) {
+    for (NSCalendarDate *day in historyDays) {
         NSString * const    dayTitle = [self.dayFormatter stringFromDate:day];
         NSMenuItem * const  dayMenuItem = [[NSMenuItem alloc] initWithTitle:dayTitle action:NULL keyEquivalent:@""];
         NSMenu * const      daySubmenu = [[NSMenu alloc] initWithTitle:dayTitle];
@@ -175,9 +176,32 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
 
 // See private interface for details.
 - (void)notifyOnHistoryRemoveItems:(NSNotification *)note {
-    // Quick & dirty: call the menu procedure that loads use to do a reset to the current history state.
-    // TODO: implement this method properly
-    [self notifyOnHistoryLoad:note];
+    // Purge the items.
+    for (WebHistoryItem *item in note.userInfo[WebHistoryItemsKey]) {
+        NSValue * const   itemValue = [NSValue valueWithNonretainedObject:item];
+        NSCalendarDate * const  day = self.mapHistoryItemToDay[itemValue];
+
+        if (day) {
+            NSMenu * const   daySubmenu = [self.mapDayToMenuItem[day] submenu];
+            NSInteger const  historyMenuItemIndex = [daySubmenu indexOfItemWithRepresentedObject:item];
+
+            if (historyMenuItemIndex != -1) {
+                [daySubmenu removeItemAtIndex:historyMenuItemIndex];
+            }
+            [self.mapHistoryItemToDay removeObjectForKey:itemValue];
+        }
+    }
+
+    // Purge empty days
+    NSIndexSet * const  emptyDays = [self.dayMenuItems indexesOfObjectsPassingTest:^BOOL(NSMenuItem *obj, NSUInteger idx, BOOL *stop) {
+        return !obj.submenu.numberOfItems;
+    }];
+
+    if (!emptyDays) return;
+    [self willChange:NSKeyValueChangeRemoval valuesAtIndexes:emptyDays forKey:PrKeyPathDayMenuItems];
+    [self->_dayMenuItems removeObjectsAtIndexes:emptyDays];
+    [self didChange:NSKeyValueChangeRemoval valuesAtIndexes:emptyDays forKey:PrKeyPathDayMenuItems];
+
     self.needsSaving = YES;
 }
 
@@ -209,7 +233,7 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
         WebHistoryItem * const  historyItem = historyMenuItem.representedObject;
         NSString *             desiredTitle = historyItem.title;
 
-        if (!desiredTitle) {
+        if (nil == desiredTitle) {
             desiredTitle = historyItem.URLString;
         }
         if (![historyMenuItem.title isEqualToString:desiredTitle]) {
