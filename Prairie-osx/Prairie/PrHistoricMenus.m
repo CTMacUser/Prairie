@@ -15,6 +15,43 @@
 
 NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
 
+#pragma mark File-local functions
+
+/*!
+    @brief Makes a menu item representing a history day.
+    @param day The date the menu item represents.
+    @param format The object translating a day into a string value.
+    @return A menu item titled with the day, with an empty submenu, and storing the day as extra data.
+ */
+static inline
+NSMenuItem *  CreateMenuItemForDay(NSCalendarDate *day, NSDateFormatter *format) {
+    NSString * const   dayTitle = [format stringFromDate:day];
+    NSMenu * const   daySubmenu = [[NSMenu alloc] initWithTitle:dayTitle];
+    NSMenuItem * const  dayItem = [[NSMenuItem alloc] initWithTitle:dayTitle action:NULL keyEquivalent:@""];
+
+    dayItem.representedObject = day;
+    dayItem.submenu = daySubmenu;
+    return dayItem;
+}
+
+/*!
+    @brief Makes a menu item representing a history entry.
+    @param item The web-history entry the menu item represents.
+    @return A menu item titled from the entry, linked to the revisit-history action, and storing the entry as extra data.
+ */
+static inline
+NSMenuItem *  CreateMenuItemFromHistory(WebHistoryItem *item) {
+    NSString *  itemTitle = item.title;
+
+    if (nil == itemTitle) {  // Web-history entries have titles only if their resource properly has them.
+        itemTitle = item.URLString;
+    }
+    NSMenuItem * const  historyMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(revisitHistory:) keyEquivalent:@""];
+
+    historyMenuItem.representedObject = item;
+    return historyMenuItem;
+}
+
 #pragma mark Private interface
 
 @interface PrHistoricMenus () {
@@ -126,35 +163,23 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
 - (void)notifyOnHistoryLoad:(NSNotification *)note {
     NSArray * const              historyDays = self.history.orderedLastVisitedDays;
     NSMutableArray * const       newDayMenuItems = [[NSMutableArray alloc] initWithCapacity:historyDays.count];
-    NSMutableDictionary * const  newMapDaysToMenuItems = [[NSMutableDictionary alloc] initWithCapacity:historyDays.count];
-    NSMutableDictionary * const  newHistoryItemToDay = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary * const  newMapDayToMenuItem = [[NSMutableDictionary alloc] initWithCapacity:historyDays.count];
+    NSMutableDictionary * const  newMapHistoryItemToDay = [[NSMutableDictionary alloc] init];
 
     for (NSCalendarDate *day in historyDays) {
-        NSString * const    dayTitle = [self.dayFormatter stringFromDate:day];
-        NSMenuItem * const  dayMenuItem = [[NSMenuItem alloc] initWithTitle:dayTitle action:NULL keyEquivalent:@""];
-        NSMenu * const      daySubmenu = [[NSMenu alloc] initWithTitle:dayTitle];
+        NSMenuItem * const  dayMenuItem = CreateMenuItemForDay(day, self.dayFormatter);
 
-        dayMenuItem.submenu = daySubmenu;
-        dayMenuItem.representedObject = day;
         for (WebHistoryItem *item in [self.history orderedItemsLastVisitedOnDay:day]) {
-            NSString *          itemTitle = item.title;
-            NSMenuItem * const  historyMenuItem = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(revisitHistory:) keyEquivalent:@""];
-
-            if (nil == itemTitle) {  // Web-history entries have titles only if their resource properly has them.
-                itemTitle = item.URLString;
-            }
-            historyMenuItem.title = itemTitle;
-            historyMenuItem.representedObject = item;
-            newHistoryItemToDay[[NSValue valueWithNonretainedObject:item]] = day;
-            [daySubmenu addItem:historyMenuItem];
+            [dayMenuItem.submenu addItem:CreateMenuItemFromHistory(item)];
+            newMapHistoryItemToDay[[NSValue valueWithNonretainedObject:item]] = day;
         }
         [newDayMenuItems addObject:dayMenuItem];
-        newMapDaysToMenuItems[day] = dayMenuItem;
+        newMapDayToMenuItem[day] = dayMenuItem;
     }
     [self willChangeValueForKey:PrKeyPathDayMenuItems];
-    _dayMenuItems = newDayMenuItems;
-    self.mapDayToMenuItem = newMapDaysToMenuItems;
-    self.mapHistoryItemToDay = newHistoryItemToDay;
+    self->_dayMenuItems = newDayMenuItems;
+    self.mapDayToMenuItem = newMapDayToMenuItem;
+    self.mapHistoryItemToDay = newMapHistoryItemToDay;
     [self didChangeValueForKey:PrKeyPathDayMenuItems];
 
     self.needsSaving = NO;
@@ -168,9 +193,99 @@ NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
 
 // See private interface for details.
 - (void)notifyOnHistoryAddItems:(NSNotification *)note {
-    // Quick & dirty: call the menu procedure that loads use to do a reset to the current history state.
-    // TODO: implement this method properly
-    [self notifyOnHistoryLoad:note];
+    // Find what days are being added or removed (or staying around).
+    NSOrderedSet * const         newHistoryDays = [NSOrderedSet orderedSetWithArray:self.history.orderedLastVisitedDays];
+    NSMutableOrderedSet * const  oldHistoryDays = [[NSMutableOrderedSet alloc] initWithCapacity:self.dayMenuItems.count];
+
+    for (NSMenuItem *item in self.dayMenuItems) {
+        [oldHistoryDays addObject:item.representedObject];
+    }
+    NSMutableOrderedSet * const    addedHistoryDays = [newHistoryDays mutableCopy];
+    NSMutableOrderedSet * const  removedHistoryDays = [oldHistoryDays mutableCopy];
+    NSMutableOrderedSet * const   commonHistoryDays = [newHistoryDays mutableCopy];
+
+    [addedHistoryDays minusOrderedSet:oldHistoryDays];
+    [removedHistoryDays minusOrderedSet:newHistoryDays];
+    [commonHistoryDays intersectOrderedSet:oldHistoryDays];
+
+    // Prime menus for new days.
+    for (NSCalendarDate *day in addedHistoryDays) {
+        self.mapDayToMenuItem[day] = CreateMenuItemForDay(day, self.dayFormatter);
+    }
+
+    // Load all the new history items to the front of the latest old day.
+    NSCalendarDate *  latestDay = commonHistoryDays.firstObject;
+
+    if (!latestDay) latestDay = removedHistoryDays.firstObject;
+    if (!latestDay) latestDay = addedHistoryDays.lastObject;
+    NSMenu * const  latestDayMenu = [self.mapDayToMenuItem[latestDay] submenu];
+
+    for (WebHistoryItem *item in [note.userInfo[WebHistoryItemsKey] reverseObjectEnumerator]) {
+        NSMenuItem *  historyMenuItem;
+        NSValue * const          itemValue = [NSValue valueWithNonretainedObject:item];
+        NSCalendarDate * const   itemDay = self.mapHistoryItemToDay[itemValue];
+
+        if (itemDay) {
+            NSMenu * const  daySubmenu = [self.mapDayToMenuItem[itemDay] submenu];
+
+            historyMenuItem = [daySubmenu itemAtIndex:[daySubmenu indexOfItemWithRepresentedObject:item]];
+            [daySubmenu removeItem:historyMenuItem];
+        } else {
+            historyMenuItem = CreateMenuItemFromHistory(item);
+        }
+        [latestDayMenu insertItem:historyMenuItem atIndex:0];
+        self.mapHistoryItemToDay[itemValue] = latestDay;
+    }
+
+    // Set any new days with their history menu items.
+    for (NSCalendarDate *day in addedHistoryDays) {
+        NSMenu * const  daySubmenu = [self.mapDayToMenuItem[day] submenu];
+
+        for (WebHistoryItem *item in [self.history orderedItemsLastVisitedOnDay:day].reverseObjectEnumerator) {
+            NSValue * const       itemValue = [NSValue valueWithNonretainedObject:item];
+            NSCalendarDate * const  itemDay = self.mapHistoryItemToDay[itemValue];
+
+            if ((nil == itemDay) || [itemDay isEqualToDate:day]) continue;  // Don't recurse nor bother with missed items.
+            NSMenu * const       itemDaySubmenu = [self.mapDayToMenuItem[itemDay] submenu];
+            NSMenuItem * const  historyMenuItem = [itemDaySubmenu itemAtIndex:[itemDaySubmenu indexOfItemWithRepresentedObject:item]];
+
+            [itemDaySubmenu removeItem:historyMenuItem];
+            [daySubmenu insertItem:historyMenuItem atIndex:0];
+            self.mapHistoryItemToDay[itemValue] = day;
+        }
+    }
+
+    // Publish any changes with added or removed days (changed days don't count).
+    if (removedHistoryDays.count) {
+        NSIndexSet * const  removedIndexes = [self.dayMenuItems indexesOfObjectsPassingTest:^BOOL(NSMenuItem *obj, NSUInteger idx, BOOL *stop) {
+            return [removedHistoryDays containsObject:obj.representedObject];
+        }];
+
+        [self willChange:NSKeyValueChangeRemoval valuesAtIndexes:removedIndexes forKey:PrKeyPathDayMenuItems];
+        for (NSCalendarDate *day in removedHistoryDays) {
+            [self.mapHistoryItemToDay removeObjectsForKeys:[self.mapHistoryItemToDay allKeysForObject:day]];
+            [self.mapDayToMenuItem removeObjectForKey:day];
+        }
+        [self->_dayMenuItems removeObjectsAtIndexes:removedIndexes];
+        [self didChange:NSKeyValueChangeRemoval valuesAtIndexes:removedIndexes forKey:PrKeyPathDayMenuItems];
+    }
+
+    if (addedHistoryDays.count) {
+        NSMutableArray * const  addedMenuItems = [[NSMutableArray alloc] initWithCapacity:addedHistoryDays.count];
+        NSIndexSet * const      addedIndexes = [newHistoryDays indexesOfObjectsPassingTest:^BOOL(NSCalendarDate *obj, NSUInteger idx, BOOL *stop) {
+            BOOL const  isAdded = [addedHistoryDays containsObject:obj];
+
+            if (isAdded) {
+                [addedMenuItems addObject:self.mapDayToMenuItem[obj]];
+            }
+            return isAdded;
+        }];
+
+        [self willChange:NSKeyValueChangeInsertion valuesAtIndexes:addedIndexes forKey:PrKeyPathDayMenuItems];
+        [self->_dayMenuItems insertObjects:addedMenuItems atIndexes:addedIndexes];
+        [self didChange:NSKeyValueChangeInsertion valuesAtIndexes:addedIndexes forKey:PrKeyPathDayMenuItems];
+    }
+
     self.needsSaving = YES;
 }
 

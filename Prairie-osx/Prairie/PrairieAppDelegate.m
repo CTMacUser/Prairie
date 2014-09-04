@@ -345,7 +345,7 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
     switch (changeType) {
         default:
-        case NSKeyValueChangeSetting:
+        case NSKeyValueChangeSetting: {
             // Do wholesale replacement; get rid of the current menu items and install the new ones.
             while (![browseMenu itemAtIndex:beyondHistoryIndex].isSeparatorItem) {
                 [browseMenu removeItemAtIndex:beyondHistoryIndex];
@@ -355,12 +355,23 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
             }
             beyondHistoryIndex = [browseMenu indexOfItem:self.historyHeader] + 1;
             break;
+        }
 
-        case NSKeyValueChangeRemoval:
+        case NSKeyValueChangeRemoval: {
             // Purge the menus of the deleted indexes.
             [indexesChanged enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop) {
                 [browseMenu removeItemAtIndex:(beyondHistoryIndex + (NSInteger)idx)];
             }];
+            break;
+        }
+            
+        case NSKeyValueChangeInsertion: {
+            // Place the menus of the added indexes.
+            [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                [browseMenu insertItem:self.menuHistorian.dayMenuItems[idx] atIndex:(beyondHistoryIndex + (NSInteger)idx)];
+            }];
+            break;
+        }
     }
 }
 
