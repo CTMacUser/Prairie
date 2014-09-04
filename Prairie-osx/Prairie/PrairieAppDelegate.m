@@ -372,6 +372,17 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
             }];
             break;
         }
+
+        case NSKeyValueChangeReplacement: {
+            // Since NSMenu doesn't have a replacement API, do a removal & insert.
+            [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                NSInteger const  location = beyondHistoryIndex + (NSInteger)idx;
+
+                [browseMenu removeItemAtIndex:location];
+                [browseMenu insertItem:self.menuHistorian.dayMenuItems[idx] atIndex:location];
+            }];
+            break;
+        }
     }
 }
 
