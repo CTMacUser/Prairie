@@ -256,7 +256,7 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 - (void)applicationWillTerminate:(NSNotification *)notification {
     // Use app-global web-history.
     [self preserveHistory];  // May happen before the next line.
-    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathDayMenuItems];
+    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathDayMenuItems context:NULL];
 }
 
 #pragma mark NSKeyValueObserving override
