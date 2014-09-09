@@ -26,6 +26,7 @@ NSString * const  PrDefaultControlStatusBarFromWSKey = @"ControlStatusBarFromWeb
 NSString * const  PrDefaultOpenUntitledToDefaultPageKey = @"OpenUntitledToDefaultPage";
 NSString * const  PrDefaultUseValidateHistoryMenuItemKey = @"UseValidateHistoryMenuItem";
 NSString * const  PrDefaultLoadSaveHistoryKey = @"LoadSaveHistory";
+NSString * const  PrDefaultMaxTodayHistoryMenuLengthKey = @"MaxTodayHistoryMenuLength";
 
 NSString * const  PrDefaultPage = @"http://www.apple.com";
 NSInteger const   PrDefaultBackForwardMenuLength = 10;
@@ -33,6 +34,7 @@ BOOL const        PrDefaultControlStatusBarFromWS = NO;
 BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
 BOOL const        PrDefaultUseValidateHistoryMenuItem = NO;
 BOOL const        PrDefaultLoadSaveHistory = YES;
+NSUInteger const  PrDefaultMaxTodayHistoryMenuLength = 2u;
 
 #pragma mark File-local constants
 
@@ -62,13 +64,36 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
  */
 - (void)preserveHistory;
 /*!
+    @brief Connects 'todayHistoryHandler' to the appropriate per-day WebHistoryItem menu.
+    @details If there's a menu item (and submenu) for today, connect it to 'todayHistoryHandler' and then hide it.
+ */
+- (void)prepareTodayHistoryMenu;
+/*!
     @brief Add and update the WebHistory-day menus.
     @param change A KVO-oriented description of the changes to the history menus.
-    @details Adds the menu items after the "History" header.
+    @details Adds the menu items after the "Earlier Today" submenu.
  */
 - (void)rebuildHistoryMenusDueToChange:(NSDictionary *)change;
+/*!
+    @brief Add and update the most recent WebHistory menu items for Today directly in the Browse menu.
+    @param change A KVO-oriented description of the changes to the history menu section.
+    @details Adds/updates/removes the menu items between the "History" header and "Earlier Today" submenu.
+ */
+- (void)rebuildTodayDirectHistoryMenuDueToChange:(NSDictionary *)change;
+/*!
+    @brief Add and update the non-recent WebHistory menu items for Today in the Browse menu's "Earlier Today" submenu.
+    @param change A KVO-oriented description of the changes to a history menu subsection.
+    @details Adds/updates/removes the menu items in the "Earlier Today" submenu.
+ */
+- (void)rebuildTodayOverflowHistoryMenuDueToChange:(NSDictionary *)change;
 
 - (void)notifyOnWindowClose:(NSNotification *)notification;
+/*!
+    @brief Response to NSCalendarDayChangedNotification.
+    @param notification The sent notification.
+    @details Resets what 'todayHistoryHandler' points to.
+ */
+- (void)notifyOnNewDay:(NSNotification *)notification;
 
 - (void)handleGetURLEvent:(NSAppleEventDescriptor *)event replyEvent:(NSAppleEventDescriptor *)reply;
 
@@ -94,7 +119,8 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
         _windowControllers = [[NSMutableSet alloc] init];
         _openFilers = [[NSMutableSet alloc] init];
         _menuHistorian = [[PrHistoricMenus alloc] initWithHistory:history];
-        if (history && _windowControllers && _openFilers && _menuHistorian) {
+        _todayHistoryHandler = [[PrOverflowingMenu alloc] init];
+        if (history && _windowControllers && _openFilers && _menuHistorian && _todayHistoryHandler) {
             [WebHistory setOptionalSharedHistory:history];
         } else {
             return nil;
@@ -134,6 +160,10 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
 - (BOOL)loadSaveHistory {
     return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultLoadSaveHistoryKey];
+}
+
+- (NSUInteger)maxTodayHistoryMenuLength {
+    return (NSUInteger)[[NSUserDefaults standardUserDefaults] integerForKey:PrDefaultMaxTodayHistoryMenuLengthKey];
 }
 
 - (NSURL *)applicationSupportDirectory {
@@ -241,21 +271,31 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
                         PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS),
                         PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage),
                         PrDefaultUseValidateHistoryMenuItemKey: @(PrDefaultUseValidateHistoryMenuItem),
-                        PrDefaultLoadSaveHistoryKey: @(PrDefaultLoadSaveHistory)
+                        PrDefaultLoadSaveHistoryKey: @(PrDefaultLoadSaveHistory),
+                        PrDefaultMaxTodayHistoryMenuLengthKey: @(PrDefaultMaxTodayHistoryMenuLength)
                         }];
 
     // Open remote URLs
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:replyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
 
-    // Use app-global web-history.
+    // Perliminaries to using app-global web-history.
     (void)[[NSFileManager defaultManager] createDirectoryAtURL:self.applicationSupportDirectory withIntermediateDirectories:YES attributes:nil error:nil];  // WebHistory's -saveToURL:error: won't create intermediate directories.
+    self.todayHistoryHandler.maxDirectCount = self.maxTodayHistoryMenuLength;
+
+    // Use app-global web-history. Must happen in the order given.
     [self.menuHistorian addObserver:self forKeyPath:PrKeyPathDayMenuItems options:NSKeyValueObservingOptionNew context:NULL];
-    [self recallHistory];  // Must happen after the previous line.
+    [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathDirectMenuItems options:NSKeyValueObservingOptionNew context:NULL];
+    [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathOverflowMenuItems options:NSKeyValueObservingOptionNew context:NULL];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnNewDay:) name:NSCalendarDayChangedNotification object:nil];
+    [self recallHistory];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {
-    // Use app-global web-history.
-    [self preserveHistory];  // May happen before the next line.
+    // Use app-global web-history. Must happen in the order given (the reverse of the finish-launching handler).
+    [self preserveHistory];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSCalendarDayChangedNotification object:nil];
+    [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathOverflowMenuItems context:NULL];
+    [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathDirectMenuItems context:NULL];
     [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathDayMenuItems context:NULL];
 }
 
@@ -269,6 +309,10 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
         [self.openFilers removeObject:object];
     } else if ((self.menuHistorian == object) && [keyPath isEqualToString:PrKeyPathDayMenuItems]) {
         [self rebuildHistoryMenusDueToChange:change];
+    } else if ((self.todayHistoryHandler == object) && [keyPath isEqualToString:PrKeyPathDirectMenuItems]) {
+        [self rebuildTodayDirectHistoryMenuDueToChange:change];
+    } else if ((self.todayHistoryHandler == object) && [keyPath isEqualToString:PrKeyPathOverflowMenuItems]) {
+        [self rebuildTodayOverflowHistoryMenuDueToChange:change];
     }
 }
 
@@ -337,20 +381,109 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 }
 
 // See private interface for details.
+- (void)prepareTodayHistoryMenu {
+    NSMenu * const  browseMenu = self.earlierToday.menu;
+    NSInteger       earlierTodayIndex = [browseMenu indexOfItem:self.earlierToday];
+    NSMenuItem *    menuItem;
+
+    NSParameterAssert(browseMenu);
+    NSParameterAssert(earlierTodayIndex != -1);
+    while ((menuItem = [browseMenu itemAtIndex:++earlierTodayIndex]) && !menuItem.isSeparatorItem) {
+        if ([[NSCalendar autoupdatingCurrentCalendar] isDateInToday:menuItem.representedObject]) {
+            break;
+        }
+    }
+    if (!menuItem || menuItem.isSeparatorItem) {
+        self.todayHistoryHandler.sourceMenu = nil;
+    } else if (self.todayHistoryHandler.sourceMenu != menuItem.submenu) {
+        self.todayHistoryHandler.sourceMenu = menuItem.submenu;
+    }
+}
+
+// See private interface for details.
 - (void)rebuildHistoryMenusDueToChange:(NSDictionary *)change {
+    NSMenu * const          browseMenu = self.earlierToday.menu;
+    NSInteger  beyondEarlierTodayIndex = [browseMenu indexOfItem:self.earlierToday] + 1;
+    NSKeyValueChange const  changeType = (NSKeyValueChange)[change[NSKeyValueChangeKindKey] unsignedIntegerValue];
+    NSIndexSet * const  indexesChanged = change[NSKeyValueChangeIndexesKey];  // May be nil, depending on 'changeType'.
+
+    NSParameterAssert(browseMenu);
+    NSParameterAssert(beyondEarlierTodayIndex != -1 + 1);
+    switch (changeType) {
+        default:
+        case NSKeyValueChangeSetting: {
+            // Do wholesale replacement; get rid of the current menu items and install the new ones.
+            while (![browseMenu itemAtIndex:beyondEarlierTodayIndex].isSeparatorItem) {
+                [browseMenu removeItemAtIndex:beyondEarlierTodayIndex];
+            }
+            for (NSMenuItem *item in self.menuHistorian.dayMenuItems) {
+                [browseMenu insertItem:item atIndex:beyondEarlierTodayIndex++];
+            }
+            beyondEarlierTodayIndex = [browseMenu indexOfItem:self.earlierToday] + 1;
+            [self prepareTodayHistoryMenu];  // Rebuild today's history menus.
+            break;
+        }
+
+        case NSKeyValueChangeRemoval: {
+            // Purge the menus of the deleted indexes.
+            NSParameterAssert(indexesChanged);
+            [indexesChanged enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop) {
+                [browseMenu removeItemAtIndex:(beyondEarlierTodayIndex + (NSInteger)idx)];
+            }];
+            if ([indexesChanged containsIndex:0u]) {  // Only if today was deleted,...
+                [self prepareTodayHistoryMenu];  // ...rebuild today's history menus.
+            }
+            break;
+        }
+            
+        case NSKeyValueChangeInsertion: {
+            // Place the menus of the added indexes.
+            NSParameterAssert(indexesChanged);
+            [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                [browseMenu insertItem:self.menuHistorian.dayMenuItems[idx] atIndex:(beyondEarlierTodayIndex + (NSInteger)idx)];
+            }];
+            if ([indexesChanged containsIndex:0u]) {  // Gained or still have a today menu item, so just update.
+                [self prepareTodayHistoryMenu];
+            }
+            break;
+        }
+
+        case NSKeyValueChangeReplacement: {
+            // Since NSMenu doesn't have a replacement API, do a removal & insert.
+            NSParameterAssert(indexesChanged);
+            [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                NSInteger const  location = beyondEarlierTodayIndex + (NSInteger)idx;
+
+                [browseMenu removeItemAtIndex:location];
+                [browseMenu insertItem:self.menuHistorian.dayMenuItems[idx] atIndex:location];
+            }];
+            if ([indexesChanged containsIndex:0u]) {  // Still have a today menu item, so just update.
+                [self prepareTodayHistoryMenu];
+            }
+            break;
+        }
+    }
+}
+
+// See private interface for details.
+- (void)rebuildTodayDirectHistoryMenuDueToChange:(NSDictionary *)change {
     NSMenu * const          browseMenu = self.historyHeader.menu;
     NSInteger       beyondHistoryIndex = [browseMenu indexOfItem:self.historyHeader] + 1;
     NSKeyValueChange const  changeType = (NSKeyValueChange)[change[NSKeyValueChangeKindKey] unsignedIntegerValue];
     NSIndexSet * const  indexesChanged = change[NSKeyValueChangeIndexesKey];  // May be nil, depending on 'changeType'.
 
+    NSParameterAssert(browseMenu);
+    NSParameterAssert(beyondHistoryIndex != -1 + 1);
     switch (changeType) {
         default:
         case NSKeyValueChangeSetting: {
             // Do wholesale replacement; get rid of the current menu items and install the new ones.
-            while (![browseMenu itemAtIndex:beyondHistoryIndex].isSeparatorItem) {
+            NSMenuItem * const  earlierTodayMenuItem = self.earlierToday;
+
+            while ([browseMenu itemAtIndex:beyondHistoryIndex] != earlierTodayMenuItem) {
                 [browseMenu removeItemAtIndex:beyondHistoryIndex];
             }
-            for (NSMenuItem *item in self.menuHistorian.dayMenuItems) {
+            for (NSMenuItem *item in self.todayHistoryHandler.directMenuItems) {
                 [browseMenu insertItem:item atIndex:beyondHistoryIndex++];
             }
             beyondHistoryIndex = [browseMenu indexOfItem:self.historyHeader] + 1;
@@ -359,27 +492,78 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
         case NSKeyValueChangeRemoval: {
             // Purge the menus of the deleted indexes.
+            NSParameterAssert(indexesChanged);
             [indexesChanged enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop) {
                 [browseMenu removeItemAtIndex:(beyondHistoryIndex + (NSInteger)idx)];
             }];
             break;
         }
-            
+
         case NSKeyValueChangeInsertion: {
             // Place the menus of the added indexes.
+            NSParameterAssert(indexesChanged);
             [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-                [browseMenu insertItem:self.menuHistorian.dayMenuItems[idx] atIndex:(beyondHistoryIndex + (NSInteger)idx)];
+                [browseMenu insertItem:self.todayHistoryHandler.directMenuItems[idx] atIndex:(beyondHistoryIndex + (NSInteger)idx)];
             }];
             break;
         }
 
         case NSKeyValueChangeReplacement: {
             // Since NSMenu doesn't have a replacement API, do a removal & insert.
+            NSParameterAssert(indexesChanged);
             [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
                 NSInteger const  location = beyondHistoryIndex + (NSInteger)idx;
-
+                
                 [browseMenu removeItemAtIndex:location];
-                [browseMenu insertItem:self.menuHistorian.dayMenuItems[idx] atIndex:location];
+                [browseMenu insertItem:self.todayHistoryHandler.directMenuItems[idx] atIndex:location];
+            }];
+            break;
+        }
+    }
+}
+
+// See private interface for details.
+- (void)rebuildTodayOverflowHistoryMenuDueToChange:(NSDictionary *)change {
+    NSMenu * const    earlierTodayMenu = self.earlierToday.submenu;
+    NSKeyValueChange const  changeType = (NSKeyValueChange)[change[NSKeyValueChangeKindKey] unsignedIntegerValue];
+    NSIndexSet * const  indexesChanged = change[NSKeyValueChangeIndexesKey];  // May be nil, depending on 'changeType'.
+
+    NSParameterAssert(earlierTodayMenu);
+    switch (changeType) {
+        default:
+        case NSKeyValueChangeSetting: {
+            // Do wholesale replacement; get rid of the current menu items and install the new ones.
+            [earlierTodayMenu removeAllItems];
+            for (NSMenuItem *item in self.todayHistoryHandler.overflowMenuItems) {
+                [earlierTodayMenu addItem:item];
+            }
+            break;
+        }
+
+        case NSKeyValueChangeRemoval: {
+            // Purge the menus of the deleted indexes.
+            NSParameterAssert(indexesChanged);
+            [indexesChanged enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL *stop) {
+                [earlierTodayMenu removeItemAtIndex:(NSInteger)idx];
+            }];
+            break;
+        }
+
+        case NSKeyValueChangeInsertion: {
+            // Place the menus of the added indexes.
+            NSParameterAssert(indexesChanged);
+            [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                [earlierTodayMenu insertItem:self.todayHistoryHandler.overflowMenuItems[idx] atIndex:(NSInteger)idx];
+            }];
+            break;
+        }
+
+        case NSKeyValueChangeReplacement: {
+            // Since NSMenu doesn't have a replacement API, do a removal & insert.
+            NSParameterAssert(indexesChanged);
+            [indexesChanged enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                [earlierTodayMenu removeItemAtIndex:(NSInteger)idx];
+                [earlierTodayMenu insertItem:self.todayHistoryHandler.overflowMenuItems[idx] atIndex:(NSInteger)idx];
             }];
             break;
         }
@@ -396,6 +580,11 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 - (void)notifyOnWindowClose:(NSNotification *)notification {
     [self.mutableWindowControllers removeObject:[notification.object windowController]];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowWillCloseNotification object:notification.object];
+}
+
+// See private interface for details.
+- (void)notifyOnNewDay:(NSNotification *)notification {
+    [self prepareTodayHistoryMenu];
 }
 
 #pragma mark Apple event handlers

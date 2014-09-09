@@ -15,7 +15,32 @@
 
 NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
 
-#pragma mark File-local functions
+#pragma mark - Private NSValueTransformer
+
+@interface PrObjectIdentityTransformer : NSValueTransformer
+
+//! Starts as nil; the instance to be compared.
+@property (nonatomic) id  compared;
+
+@end
+
+@implementation PrObjectIdentityTransformer
+
++ (Class)transformedValueClass {
+    return [NSNumber class];
+}
+
++ (BOOL)allowsReverseTransformation {
+    return NO;
+}
+
+- (id)transformedValue:(id)value {
+    return [NSNumber numberWithBool:(self.compared == value)];
+}
+
+@end
+
+#pragma mark - File-local functions
 
 /*!
     @brief Makes a menu item representing a history day.
@@ -31,6 +56,13 @@ NSMenuItem *  CreateMenuItemForDay(NSCalendarDate *day, NSDateFormatter *format)
 
     dayItem.representedObject = day;
     dayItem.submenu = daySubmenu;
+
+    // Attach a binding to let the menu item auto-hide when used as the Today menu item.
+    PrairieAppDelegate * const           appDelegate = [NSApp delegate];
+    PrObjectIdentityTransformer * const  transformer = [[PrObjectIdentityTransformer alloc] init];
+
+    transformer.compared = dayItem.submenu;
+    [dayItem bind:NSHiddenBinding toObject:appDelegate.todayHistoryHandler withKeyPath:PrKeyPathSourceMenu options:@{NSValueTransformerBindingOption: transformer}];
     return dayItem;
 }
 

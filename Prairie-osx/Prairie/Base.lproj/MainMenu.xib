@@ -13,6 +13,7 @@
         <customObject id="-3" userLabel="Application" customClass="PrApplication"/>
         <customObject id="HFd-hS-jrP" customClass="PrairieAppDelegate">
             <connections>
+                <outlet property="earlierToday" destination="sjm-h3-DWZ" id="dNT-eD-dlA"/>
                 <outlet property="historyHeader" destination="dTD-wR-c8f" id="6kb-8V-Z7O"/>
             </connections>
         </customObject>
@@ -443,6 +444,17 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="validateHistory:" target="-1" id="8WF-Oa-lvw"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Earlier Today" id="sjm-h3-DWZ">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Earlier Today" id="6M0-4k-IVb"/>
+                                <connections>
+                                    <binding destination="HFd-hS-jrP" name="hidden" keyPath="todayHistoryHandler.overflowMenuItems.@count" id="DoG-II-Gjb">
+                                        <dictionary key="options">
+                                            <string key="NSValueTransformerName">NSNegateBoolean</string>
+                                        </dictionary>
+                                    </binding>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="pbg-ta-kqU"/>
