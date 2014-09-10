@@ -12,30 +12,20 @@
 
 
 // Keys for the preference dictionary
-extern NSString * const  PrDefaultPageKey;  // NSString, interpret as URL
-extern NSString * const  PrDefaultBackForwardMenuLengthKey;  // NSInteger (probably as NSNumber), must be positive
-extern NSString * const  PrDefaultControlStatusBarFromWSKey;  // BOOL (probably as NSNumber)
-extern NSString * const  PrDefaultOpenUntitledToDefaultPageKey;  // BOOL (probably as NSNumber)
-//! Preference key for "useValidateHistoryMenuItem".
+//! Preference key for 'defaultPage' (NSURL as NSString, must be valid URL, should be reachable).
+extern NSString * const  PrDefaultPageKey;
+//! Preference key for 'backForwardMenuLength' (NSInteger as NSNumber, must be positive).
+extern NSString * const  PrDefaultBackForwardMenuLengthKey;
+//! Preference key for 'controlStatusBarFromWS' (BOOL as NSNumber).
+extern NSString * const  PrDefaultControlStatusBarFromWSKey;
+//! Preference key for 'openUntitledToDefaultPage' (BOOL as NSNumber).
+extern NSString * const  PrDefaultOpenUntitledToDefaultPageKey;
+//! Preference key for 'useValidateHistoryMenuItem' (BOOL as NSNumber).
 extern NSString * const  PrDefaultUseValidateHistoryMenuItemKey;
-//! Preference key for "loadSaveHistory".
+//! Preference key for 'loadSaveHistory' (BOOL as NSNumber).
 extern NSString * const  PrDefaultLoadSaveHistoryKey;
-//! Preference key for "maxTodayHistoryMenuLength".
+//! Preference key for 'maxTodayHistoryMenuLength' (NSUInteger as NSNumber).
 extern NSString * const  PrDefaultMaxTodayHistoryMenuLengthKey;
-
-
-// Default values of various preferences
-extern NSString * const  PrDefaultPage;
-extern NSInteger const   PrDefaultBackForwardMenuLength;
-extern BOOL const        PrDefaultControlStatusBarFromWS;
-extern BOOL const        PrDefaultOpenUntitledToDefaultPage;
-//! Default value for "useValidateHistoryMenuItem".
-extern BOOL const        PrDefaultUseValidateHistoryMenuItem;
-//! Default value for "loadSaveHistory".
-extern BOOL const        PrDefaultLoadSaveHistory;
-//! Default value for "maxTodayHistoryMenuLength".
-extern NSUInteger const  PrDefaultMaxTodayHistoryMenuLength;
-
 
 @interface PrairieAppDelegate : NSObject <NSApplicationDelegate>
 

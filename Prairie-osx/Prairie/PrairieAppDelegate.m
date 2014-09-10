@@ -20,6 +20,7 @@
 
 #pragma mark Declared constants
 
+// Definitions of constants for keys of the preference dictionary, for the user-oriented entries. For any preference entry that is in "UserDefaults.plist", make sure these string values stay in sync.
 NSString * const  PrDefaultPageKey = @"DefaultPage";
 NSString * const  PrDefaultBackForwardMenuLengthKey = @"BackForwardMenuLength";
 NSString * const  PrDefaultControlStatusBarFromWSKey = @"ControlStatusBarFromWebScripting";
@@ -27,14 +28,6 @@ NSString * const  PrDefaultOpenUntitledToDefaultPageKey = @"OpenUntitledToDefaul
 NSString * const  PrDefaultUseValidateHistoryMenuItemKey = @"UseValidateHistoryMenuItem";
 NSString * const  PrDefaultLoadSaveHistoryKey = @"LoadSaveHistory";
 NSString * const  PrDefaultMaxTodayHistoryMenuLengthKey = @"MaxTodayHistoryMenuLength";
-
-NSString * const  PrDefaultPage = @"http://www.apple.com";
-NSInteger const   PrDefaultBackForwardMenuLength = 10;
-BOOL const        PrDefaultControlStatusBarFromWS = NO;
-BOOL const        PrDefaultOpenUntitledToDefaultPage = YES;
-BOOL const        PrDefaultUseValidateHistoryMenuItem = NO;
-BOOL const        PrDefaultLoadSaveHistory = YES;
-NSUInteger const  PrDefaultMaxTodayHistoryMenuLength = 2u;
 
 #pragma mark File-local constants
 
@@ -264,16 +257,7 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     // If there's a new window, file open, or file print on app launch, then those will be done after this method but before applicationDidFinishLaunching:, so anything setup required for any created windows needs to be done here.
 
     // Last-resort preference settings
-    [[NSUserDefaults standardUserDefaults]
-     registerDefaults:@{
-                        PrDefaultPageKey: PrDefaultPage,
-                        PrDefaultBackForwardMenuLengthKey: @(PrDefaultBackForwardMenuLength),
-                        PrDefaultControlStatusBarFromWSKey: @(PrDefaultControlStatusBarFromWS),
-                        PrDefaultOpenUntitledToDefaultPageKey: @(PrDefaultOpenUntitledToDefaultPage),
-                        PrDefaultUseValidateHistoryMenuItemKey: @(PrDefaultUseValidateHistoryMenuItem),
-                        PrDefaultLoadSaveHistoryKey: @(PrDefaultLoadSaveHistory),
-                        PrDefaultMaxTodayHistoryMenuLengthKey: @(PrDefaultMaxTodayHistoryMenuLength)
-                        }];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@"UserDefaults" withExtension:@"plist"]]];
 
     // Open remote URLs
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:replyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>DefaultPage</key>
+	<string>http://www.apple.com</string>
+	<key>BackForwardMenuLength</key>
+	<integer>10</integer>
+	<key>ControlStatusBarFromWebScripting</key>
+	<false/>
+	<key>OpenUntitledToDefaultPage</key>
+	<true/>
+	<key>UseValidateHistoryMenuItem</key>
+	<false/>
+	<key>LoadSaveHistory</key>
+	<true/>
+	<key>MaxTodayHistoryMenuLength</key>
+	<integer>2</integer>
+</dict>
+</plist>
