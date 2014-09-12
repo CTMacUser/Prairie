@@ -417,6 +417,13 @@
                             <menuItem title="Zoom Text Only" state="on" enabled="NO" id="Gjg-n3-nbg">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="xMC-50-cfz"/>
+                            <menuItem title="Enter Full Screen" keyEquivalent="f" id="pWc-Mz-mkH">
+                                <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                <connections>
+                                    <action selector="toggleFullScreen:" target="-1" id="zqy-FS-7ZF"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>
