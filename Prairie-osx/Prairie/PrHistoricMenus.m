@@ -14,6 +14,7 @@
 #pragma mark Declared constants
 
 NSString * const  PrKeyPathDayMenuItems = @"dayMenuItems";  // from this class
+NSString * const  PrKeyPathNeedsSaving = @"needsSaving";  // from this class
 
 #pragma mark - Private NSValueTransformer
 

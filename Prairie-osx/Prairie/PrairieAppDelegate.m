@@ -40,6 +40,9 @@ static NSString * const    PrHistoryFilenameV1 = @"History";
 //! Preference key for "historyFileBookmark".
 static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark";
 
+// Number of seconds after the WebHistory object is dirtied that a saving action is sent. Other dirtying events within the time window do not trigger more delayed saves.
+static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
+
 #pragma mark Private interface
 
 @interface PrairieAppDelegate () {
@@ -268,6 +271,7 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
     // Use app-global web-history. Must happen in the order given.
     [self.menuHistorian addObserver:self forKeyPath:PrKeyPathDayMenuItems options:NSKeyValueObservingOptionNew context:NULL];
+    [self.menuHistorian addObserver:self forKeyPath:PrKeyPathNeedsSaving options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
     [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathDirectMenuItems options:NSKeyValueObservingOptionNew context:NULL];
     [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathOverflowMenuItems options:NSKeyValueObservingOptionNew context:NULL];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnNewDay:) name:NSCalendarDayChangedNotification object:nil];
@@ -280,19 +284,35 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSCalendarDayChangedNotification object:nil];
     [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathOverflowMenuItems context:NULL];
     [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathDirectMenuItems context:NULL];
+    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathNeedsSaving context:NULL];
     [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathDayMenuItems context:NULL];
 }
 
 #pragma mark NSKeyValueObserving override
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    id const  newFinished = change[NSKeyValueChangeNewKey];
+    id const  newValue = change[NSKeyValueChangeNewKey];
+    id const  oldValue = change[NSKeyValueChangeOldKey];
 
-    if ([self.openFilers containsObject:object] && [keyPath isEqualToString:keyPathFinished] && (newFinished && [newFinished isKindOfClass:[NSNumber class]] && [newFinished boolValue])) {
-        [object removeObserver:self forKeyPath:keyPathFinished context:context];
-        [self.openFilers removeObject:object];
+    if ([self.openFilers containsObject:object] && [keyPath isEqualToString:keyPathFinished]) {
+        NSParameterAssert(newValue && [newValue isKindOfClass:[NSNumber class]]);
+        if ([newValue boolValue]) {
+            [object removeObserver:self forKeyPath:keyPathFinished context:context];
+            [self.openFilers removeObject:object];
+        }
     } else if ((self.menuHistorian == object) && [keyPath isEqualToString:PrKeyPathDayMenuItems]) {
         [self rebuildHistoryMenusDueToChange:change];
+    } else if ((self.menuHistorian == object) && [keyPath isEqualToString:PrKeyPathNeedsSaving]) {
+        NSParameterAssert(newValue && [newValue isKindOfClass:[NSNumber class]]);
+        NSParameterAssert(oldValue && [oldValue isKindOfClass:[NSNumber class]]);
+        if (![oldValue boolValue] && [newValue boolValue]) {
+            // Web-history is dirty; save it soon, but suspend sudden-termination until then.
+            [[NSProcessInfo processInfo] disableSuddenTermination];
+            [self performSelector:@selector(preserveHistory) withObject:nil afterDelay:PrHistoryChangeSaveDelay];
+        } else if ([oldValue boolValue] && ![newValue boolValue]) {
+            // Web-history just became undirty; allow sudden-termination again.
+            [[NSProcessInfo processInfo] enableSuddenTermination];
+        }
     } else if ((self.todayHistoryHandler == object) && [keyPath isEqualToString:PrKeyPathDirectMenuItems]) {
         [self rebuildTodayDirectHistoryMenuDueToChange:change];
     } else if ((self.todayHistoryHandler == object) && [keyPath isEqualToString:PrKeyPathOverflowMenuItems]) {

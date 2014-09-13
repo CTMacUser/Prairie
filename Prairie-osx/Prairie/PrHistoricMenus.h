@@ -13,6 +13,8 @@
 // Important property key-path strings.
 //! Key-path string for the 'dayMenuItems' property.
 extern NSString * const  PrKeyPathDayMenuItems;
+//! Key-path string for the 'needsSaving' property.
+extern NSString * const  PrKeyPathNeedsSaving;
 
 
 @interface PrHistoricMenus : NSObject
