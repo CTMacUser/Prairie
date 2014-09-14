@@ -36,7 +36,17 @@ static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark
 
 @implementation PrUserDefaults
 
-#pragma mark Factory setup
+#pragma mark Factory methods
+
++ (instancetype)sharedInstance {
+    static PrUserDefaults *    shared;
+    static dispatch_once_t  onceToken;
+
+    dispatch_once(&onceToken, ^{
+        shared = [self new];
+    });
+    return shared;
+}
 
 + (void)setup {
     static dispatch_once_t onceToken;

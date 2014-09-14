@@ -51,7 +51,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (void)performPreciseBackOrForward:(id)sender;
 
-//! Centralized access point for user defaults. All instances, whether here, in other controller instances, or in the application delegate, reference the same defaults.
+//! Centralized access point for user defaults.
 @property (nonatomic, readonly) PrUserDefaults *  defaults;
 
 @end
@@ -64,7 +64,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 {
     self = [super initWithWindowNibName:[NSStringFromClass([self class]) stringByReplacingOccurrencesOfString:@"Controller" withString:@""]];
     if (self) {
-        if (!(_defaults = [PrUserDefaults new])) {
+        if (!(_defaults = [PrUserDefaults sharedInstance])) {
             return nil;
         }
     }

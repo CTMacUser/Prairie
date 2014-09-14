@@ -12,6 +12,13 @@
 @interface PrUserDefaults : NSObject
 
 /*!
+    @brief Singleton access.
+    @details Since the property data is global, might as well use a global instance for access.
+    @return The singleton. Pray that it doesn't fail (and return nil).
+ */
++ (instancetype)sharedInstance;
+
+/*!
     @brief Connect to the NSUserDefaults system.
     @details Loads the contents of the user-default resource file as the app's Registration-domain user defaults. Call this during application initialization. Since the effects are global, so are the properties and all instances are effectively the same.
  */

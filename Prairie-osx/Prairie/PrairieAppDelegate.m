@@ -83,7 +83,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 @property (nonatomic, readonly) NSMutableSet *     openFilers;  // Holds processors so ARC won't claim them early.
 @property (nonatomic, readonly, copy) NSURL *      defaultHistoryFileURL;  // Default location for the History file.
 @property (nonatomic, readonly) PrHistoricMenus *  menuHistorian;  // Handles History menu updates.
-//! Centralized access point for user defaults. All instances, whether here or in controller instances, reference the same defaults.
+//! Centralized access point for user defaults.
 @property (nonatomic, readonly) PrUserDefaults *   defaults;
 
 @end
@@ -100,7 +100,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
         _openFilers = [[NSMutableSet alloc] init];
         _menuHistorian = [[PrHistoricMenus alloc] initWithHistory:history];
         _todayHistoryHandler = [[PrOverflowingMenu alloc] init];
-        _defaults = [PrUserDefaults new];
+        _defaults = [PrUserDefaults sharedInstance];
         if (history && _windowControllers && _openFilers && _menuHistorian && _todayHistoryHandler && _defaults) {
             [WebHistory setOptionalSharedHistory:history];
         } else {
