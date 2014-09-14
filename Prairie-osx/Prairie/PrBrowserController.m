@@ -9,6 +9,7 @@
 #import "PrBrowserController.h"
 #import "PrairieAppDelegate.h"
 #import "PrDocumentController.h"
+#import "PrUserDefaults.h"
 
 
 #pragma mark Declared constants
@@ -50,7 +51,8 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (void)performPreciseBackOrForward:(id)sender;
 
-@property (nonatomic, readonly) PrairieAppDelegate *appDelegate;
+//! Centralized access point for user defaults. All instances, whether here, in other controller instances, or in the application delegate, reference the same defaults.
+@property (nonatomic, readonly) PrUserDefaults *  defaults;
 
 @end
 
@@ -62,7 +64,9 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 {
     self = [super initWithWindowNibName:[NSStringFromClass([self class]) stringByReplacingOccurrencesOfString:@"Controller" withString:@""]];
     if (self) {
-        // Add your subclass-specific initialization here.
+        if (!(_defaults = [PrUserDefaults new])) {
+            return nil;
+        }
     }
     return self;
 }
@@ -112,7 +116,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-    id const  browser = [self.appDelegate createBrowser];
+    id const  browser = [[NSApp delegate] createBrowser];
 
     [[browser webView].mainFrame loadRequest:request];
     return [browser webView];
@@ -125,14 +129,14 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (void)webView:(WebView *)sender setStatusText:(NSString *)text
 {
-    if (self.appDelegate.controlStatusBarFromWS) {
+    if (self.defaults.controlStatusBarFromWS) {
         self.statusLine.stringValue = text;
     }  // Calling the version for "super" for an "else" case caused an internal exception, as in no implementation.
 }
 
 - (NSString *)webViewStatusText:(WebView *)sender  // UNTESTED
 {
-    return self.appDelegate.controlStatusBarFromWS ? self.statusLine.stringValue : [super webViewStatusText:sender];
+    return self.defaults.controlStatusBarFromWS ? self.statusLine.stringValue : [super webViewStatusText:sender];
 }
 
 - (BOOL)webViewAreToolbarsVisible:(WebView *)sender
@@ -149,12 +153,12 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 - (BOOL)webViewIsStatusBarVisible:(WebView *)sender
 {
-    return self.appDelegate.controlStatusBarFromWS ? [self isStatusBarVisible] : NO;  // No "super"
+    return self.defaults.controlStatusBarFromWS ? [self isStatusBarVisible] : NO;  // No "super"
 }
 
 - (void)webView:(WebView *)sender setStatusBarVisible:(BOOL)visible  // UNTESTED
 {
-    self.appDelegate.controlStatusBarFromWS ? visible ? [self showStatusBar] : [self hideStatusBar] : [super webView:sender setStatusBarVisible:visible];
+    self.defaults.controlStatusBarFromWS ? visible ? [self showStatusBar] : [self hideStatusBar] : [super webView:sender setStatusBarVisible:visible];
 }
 
 #pragma mark WebFrameLoadDelegate overrides
@@ -225,7 +229,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
         NSMenu *                    backMenu = [[NSMenu alloc] initWithTitle:@""];
         NSMenu *                 forwardMenu = [[NSMenu alloc] initWithTitle:@""];
         __block NSInteger         counterTag = 0;
-        NSInteger const        maxMenuLength = self.appDelegate.backForwardMenuLength;
+        NSInteger const        maxMenuLength = self.defaults.backForwardMenuLength;
 
         for (WebHistoryItem *obj in [backForwardList backListWithLimit:(int)maxMenuLength].reverseObjectEnumerator) {
             NSString *  itemTitle = obj.title;
@@ -422,17 +426,6 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
     [self.window setContentBorderThickness:(self.bottomSpacing.constant = PrStatusBarHeight) forEdge:NSMinYEdge];
 }
 
-#pragma mark Property getters & setters
-
-/*!
-    @brief Getter for "appDelegate" property
-    @return The application delegate instance, converted to its actual type.
- */
-- (PrairieAppDelegate *)appDelegate
-{
-    return [NSApp delegate];
-}
-
 #pragma mark Action methods
 
 /*!
@@ -574,7 +567,7 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
  */
 - (IBAction)goHome:(id)sender
 {
-    [self loadPage:self.appDelegate.defaultPage];
+    [self loadPage:self.defaults.defaultPage];
 }
 
 // See header for details.

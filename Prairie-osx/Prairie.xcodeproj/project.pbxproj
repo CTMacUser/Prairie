@@ -30,6 +30,7 @@
 		F3B5D43B19AC6DE300F5E009 /* PrFileOpener.m in Sources */ = {isa = PBXBuildFile; fileRef = F3B5D43A19AC6DE300F5E009 /* PrFileOpener.m */; };
 		F3B5D43E19AD7C6E00F5E009 /* PrGetURLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = F3B5D43D19AD7C6E00F5E009 /* PrGetURLHandler.m */; };
 		F3C0D1A419AAF96E00DD229D /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3C0D1A319AAF96E00DD229D /* ApplicationServices.framework */; };
+		F3C4706B19C559BC00D15853 /* PrUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = F3C4706A19C559BC00D15853 /* PrUserDefaults.m */; };
 		F3E0F0A3198617B400EABE36 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E0F0A2198617B400EABE36 /* WebKit.framework */; };
 		F3E0F0A919887B2400EABE36 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F3E0F0AB19887B2400EABE36 /* Localizable.strings */; };
 		F3E0F0AE198FF80A00EABE36 /* PrairieAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3E0F0AD198FF80A00EABE36 /* PrairieAppDelegate.m */; };
@@ -84,6 +85,8 @@
 		F3B5D43C19AD7C6E00F5E009 /* PrGetURLHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrGetURLHandler.h; sourceTree = "<group>"; };
 		F3B5D43D19AD7C6E00F5E009 /* PrGetURLHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrGetURLHandler.m; sourceTree = "<group>"; };
 		F3C0D1A319AAF96E00DD229D /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
+		F3C4706919C559BC00D15853 /* PrUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrUserDefaults.h; sourceTree = "<group>"; };
+		F3C4706A19C559BC00D15853 /* PrUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrUserDefaults.m; sourceTree = "<group>"; };
 		F3E0F0A2198617B400EABE36 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		F3E0F0AA19887B2400EABE36 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F3E0F0AC198FF80A00EABE36 /* PrairieAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrairieAppDelegate.h; sourceTree = "<group>"; };
@@ -175,6 +178,8 @@
 				F3834EEE19B4261A00ADFFF5 /* PrHistoricMenus.m */,
 				F3834EF019B9BED400ADFFF5 /* PrOverflowingMenu.h */,
 				F3834EF119B9BED400ADFFF5 /* PrOverflowingMenu.m */,
+				F3C4706919C559BC00D15853 /* PrUserDefaults.h */,
+				F3C4706A19C559BC00D15853 /* PrUserDefaults.m */,
 				F3A8ADD919A876F000CAE801 /* PrWebViewShowMIMEValidator.h */,
 				F3A8ADDA19A876F000CAE801 /* PrWebViewShowMIMEValidator.m */,
 				F36CC95F1982AA590001EC41 /* MainMenu.xib */,
@@ -326,6 +331,7 @@
 				F3A8ADD019A2C36800CAE801 /* PrApplication.m in Sources */,
 				F3834EF219B9BED400ADFFF5 /* PrOverflowingMenu.m in Sources */,
 				F3834EEF19B4261A00ADFFF5 /* PrHistoricMenus.m in Sources */,
+				F3C4706B19C559BC00D15853 /* PrUserDefaults.m in Sources */,
 				F3B5D43E19AD7C6E00F5E009 /* PrGetURLHandler.m in Sources */,
 				F36CC95B1982AA590001EC41 /* PrBrowserController.m in Sources */,
 				F36CC9541982AA590001EC41 /* main.m in Sources */,

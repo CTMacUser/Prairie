@@ -12,22 +12,12 @@
 #import "PrFileOpener.h"
 #import "PrGetURLHandler.h"
 #import "PrHistoricMenus.h"
+#import "PrUserDefaults.h"
 
 @import ApplicationServices;
 @import CoreServices;
 @import WebKit;
 
-
-#pragma mark Declared constants
-
-// Definitions of constants for keys of the preference dictionary, for the user-oriented entries. For any preference entry that is in "UserDefaults.plist", make sure these string values stay in sync.
-NSString * const  PrDefaultPageKey = @"DefaultPage";
-NSString * const  PrDefaultBackForwardMenuLengthKey = @"BackForwardMenuLength";
-NSString * const  PrDefaultControlStatusBarFromWSKey = @"ControlStatusBarFromWebScripting";
-NSString * const  PrDefaultOpenUntitledToDefaultPageKey = @"OpenUntitledToDefaultPage";
-NSString * const  PrDefaultUseValidateHistoryMenuItemKey = @"UseValidateHistoryMenuItem";
-NSString * const  PrDefaultLoadSaveHistoryKey = @"LoadSaveHistory";
-NSString * const  PrDefaultMaxTodayHistoryMenuLengthKey = @"MaxTodayHistoryMenuLength";
 
 #pragma mark File-local constants
 
@@ -35,10 +25,6 @@ static NSString * const  keyPathFinished = @"finished";  // from PrFileOpener
 
 static NSString * const    PrHistoryFilenameV1 = @"History";
 #define PrHistoryFilename  PrHistoryFilenameV1  // Can't point to another NSString and stay a compile-time constant.
-
-// Keys of the preference dictionary for non-user entries.
-//! Preference key for "historyFileBookmark".
-static NSString * const  PrDefaultHistoryFileBookmarkKey = @"HistoryFileBookmark";
 
 // Number of seconds after the WebHistory object is dirtied that a saving action is sent. Other dirtying events within the time window do not trigger more delayed saves.
 static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
@@ -51,12 +37,12 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
 /*!
     @brief Load the user's History file.
-    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise, loads the cached WebHistory store from a file location stored as bookmark data in another property. Updates bookmark data as needed.
+    @details If the 'defaults.loadSaveHistory' nested property is NO, does nothing. Otherwise, loads the cached WebHistory store from a file location stored as bookmark data in another property. Updates bookmark data as needed.
  */
 - (void)recallHistory;
 /*!
     @brief Save the user's History file.
-    @details If the "loadSaveHistory" property is NO, does nothing. Otherwise saves the WebHistory store to a cache file, whose location is either stored as bookmark data in another property or will be stored there once the file is created at a default URL.
+    @details If the 'defaults.loadSaveHistory' nested property is NO, does nothing. Otherwise saves the WebHistory store to a cache file, whose location is either stored as bookmark data in another property or will be stored there once the file is created at a default URL.
  */
 - (void)preserveHistory;
 /*!
@@ -97,10 +83,8 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 @property (nonatomic, readonly) NSMutableSet *     openFilers;  // Holds processors so ARC won't claim them early.
 @property (nonatomic, readonly, copy) NSURL *      defaultHistoryFileURL;  // Default location for the History file.
 @property (nonatomic, readonly) PrHistoricMenus *  menuHistorian;  // Handles History menu updates.
-
-// Non-user (i.e. private) preferences
-//! Bookmark for the History file. Valid when the WebHistory store gets saved at least once.
-@property (nonatomic) NSData *  historyFileBookmark;
+//! Centralized access point for user defaults. All instances, whether here or in controller instances, reference the same defaults.
+@property (nonatomic, readonly) PrUserDefaults *   defaults;
 
 @end
 
@@ -116,7 +100,8 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
         _openFilers = [[NSMutableSet alloc] init];
         _menuHistorian = [[PrHistoricMenus alloc] initWithHistory:history];
         _todayHistoryHandler = [[PrOverflowingMenu alloc] init];
-        if (history && _windowControllers && _openFilers && _menuHistorian && _todayHistoryHandler) {
+        _defaults = [PrUserDefaults new];
+        if (history && _windowControllers && _openFilers && _menuHistorian && _todayHistoryHandler && _defaults) {
             [WebHistory setOptionalSharedHistory:history];
         } else {
             return nil;
@@ -130,37 +115,6 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 }
 
 #pragma mark Property getters & setters
-
-- (NSURL *)defaultPage
-{
-    return [NSURL URLWithString:[[NSUserDefaults standardUserDefaults] stringForKey:PrDefaultPageKey]];
-}
-
-- (NSInteger)backForwardMenuLength
-{
-    return [[NSUserDefaults standardUserDefaults] integerForKey:PrDefaultBackForwardMenuLengthKey];
-}
-
-- (BOOL)controlStatusBarFromWS
-{
-    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultControlStatusBarFromWSKey];
-}
-
-- (BOOL)openUntitledToDefaultPage {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultOpenUntitledToDefaultPageKey];
-}
-
-- (BOOL)useValidateHistoryMenuItem {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultUseValidateHistoryMenuItemKey];
-}
-
-- (BOOL)loadSaveHistory {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:PrDefaultLoadSaveHistoryKey];
-}
-
-- (NSUInteger)maxTodayHistoryMenuLength {
-    return (NSUInteger)[[NSUserDefaults standardUserDefaults] integerForKey:PrDefaultMaxTodayHistoryMenuLengthKey];
-}
 
 - (NSURL *)applicationSupportDirectory {
     return [[[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject URLByAppendingPathComponent:[NSRunningApplication currentApplication].bundleIdentifier isDirectory:YES];
@@ -182,14 +136,6 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
 - (NSURL *)defaultHistoryFileURL {
     return [self.applicationSupportDirectory URLByAppendingPathComponent:PrHistoryFilename];
-}
-
-- (NSData *)historyFileBookmark {
-    return [[NSUserDefaults standardUserDefaults] dataForKey:PrDefaultHistoryFileBookmarkKey];
-}
-
-- (void)setHistoryFileBookmark:(NSData *)historyFileBookmark {
-    [[NSUserDefaults standardUserDefaults] setObject:historyFileBookmark forKey:PrDefaultHistoryFileBookmarkKey];
 }
 
 #pragma mark Public methods (besides actions)
@@ -247,7 +193,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
     PrBrowserController * const  browser = [self createBrowser];
 
     [browser showWindow:sender];
-    if (self.openUntitledToDefaultPage) {
+    if (self.defaults.openUntitledToDefaultPage) {
         [browser goHome:sender];
     } else {
         [browser openLocation:sender];
@@ -260,14 +206,14 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
     // If there's a new window, file open, or file print on app launch, then those will be done after this method but before applicationDidFinishLaunching:, so anything setup required for any created windows needs to be done here.
 
     // Last-resort preference settings
-    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithContentsOfURL:[[NSBundle mainBundle] URLForResource:@"UserDefaults" withExtension:@"plist"]]];
+    [PrUserDefaults setup];
 
     // Open remote URLs
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleGetURLEvent:replyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
 
     // Perliminaries to using app-global web-history.
     (void)[[NSFileManager defaultManager] createDirectoryAtURL:self.applicationSupportDirectory withIntermediateDirectories:YES attributes:nil error:nil];  // WebHistory's -saveToURL:error: won't create intermediate directories.
-    self.todayHistoryHandler.maxDirectCount = self.maxTodayHistoryMenuLength;
+    self.todayHistoryHandler.maxDirectCount = self.defaults.maxTodayHistoryMenuLength;
 
     // Use app-global web-history. Must happen in the order given.
     [self.menuHistorian addObserver:self forKeyPath:PrKeyPathDayMenuItems options:NSKeyValueObservingOptionNew context:NULL];
@@ -327,7 +273,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
     
     if (action == @selector(validateHistory:)) {
         menuItem.title = [WebHistory optionalSharedHistory].orderedLastVisitedDays.count ? NSLocalizedString(@"HISTORY_STORE_NONEMPTY", nil) : NSLocalizedString(@"HISTORY_STORE_EMPTY", nil);
-        return self.useValidateHistoryMenuItem;
+        return self.defaults.useValidateHistoryMenuItem;
     }
     return YES;
 }
@@ -336,18 +282,18 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
 // See private interface for details.
 - (void)recallHistory {
-    if (!self.loadSaveHistory) return;  // Respect the preference for having an external copy.
+    if (!self.defaults.loadSaveHistory) return;  // Respect the preference for having an external copy.
 
     BOOL          stale = NO;
     NSError *     error = nil;
-    NSURL *  historyURL = [NSURL URLByResolvingBookmarkData:self.historyFileBookmark options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
+    NSURL *  historyURL = [NSURL URLByResolvingBookmarkData:self.defaults.historyFileBookmark options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
 
     if (historyURL) {
         if (stale) {
             NSData * const  newBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
 
             if (newBookmark) {
-                self.historyFileBookmark = newBookmark;
+                self.defaults.historyFileBookmark = newBookmark;
             }
         }
 
@@ -357,18 +303,18 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
 // See private interface for details.
 - (void)preserveHistory {
-    if (!self.loadSaveHistory) return;  // Respect the preference for having an external copy.
+    if (!self.defaults.loadSaveHistory) return;  // Respect the preference for having an external copy.
 
     BOOL       stale = NO;
     NSError *  error = nil;
-    NSURL *    historyURL = [NSURL URLByResolvingBookmarkData:self.historyFileBookmark options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
+    NSURL *    historyURL = [NSURL URLByResolvingBookmarkData:self.defaults.historyFileBookmark options:NSURLBookmarkResolutionWithoutUI relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
 
     if (historyURL) {
         if (stale) {
             NSData * const  newBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
             
             if (newBookmark) {
-                self.historyFileBookmark = newBookmark;
+                self.defaults.historyFileBookmark = newBookmark;
             }
         }
         stale = NO;  // repurpose to indicate bookmark data does not need to be (re)calculated.
@@ -379,7 +325,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
     if ([[WebHistory optionalSharedHistory] saveToURL:historyURL error:&error]) {
         if (stale) {
-            self.historyFileBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];  // If creating bookmark fails, try again next session.
+            self.defaults.historyFileBookmark = [historyURL bookmarkDataWithOptions:kNilOptions includingResourceValuesForKeys:nil relativeToURL:nil error:&error];  // If creating bookmark fails, try again next session.
         }
     }
 }
