@@ -382,7 +382,11 @@ NSMenuItem *  CreateMenuItemFromHistory(WebHistoryItem *item) {
         NSString *             desiredTitle = historyItem.title;
 
         if (nil == desiredTitle) {
-            desiredTitle = historyItem.URLString;
+            if (!(desiredTitle = historyItem.alternateTitle)) {
+                NSURL * const  url = [NSURL URLWithString:historyItem.URLString];
+
+                desiredTitle = url.isFileURL ? url.lastPathComponent : historyItem.URLString;
+            }
         }
         if (![historyMenuItem.title isEqualToString:desiredTitle]) {
             [menuItemsToChange addIndex:(NSUInteger)i];
