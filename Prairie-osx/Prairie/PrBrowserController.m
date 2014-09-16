@@ -31,6 +31,16 @@ NSInteger const PrGoForwardSegment = 1;
 static CGFloat const PrLoadingBarHeight = 32.0;  // Regular; is there a header with the standard sizes?
 static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
+// Keys for the 'postLoadActions' dictionary.
+//! This dictionary key points to a NSString object that is the search string.
+static NSString * const  PrLoadActionSearchKey = @"search";
+//! This dictionary key points to a NSPrintInfo object that is the print record.
+static NSString * const  PrLoadActionPrintInfoKey = @"print info";
+//! This dictionary key points to a BOOL in an NSNumber object indicating whether to show the Print panel.
+static NSString * const  PrLoadActionPrintPanelKey = @"print panel";
+//! This dictionary key points to a BOOL in an NSNumber object indicating whether to show the Print-Progress panel.
+static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
+
 #pragma mark Private interface
 
 @interface PrBrowserController ()
@@ -48,11 +58,17 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 - (BOOL)isStatusBarVisible;
 - (void)hideStatusBar;
 - (void)showStatusBar;
+/*!
+    @brief Calls printWithInfo:showPrint:showProgress: with the data stored in 'postLoadActions'. Assumes the data required is actually there, so check first.
+ */
+- (void)printWithPostLoadInfo;
 
 - (void)performPreciseBackOrForward:(id)sender;
 
 //! Centralized access point for user defaults.
 @property (nonatomic, readonly) PrUserDefaults *  defaults;
+//! Directions on what to do after the next page load. Starts as nil.
+@property (nonatomic) NSDictionary *       postLoadActions;
 
 @end
 
@@ -264,6 +280,17 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
             [forwardMenu insertItem:forwardMenuItem atIndex:+counterTag - 1];
         }
         [backForwardControl setMenu:forwardMenu forSegment:PrGoForwardSegment];
+
+        // Do any post-loading actions.
+        NSString * const   postLoadSearch = self.postLoadActions[PrLoadActionSearchKey];
+        NSPrintInfo * const  postLoadInfo = self.postLoadActions[PrLoadActionPrintInfoKey];
+
+        if (postLoadSearch) {
+            (void)[sender searchFor:postLoadSearch direction:YES caseSensitive:NO wrap:YES];
+        }
+        if (postLoadInfo) {
+            [self performSelector:@selector(printWithPostLoadInfo) withObject:nil afterDelay:0.0];
+        }
     }
 }
 
@@ -327,16 +354,33 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 #pragma mark Public methods (besides actions)
 
+// See header for details.
+- (void)loadPage:(NSURL *)pageURL searching:(NSString *)search printing:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress {
+    // Prepare extra arguments. Clears out data from any previous page load, even if nil.
+    NSMutableDictionary * const  loadingActions = [[NSMutableDictionary alloc] initWithCapacity:4];
+
+    if (search) {
+        [loadingActions setObject:search forKeyedSubscript:PrLoadActionSearchKey];
+    }
+    if (info) {
+        [loadingActions setObject:info forKeyedSubscript:PrLoadActionPrintInfoKey];
+        [loadingActions setObject:@(configure) forKeyedSubscript:PrLoadActionPrintPanelKey];
+        [loadingActions setObject:@(progress) forKeyedSubscript:PrLoadActionPrintProgressKey];
+    }
+    self.postLoadActions = loadingActions;
+
+    // Request the page.
+    [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:pageURL]];
+}
+
 /*!
     @brief Orders web-view member to load a new URL.
     @param pageURL The URL for the resource to be loaded.
-    @details Encapsulates URL loads, packaging the URL into the NSURLRequest object that loadRequest needs. Having this code encapsulated means it can be manipulated by selector games (like adding a delay).
-
-    Will send either a PrBrowserLoadFailedNotification or PrBrowserLoadPassedNotification when the page loading ends. The notification object is this window controller instance. The user dictionary has entries with the desired URL and, if the load failed, a Boolean indicating if the load ended during the provisional or committed phase.
+    @details Acts like loadPage:title:searching:printing:showPrint:showProgress: with all arguments after the first one either nil or ignored. Sends the same notifications (without the ones relating to printing). Having the most basic case encapsulated means it can be manipulated by selector games (like adding a delay).
  */
 - (void)loadPage:(NSURL *)pageURL
 {
-    [self.webView.mainFrame loadRequest:[NSURLRequest requestWithURL:pageURL]];
+    [self loadPage:pageURL searching:nil printing:nil showPrint:NO showProgress:NO];
 }
 
 /*!
@@ -424,6 +468,11 @@ static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 {
     [self.statusLine setHidden:NO];
     [self.window setContentBorderThickness:(self.bottomSpacing.constant = PrStatusBarHeight) forEdge:NSMinYEdge];
+}
+
+// See private interface for details.
+- (void)printWithPostLoadInfo {
+    [self printWithInfo:self.postLoadActions[PrLoadActionPrintInfoKey] showPrint:[self.postLoadActions[PrLoadActionPrintPanelKey] boolValue] showProgress:[self.postLoadActions[PrLoadActionPrintProgressKey] boolValue]];
 }
 
 #pragma mark Action methods

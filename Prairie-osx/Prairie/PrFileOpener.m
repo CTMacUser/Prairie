@@ -24,7 +24,6 @@
 
 - (BOOL)takeBrowser:(id)browser fromPool:(NSMutableSet *)pool;
 - (void)checkFinished;
-- (void)startPrintJobFor:(id)browser;
 
 @property (nonatomic, assign) NSUInteger  fails, cancels, successes;  // counters
 @property (nonatomic) NSMutableSet        *openSpool, *printSpool;    // file-handling management
@@ -105,12 +104,8 @@
     if ([self takeBrowser:note.object fromPool:self.openSpool]) {
         if (self.settings) {  // Hopefully, checkFinished won't be called between the above and below lines.
             [self.printSpool addObject:note.object];
-            [self performSelector:@selector(startPrintJobFor:) withObject:note.object afterDelay:0.0];
         } else {
             ++self.successes;
-            if (self.search) {
-                (void)[[note.object webView] searchFor:self.search direction:YES caseSensitive:NO wrap:YES];
-            }
             [self checkFinished];
         }
     }
@@ -164,17 +159,6 @@
     }
 }
 
-/*!
-    @brief Calls the print action for the targeted browser.
-    @param browser The targeted PrBrowserController instance.
-    @details This should be called after a delay in the run loop.
- */
-- (void)startPrintJobFor:(id)browser {
-    if (self.settings) {
-        [browser printWithInfo:self.settings showPrint:self.showPrintPanel showProgress:YES];
-    }
-}
-
 // See the header for details.
 - (void)start {
     NSNotificationCenter * const  notifier = [NSNotificationCenter defaultCenter];
@@ -192,7 +176,7 @@
         if (browser) {
             [self.openSpool addObject:browser];
             [browser showWindow:self.application];
-            [browser loadPage:file];
+            [browser loadPage:file searching:self.search printing:self.settings showPrint:self.showPrintPanel showProgress:YES];
         } else {
             ++self.fails;
         }

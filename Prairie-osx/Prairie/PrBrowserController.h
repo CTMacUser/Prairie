@@ -41,6 +41,18 @@ extern NSInteger const PrGoForwardSegment;
  */
 - (IBAction)revisitHistory:(id)sender;
 
+/*!
+    @brief Loads a new URL and possibly applies additional actions.
+    @param pageURL The URL for the resource to be loaded.
+    @param search The text to search for once the resource is loaded. May be nil.
+    @param info The parameters to print from once the resource is loaded. May be nil.
+    @param configure Whether to show print panel once the resource is loaded. Ignored if info is nil.
+    @param progress Whether to show progress while printing once the resource is loaded. Ignored if info is nil.
+    @details Encapsulates URL loads, packaging the URL into the NSURLRequest object that the loadRequest call needs. If the page is successfully loaded, may perform the following actions. If search is not nil, its first occurrence in the page text is highlighted. If info is not nil, it is used as the configuration settings while the page is printed.
+
+    Will send either a PrBrowserLoadFailedNotification or PrBrowserLoadPassedNotification when the page loading ends. The notification object is this window controller instance. The user dictionary has entries with the desired URL and, if the load failed, a Boolean indicating if the load ended during the provisional or committed phase. If printing is enabled, a notification from printWithInfo:showPrint:showProgress: is also sent.
+ */
+- (void)loadPage:(NSURL *)pageURL searching:(NSString *)search printing:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;
 - (void)loadPage:(NSURL *)pageURL;
 - (void)printWithInfo:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;
 
