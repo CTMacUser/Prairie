@@ -32,6 +32,8 @@ static CGFloat const PrLoadingBarHeight = 32.0;  // Regular; is there a header w
 static CGFloat const PrStatusBarHeight  = 22.0;  // Small
 
 // Keys for the 'postLoadActions' dictionary.
+//! This dictionary key points to a NSString object with the new page's window title.
+static NSString * const  PrLoadActionSetTitleKey = @"title";
 //! This dictionary key points to a NSString object that is the search string.
 static NSString * const  PrLoadActionSearchKey = @"search";
 //! This dictionary key points to a NSPrintInfo object that is the print record.
@@ -282,9 +284,13 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
         [backForwardControl setMenu:forwardMenu forSegment:PrGoForwardSegment];
 
         // Do any post-loading actions.
+        NSString * const    postLoadTitle = self.postLoadActions[PrLoadActionSetTitleKey];
         NSString * const   postLoadSearch = self.postLoadActions[PrLoadActionSearchKey];
         NSPrintInfo * const  postLoadInfo = self.postLoadActions[PrLoadActionPrintInfoKey];
 
+        if (postLoadTitle) {
+            self.window.title = backForwardList.currentItem.alternateTitle = postLoadTitle;
+        }
         if (postLoadSearch) {
             (void)[sender searchFor:postLoadSearch direction:YES caseSensitive:NO wrap:YES];
         }
@@ -355,10 +361,13 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 #pragma mark Public methods (besides actions)
 
 // See header for details.
-- (void)loadPage:(NSURL *)pageURL searching:(NSString *)search printing:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress {
+- (void)loadPage:(NSURL *)pageURL title:(NSString *)pageTitle searching:(NSString *)search printing:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress {
     // Prepare extra arguments. Clears out data from any previous page load, even if nil.
-    NSMutableDictionary * const  loadingActions = [[NSMutableDictionary alloc] initWithCapacity:4];
+    NSMutableDictionary * const  loadingActions = [[NSMutableDictionary alloc] initWithCapacity:5];
 
+    if (pageTitle) {
+        [loadingActions setObject:pageTitle forKeyedSubscript:PrLoadActionSetTitleKey];
+    }
     if (search) {
         [loadingActions setObject:search forKeyedSubscript:PrLoadActionSearchKey];
     }
@@ -380,7 +389,7 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
  */
 - (void)loadPage:(NSURL *)pageURL
 {
-    [self loadPage:pageURL searching:nil printing:nil showPrint:NO showProgress:NO];
+    [self loadPage:pageURL title:nil searching:nil printing:nil showPrint:NO showProgress:NO];
 }
 
 /*!

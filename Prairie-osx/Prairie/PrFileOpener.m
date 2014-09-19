@@ -176,7 +176,7 @@
         if (browser) {
             [self.openSpool addObject:browser];
             [browser showWindow:self.application];
-            [browser loadPage:file searching:self.search printing:self.settings showPrint:self.showPrintPanel showProgress:YES];
+            [browser loadPage:file title:nil searching:self.search printing:self.settings showPrint:self.showPrintPanel showProgress:YES];
         } else {
             ++self.fails;
         }

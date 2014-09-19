@@ -2,8 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSSupportsSuddenTermination</key>
-	<true/>
+	<key>AppleDockMenu</key>
+	<string>DockMenu</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDocumentTypes</key>
@@ -62,7 +62,35 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>PrApplication</string>
-	<key>AppleDockMenu</key>
-	<string>DockMenu</string>
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Open URL</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>openURL</string>
+			<key>NSPortName</key>
+			<string>Prairie</string>
+			<key>NSRequiredContext</key>
+			<dict>
+				<key>NSTextContent</key>
+				<string>URL</string>
+			</dict>
+			<key>NSSendFileTypes</key>
+			<array/>
+			<key>NSSendTypes</key>
+			<array>
+				<string>public.url</string>
+				<string>public.url-name</string>
+				<string>public.rtf</string>
+				<string>public.utf8-plain-text</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
 </dict>
 </plist>

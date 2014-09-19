@@ -13,6 +13,7 @@
 #import "PrGetURLHandler.h"
 #import "PrHistoricMenus.h"
 #import "PrUserDefaults.h"
+#import "PrServicesProvider.h"
 
 @import ApplicationServices;
 @import CoreServices;
@@ -222,6 +223,11 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
     [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathOverflowMenuItems options:NSKeyValueObservingOptionNew context:NULL];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnNewDay:) name:NSCalendarDayChangedNotification object:nil];
     [self recallHistory];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)notification {
+    // Set up Services.
+    [NSApp setServicesProvider:[PrServicesProvider new]];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {

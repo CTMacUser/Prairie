@@ -44,6 +44,7 @@ extern NSInteger const PrGoForwardSegment;
 /*!
     @brief Loads a new URL and possibly applies additional actions.
     @param pageURL The URL for the resource to be loaded.
+    @param pageTitle The title applied to the window once the resource is loaded. May be nil.
     @param search The text to search for once the resource is loaded. May be nil.
     @param info The parameters to print from once the resource is loaded. May be nil.
     @param configure Whether to show print panel once the resource is loaded. Ignored if info is nil.
@@ -52,7 +53,7 @@ extern NSInteger const PrGoForwardSegment;
 
     Will send either a PrBrowserLoadFailedNotification or PrBrowserLoadPassedNotification when the page loading ends. The notification object is this window controller instance. The user dictionary has entries with the desired URL and, if the load failed, a Boolean indicating if the load ended during the provisional or committed phase. If printing is enabled, a notification from printWithInfo:showPrint:showProgress: is also sent.
  */
-- (void)loadPage:(NSURL *)pageURL searching:(NSString *)search printing:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;
+- (void)loadPage:(NSURL *)pageURL title:(NSString *)pageTitle searching:(NSString *)search printing:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;
 - (void)loadPage:(NSURL *)pageURL;
 - (void)printWithInfo:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;
 

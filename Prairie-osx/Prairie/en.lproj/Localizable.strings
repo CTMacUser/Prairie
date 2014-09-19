@@ -61,3 +61,11 @@
 
 /* Button title to approve Alert to clear WebHistory */
 "CLEAR_BUTTON" = "Clear";
+
+/** PrServicesProvider.m **/
+
+/* Error message when the Open URL service could not create a browser window. First argument is the (1-based) index of the failed Pasteboard item, second is the total number of Pasteboard items. */
+"OPENURL_WINDOW_FAILED" = "A browser window could not be created for item #%1$lu (of %2$lu) processed by the Service.";
+
+/* Error message when the Open URL service could not extract a URL. First argument is the (1-based) index of the failed Pasteboard item, second is the total number of Pasteboard items. */
+"OPENURL_URL_FAILED" = "A URL was not found for item #%1$lu (of %2$lu) processed by the Service.";
