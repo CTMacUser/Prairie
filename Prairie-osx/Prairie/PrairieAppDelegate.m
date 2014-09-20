@@ -30,6 +30,9 @@ static NSString * const    PrHistoryFilenameV1 = @"History";
 // Number of seconds after the WebHistory object is dirtied that a saving action is sent. Other dirtying events within the time window do not trigger more delayed saves.
 static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
+// A unique context to use for the KVO functions. Needed for advanced KVO to differentiate between use by different classes of a hierarchy.
+static void * const  PrivateKVOContext = (void *)&PrivateKVOContext;
+
 #pragma mark Private interface
 
 @interface PrairieAppDelegate () {
@@ -166,7 +169,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
     if (opener) {
         [self.openFilers addObject:opener];
-        [opener addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:NULL];
+        [opener addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:PrivateKVOContext];
         opener.search = [[[[NSAppleEventManager sharedAppleEventManager] currentAppleEvent] paramDescriptorForKeyword:keyAESearchText] stringValue];
         [opener performSelector:@selector(start) withObject:nil afterDelay:0.0];
     } else {
@@ -180,7 +183,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
     if (printer && printSettings2) {
         [self.openFilers addObject:printer];
-        [printer addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:NULL];
+        [printer addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:PrivateKVOContext];
         printer.settings = printSettings2;
         printer.showPrintPanel = showPrintPanels;
         [printer performSelector:@selector(start) withObject:nil afterDelay:0.0];
@@ -217,10 +220,10 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
     self.todayHistoryHandler.maxDirectCount = self.defaults.maxTodayHistoryMenuLength;
 
     // Use app-global web-history. Must happen in the order given.
-    [self.menuHistorian addObserver:self forKeyPath:PrKeyPathDayMenuItems options:NSKeyValueObservingOptionNew context:NULL];
-    [self.menuHistorian addObserver:self forKeyPath:PrKeyPathNeedsSaving options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
-    [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathDirectMenuItems options:NSKeyValueObservingOptionNew context:NULL];
-    [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathOverflowMenuItems options:NSKeyValueObservingOptionNew context:NULL];
+    [self.menuHistorian addObserver:self forKeyPath:PrKeyPathDayMenuItems options:NSKeyValueObservingOptionNew context:PrivateKVOContext];
+    [self.menuHistorian addObserver:self forKeyPath:PrKeyPathNeedsSaving options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:PrivateKVOContext];
+    [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathDirectMenuItems options:NSKeyValueObservingOptionNew context:PrivateKVOContext];
+    [self.todayHistoryHandler addObserver:self forKeyPath:PrKeyPathOverflowMenuItems options:NSKeyValueObservingOptionNew context:PrivateKVOContext];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnNewDay:) name:NSCalendarDayChangedNotification object:nil];
     [self recallHistory];
 }
@@ -234,10 +237,10 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
     // Use app-global web-history. Must happen in the order given (the reverse of the finish-launching handler).
     [self preserveHistory];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSCalendarDayChangedNotification object:nil];
-    [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathOverflowMenuItems context:NULL];
-    [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathDirectMenuItems context:NULL];
-    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathNeedsSaving context:NULL];
-    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathDayMenuItems context:NULL];
+    [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathOverflowMenuItems context:PrivateKVOContext];
+    [self.todayHistoryHandler removeObserver:self forKeyPath:PrKeyPathDirectMenuItems context:PrivateKVOContext];
+    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathNeedsSaving context:PrivateKVOContext];
+    [self.menuHistorian removeObserver:self forKeyPath:PrKeyPathDayMenuItems context:PrivateKVOContext];
 }
 
 #pragma mark NSKeyValueObserving override
@@ -245,6 +248,10 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     id const  newValue = change[NSKeyValueChangeNewKey];
     id const  oldValue = change[NSKeyValueChangeOldKey];
+
+    if (PrivateKVOContext != context) {
+        return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 
     if ([self.openFilers containsObject:object] && [keyPath isEqualToString:keyPathFinished]) {
         NSParameterAssert(newValue && [newValue isKindOfClass:[NSNumber class]]);
@@ -555,7 +562,7 @@ static NSTimeInterval const  PrHistoryChangeSaveDelay = 60.0;
 
     if (handler) {
         [self.openFilers addObject:handler];
-        [handler addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:NULL];
+        [handler addObserver:self forKeyPath:keyPathFinished options:NSKeyValueObservingOptionNew context:PrivateKVOContext];
         [handler performSelector:@selector(start) withObject:nil afterDelay:0.0];
     } else if (reply.descriptorType != typeNull) {
         [reply setParamDescriptor:[NSAppleEventDescriptor descriptorWithInt32:unimpErr] forKeyword:keyErrorNumber];
