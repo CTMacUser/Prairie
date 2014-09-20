@@ -604,9 +604,13 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 
     [panel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
         if (result == NSFileHandlingPanelOKButton) {
-            NSError  *error = nil;
+            __block NSError *   error = nil;
+            NSFileCoordinator *  sync = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
 
-            if (![([fileTypes firstObjectCommonWithArray:(__bridge_transfer NSArray *)UTTypeCreateAllIdentifiersForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)panel.URL.pathExtension, NULL)] ? source.data : source.webArchive.data) writeToURL:panel.URL options:NSDataWritingAtomic error:&error]) {
+            [sync coordinateWritingItemAtURL:panel.URL options:NSFileCoordinatorWritingForReplacing error:&error byAccessor:^(NSURL *newURL) {
+                (void)[([fileTypes firstObjectCommonWithArray:(__bridge_transfer NSArray *)UTTypeCreateAllIdentifiersForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)panel.URL.pathExtension, nil)] ? source.data : source.webArchive.data) writeToURL:newURL options:NSDataWritingAtomic error:&error];
+            }];
+            if (error) {
                 [self performSelector:@selector(showError:) withObject:error afterDelay:0.0];
             }
         }
