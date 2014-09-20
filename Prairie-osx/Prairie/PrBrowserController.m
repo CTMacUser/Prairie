@@ -64,6 +64,10 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
     @brief Calls printWithInfo:showPrint:showProgress: with the data stored in 'postLoadActions'. Assumes the data required is actually there, so check first.
  */
 - (void)printWithPostLoadInfo;
+/*!
+    @brief Sets the Back and Forward toolbar buttons to match the WebView's history state.
+ */
+- (void)prepareBackForwardButtons;
 
 - (void)performPreciseBackOrForward:(id)sender;
 
@@ -230,58 +234,14 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
             }
         }
         if (!frame.dataSource.pageTitle) {
-            sender.window.title = requestURL.lastPathComponent;
+            sender.window.title = [requestURL.lastPathComponent stringByRemovingPercentEncoding];
         }
 
         // Announce that the URL was loaded. (Doing this before setting self.urlDisplay.stringValue crashed it.)
         [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadPassedNotification object:self userInfo:@{PrBrowserURLKey: requestURL}];
 
-        // Enabled/disabled status of the Back and Forward toolbar buttons.
-        NSSegmentedControl * const  backForwardControl = (NSSegmentedControl *)self.toolbarBackForward.view;
-
-        [backForwardControl setEnabled:[sender canGoBack] forSegment:PrGoBackSegment];
-        [backForwardControl setEnabled:[sender canGoForward] forSegment:PrGoForwardSegment];
-
-        // Revisit menus for the Back and Forward toolbar buttons.
-        WebBackForwardList * const  backForwardList = sender.backForwardList;
-        NSMenu *                    backMenu = [[NSMenu alloc] initWithTitle:@""];
-        NSMenu *                 forwardMenu = [[NSMenu alloc] initWithTitle:@""];
-        __block NSInteger         counterTag = 0;
-        NSInteger const        maxMenuLength = self.defaults.backForwardMenuLength;
-
-        for (WebHistoryItem *obj in [backForwardList backListWithLimit:(int)maxMenuLength].reverseObjectEnumerator) {
-            NSString *  itemTitle = obj.title;
-
-            if (!itemTitle) {
-                // Some (file) URLs don't generate a WebView-compatible title.
-                itemTitle = [[NSURL URLWithString:obj.URLString] lastPathComponent];
-            }
-
-            NSMenuItem *  backMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
-
-            backMenuItem.tag = --counterTag;
-            backMenuItem.toolTip = obj.originalURLString;
-            backMenuItem.target = self;
-            [backMenu insertItem:backMenuItem atIndex:-counterTag - 1];
-        }  // The history lists go from earliest to latest. The menus need to go from temporally closest to furthest. Those directions are the same for the forward list, but opposing for the back list, so the back list has to be iterated backwards.
-        [backForwardControl setMenu:backMenu forSegment:PrGoBackSegment];
-        counterTag = 0;
-        for (WebHistoryItem *obj in [backForwardList forwardListWithLimit:(int)maxMenuLength]) {
-            NSString *  itemTitle = obj.title;
-
-            if (!itemTitle) {
-                // Some (file) URLs don't generate a WebView-compatible title.
-                itemTitle = [[NSURL URLWithString:obj.URLString] lastPathComponent];
-            }
-
-            NSMenuItem *  forwardMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
-
-            forwardMenuItem.tag = ++counterTag;
-            forwardMenuItem.toolTip = obj.originalURLString;
-            forwardMenuItem.target = self;
-            [forwardMenu insertItem:forwardMenuItem atIndex:+counterTag - 1];
-        }
-        [backForwardControl setMenu:forwardMenu forSegment:PrGoForwardSegment];
+        // Handle Back and Forward toolbar buttons.
+        [self prepareBackForwardButtons];
 
         // Do any post-loading actions.
         NSString * const    postLoadTitle = self.postLoadActions[PrLoadActionSetTitleKey];
@@ -289,7 +249,7 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
         NSPrintInfo * const  postLoadInfo = self.postLoadActions[PrLoadActionPrintInfoKey];
 
         if (postLoadTitle) {
-            self.window.title = backForwardList.currentItem.alternateTitle = postLoadTitle;
+            self.window.title = sender.backForwardList.currentItem.alternateTitle = postLoadTitle;
         }
         if (postLoadSearch) {
             (void)[sender searchFor:postLoadSearch direction:YES caseSensitive:NO wrap:YES];
@@ -482,6 +442,60 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 // See private interface for details.
 - (void)printWithPostLoadInfo {
     [self printWithInfo:self.postLoadActions[PrLoadActionPrintInfoKey] showPrint:[self.postLoadActions[PrLoadActionPrintPanelKey] boolValue] showProgress:[self.postLoadActions[PrLoadActionPrintProgressKey] boolValue]];
+}
+
+// See private interface for details.
+- (void)prepareBackForwardButtons {
+    // Preliminaries
+    NSSegmentedControl * const  backForwardControl = (NSSegmentedControl *)self.toolbarBackForward.view;
+    WebView * const             webControl = self.webView;
+    WebBackForwardList * const  backForwardList = webControl.backForwardList;
+    NSInteger const             menuLength = self.defaults.backForwardMenuLength;
+
+    // Enabled/disabled status
+    [backForwardControl setEnabled:webControl.canGoBack forSegment:PrGoBackSegment];
+    [backForwardControl setEnabled:webControl.canGoForward forSegment:PrGoForwardSegment];
+
+    // Back button menu
+    NSMenu * const  backMenu = [[NSMenu alloc] initWithTitle:@""];
+    NSInteger     counterTag = 0;
+
+    for (WebHistoryItem *item in [backForwardList backListWithLimit:(int)menuLength].reverseObjectEnumerator) {  // Reverse-iteration since history lists go from earliest to latest but the menu items need to go from temporally closest to furthest.
+        NSString *  itemTitle = item.title;
+
+        if (nil == itemTitle) {
+            if (!(itemTitle = item.alternateTitle)) {
+                itemTitle = [[[NSURL URLWithString:item.URLString] lastPathComponent] stringByRemovingPercentEncoding];
+            }
+        }
+        NSMenuItem * const  backMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
+
+        backMenuItem.tag = --counterTag;
+        backMenuItem.toolTip = item.originalURLString;
+        backMenuItem.target = self;
+        [backMenu insertItem:backMenuItem atIndex:-counterTag - 1];
+    }
+    [backForwardControl setMenu:backMenu forSegment:PrGoBackSegment];
+
+    // Forward button menu
+    NSMenu * const  forwardMenu = [[NSMenu alloc] initWithTitle:@""];
+
+    counterTag = 0;
+    for (WebHistoryItem *item in [backForwardList forwardListWithLimit:(int)menuLength]) {
+        NSString *  itemTitle = item.title;
+
+        if (nil == itemTitle) {
+            if (!(itemTitle = item.alternateTitle)) {
+                itemTitle = [[[NSURL URLWithString:item.URLString] lastPathComponent] stringByRemovingPercentEncoding];
+            }
+        }
+        NSMenuItem * const  forwardMenuItem = [[NSMenuItem alloc] initWithTitle:itemTitle action:@selector(performPreciseBackOrForward:) keyEquivalent:@""];
+        forwardMenuItem.tag = ++counterTag;
+        forwardMenuItem.toolTip = item.originalURLString;
+        forwardMenuItem.target = self;
+        [forwardMenu insertItem:forwardMenuItem atIndex:+counterTag - 1];
+    }
+    [backForwardControl setMenu:forwardMenu forSegment:PrGoForwardSegment];
 }
 
 #pragma mark Action methods
