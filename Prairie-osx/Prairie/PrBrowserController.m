@@ -43,9 +43,66 @@ static NSString * const  PrLoadActionPrintPanelKey = @"print panel";
 //! This dictionary key points to a BOOL in an NSNumber object indicating whether to show the Print-Progress panel.
 static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 
-#pragma mark Private interface
+// Keys for restorable properties.
+//! Key-path string for the 'postLoadActions' property.
+static NSString * const  PrKeyPathPostLoadActions = @"postLoadActions";
+//! Dictionary key string for the URL string of a WebHistoryItem.
+static NSString * const  PrURLStringKey = @"URL String";
+//! Dictionary key string for the title of a WebHistoryItem.
+static NSString * const  PrTitleKey = @"Title";
+//! Dictionary key string for the last-visited time-interval of a WebHistoryItem.
+static NSString * const  PrLastVisitedTimeIntervalKey = @"Last Visited Time Interval";
+//! Dictionary key string for an alternate title of a WebHistoryItem.
+static NSString * const  PrAlternateTitleKey = @"Alternate Title";
+//! Archive key string for the WebView's back-list.
+static NSString * const  PrBackListKey = @"Back List";
+//! Archive key string for the WebView's current item.
+static NSString * const  PrCurrentItemKey = @"Current Item";
+//! Archive key string for the WebView's forward-list.
+static NSString * const  PrForwardListKey = @"Forward List";
 
-@interface PrBrowserController ()
+#pragma mark File-local functions
+
+/*!
+    @brief Makes a dictionary representing the attributes of a web-history item.
+    @param item The web-history entry to be copied.
+    @return A dictionary with the re-creatable attributes of a web-history item.
+ */
+static inline
+NSDictionary *  CreateDictionaryForWebHistoryItem(WebHistoryItem *item) {
+    NSMutableDictionary * const  dict = [NSMutableDictionary dictionaryWithDictionary:@{PrLastVisitedTimeIntervalKey: @(item.lastVisitedTimeInterval)}];
+
+    if (item.originalURLString) {
+        [dict setObject:item.originalURLString forKeyedSubscript:PrURLStringKey];
+    }
+    if (item.title) {
+        [dict setObject:item.title forKeyedSubscript:PrTitleKey];
+    }
+    if (item.alternateTitle) {
+        [dict setObject:item.alternateTitle forKeyedSubscript:PrAlternateTitleKey];
+    }
+    return dict;
+}
+
+/*!
+    @brief Makes a web-history item from attributes stored in a dictionary.
+    @param dict The dictionary to be read.
+    @return A web-history item with attributes copied from the dictionary.
+ */
+static inline
+WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
+    WebHistoryItem * const  item = [[WebHistoryItem alloc] initWithURLString:dict[PrURLStringKey] title:dict[PrTitleKey] lastVisitedTimeInterval:[dict[PrLastVisitedTimeIntervalKey] doubleValue]];
+    NSString * const        alternateTitle = dict[PrAlternateTitleKey];
+
+    if (alternateTitle) {
+        item.alternateTitle = alternateTitle;
+    }
+    return item;
+}
+
+#pragma mark - Private interface
+
+@interface PrBrowserController () <NSWindowRestoration>
 
 - (void)notifyOnProgressStarted:(NSNotification *)notification;
 - (void)notifyOnProgressChanged:(NSNotification *)notification;
@@ -68,13 +125,24 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
     @brief Sets the Back and Forward toolbar buttons to match the WebView's history state.
  */
 - (void)prepareBackForwardButtons;
+/*!
+    @brief The core name of this class, used for the XIB name and its window identifier.
+    @return The name of this class, minus the "Controller" part.
+ */
++ (NSString *)coreName;
+/*!
+    @brief Performs the User-Interface State-Restoration finishing calls, if needed.
+ */
+- (void)finishStateRestoration;
 
 - (void)performPreciseBackOrForward:(id)sender;
 
 //! Centralized access point for user defaults.
 @property (nonatomic, readonly) PrUserDefaults *  defaults;
-//! Directions on what to do after the next page load. Starts as nil.
-@property (nonatomic) NSDictionary *       postLoadActions;
+//! Directions on what to do after the next page load. Starts as nil. Should be KVO-compliant.
+@property (nonatomic) NSDictionary *              postLoadActions;
+//! Indicate that user-interface restore is happening. Starts as NO.
+@property (nonatomic, assign, getter=isRestoring) BOOL  restoring;
 
 @end
 
@@ -82,10 +150,8 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 
 #pragma mark Conventional overrides
 
-- (id)init
-{
-    self = [super initWithWindowNibName:[NSStringFromClass([self class]) stringByReplacingOccurrencesOfString:@"Controller" withString:@""]];
-    if (self) {
+- (instancetype)init {
+    if (self = [super initWithWindowNibName:[self.class coreName]]) {
         if (!(_defaults = [PrUserDefaults sharedInstance])) {
             return nil;
         }
@@ -101,6 +167,9 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 - (void)windowDidLoad {
     [super windowDidLoad];
 
+    // Point to restoration class.
+    self.window.restorationClass = self.class;
+
     // Observe notifications for web page loading progress.
     NSNotificationCenter * const  notifier = [NSNotificationCenter defaultCenter];
 
@@ -113,6 +182,82 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 
     // Personalize user-agent.
     self.webView.applicationNameForUserAgent = [[NSProcessInfo processInfo] processName];
+}
+
+#pragma mark NSWindowRestoration override
+
++ (void)restoreWindowWithIdentifier:(NSString *)identifier state:(NSCoder *)state completionHandler:(void (^)(NSWindow *, NSError *))completionHandler {
+    if ([identifier isEqualToString:[self.class coreName]]) {
+        NSWindow * const  window = [[[NSApp delegate] createBrowser] window];
+
+        if (window) {
+            [window.windowController setRestoring:YES];
+            [NSApp extendStateRestoration];
+        }
+        completionHandler(window, nil);
+    } else {
+        completionHandler(nil, [NSError errorWithDomain:NSCocoaErrorDomain code:NSFeatureUnsupportedError userInfo:nil]);
+    }
+}
+
+#pragma mark NSRestorableState overrides
+
++ (NSArray *)restorableStateKeyPaths {
+    return [[super restorableStateKeyPaths] arrayByAddingObject:PrKeyPathPostLoadActions];
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder *)coder {
+    WebBackForwardList * const  backForwardList = self.webView.backForwardList;
+
+    [super encodeRestorableStateWithCoder:coder];
+    if (backForwardList.currentItem) {
+        int const  backListCount = backForwardList.backListCount, forwardListCount = backForwardList.forwardListCount;
+
+        if (backListCount) {
+            NSMutableArray * const  backArray = [[NSMutableArray alloc] initWithCapacity:backListCount];
+
+            for (WebHistoryItem *item in [backForwardList backListWithLimit:backListCount]) {
+                [backArray addObject:CreateDictionaryForWebHistoryItem(item)];
+            }
+            [coder encodeObject:backArray forKey:PrBackListKey];
+        }
+        [coder encodeObject:CreateDictionaryForWebHistoryItem(backForwardList.currentItem) forKey:PrCurrentItemKey];
+        if (forwardListCount) {
+            NSMutableArray * const  forwardArray = [[NSMutableArray alloc] initWithCapacity:forwardListCount];
+
+            for (WebHistoryItem *item in [backForwardList forwardListWithLimit:forwardListCount]) {
+                [forwardArray addObject:CreateDictionaryForWebHistoryItem(item)];
+            }
+            [coder encodeObject:forwardArray forKey:PrForwardListKey];
+        }
+    }
+}
+
+- (void)restoreStateWithCoder:(NSCoder *)coder {
+    NSDictionary *  currentItemDictionary;
+
+    [super restoreStateWithCoder:coder];
+    if ((currentItemDictionary = [coder decodeObjectOfClass:[NSDictionary class] forKey:PrCurrentItemKey])) {
+        WebHistoryItem * const  currentItem = CreateWebHistoryItemFromDictionary(currentItemDictionary);
+
+        for (NSDictionary *dict in [coder decodeObjectOfClass:[NSArray class] forKey:PrBackListKey]) {
+            [self.webView.backForwardList addItem:CreateWebHistoryItemFromDictionary(dict)];
+        }
+        [self.webView.backForwardList addItem:currentItem];
+        for (NSDictionary *dict in [coder decodeObjectOfClass:[NSArray class] forKey:PrForwardListKey]) {
+            [self.webView.backForwardList addItem:CreateWebHistoryItemFromDictionary(dict)];
+        }
+
+        [self.webView performSelectorOnMainThread:@selector(goToBackForwardItem:) withObject:currentItem waitUntilDone:NO];
+    } else {
+        [self finishStateRestoration];
+    }
+}
+
+#pragma mark NSWindowDelegate override
+
+- (void)windowWillClose:(NSNotification *)notification {
+    [self finishStateRestoration];  // Assume a close during User-Interface Resume is user-initiated.
 }
 
 #pragma mark NSMenuValidation override
@@ -190,6 +335,7 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {  // Ignore notices from sub-frames.
+        [self finishStateRestoration];
         [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(YES), PrBrowserErrorKey: error}];
         [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
     }
@@ -219,6 +365,7 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {
+        [self finishStateRestoration];
         self.urlDisplay.stringValue = sender.mainFrameURL;
         if ([sender acceptsFirstResponder]) {
             (void)[self.window makeFirstResponder:sender];
@@ -257,12 +404,16 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
         if (postLoadInfo) {
             [self performSelector:@selector(printWithPostLoadInfo) withObject:nil afterDelay:0.0];
         }
+
+        // Make sure to save any updates to the Back/Forward list
+        [self invalidateRestorableState];
     }
 }
 
 - (void)webView:(WebView *)sender didFailLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
     if (frame == sender.mainFrame) {
+        [self finishStateRestoration];
         [[NSNotificationCenter defaultCenter] postNotificationName:PrBrowserLoadFailedNotification object:self userInfo:@{PrBrowserURLKey: frame.provisionalDataSource.request.URL, PrBrowserLoadFailedWasProvisionalKey: @(NO), PrBrowserErrorKey: error}];
         [self performSelector:@selector(showError:) withObject:error afterDelay:0.1];
     }
@@ -496,6 +647,19 @@ static NSString * const  PrLoadActionPrintProgressKey = @"print progress";
         [forwardMenu insertItem:forwardMenuItem atIndex:+counterTag - 1];
     }
     [backForwardControl setMenu:forwardMenu forSegment:PrGoForwardSegment];
+}
+
+// See private interface for details.
++ (NSString *)coreName {
+    return [NSStringFromClass(self) stringByReplacingOccurrencesOfString:@"Controller" withString:@""];
+}
+
+// See private interface for details.
+- (void)finishStateRestoration {
+    if (self.isRestoring) {
+        self.restoring = NO;
+        [NSApp completeStateRestoration];
+    }
 }
 
 #pragma mark Action methods
