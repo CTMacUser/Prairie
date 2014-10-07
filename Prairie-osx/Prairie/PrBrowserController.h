@@ -25,8 +25,18 @@ extern NSInteger const PrGoBackSegment;
 extern NSInteger const PrGoForwardSegment;
 
 
+//! Controller class for web-browsing windows.
 @interface PrBrowserController : NSWindowController <NSWindowDelegate>
 
+// Factory methods
+/*!
+    @brief Creates a browser window, with a matching controller of this type.
+    @details Registers the window (controller) with the application delegate.
+    @return The window controller of the new window, NIL if something went wrong.
+ */
++ (instancetype)createBrowser;
+
+// Actions
 - (IBAction)performBackOrForward:(id)sender;
 - (IBAction)toggleLoadingBar:(id)sender;
 - (IBAction)toggleStatusBar:(id)sender;
@@ -47,6 +57,7 @@ extern NSInteger const PrGoForwardSegment;
  */
 - (IBAction)viewSource:(id)sender;
 
+// Other public methods
 /*!
     @brief Loads a new URL and possibly applies additional actions.
     @param pageURL The URL for the resource to be loaded.
@@ -63,6 +74,7 @@ extern NSInteger const PrGoForwardSegment;
 - (void)loadPage:(NSURL *)pageURL;
 - (void)printWithInfo:(NSPrintInfo *)info showPrint:(BOOL)configure showProgress:(BOOL)progress;
 
+// Outlets
 @property (weak) IBOutlet WebView *webView;
 @property (weak) IBOutlet NSTextField *urlDisplay;
 @property (weak) IBOutlet NSToolbarItem *toolbarBackForward;

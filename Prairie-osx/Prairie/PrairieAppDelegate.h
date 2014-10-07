@@ -14,7 +14,6 @@
 @interface PrairieAppDelegate : NSObject <NSApplicationDelegate>
 
 // Other public messages
-- (id)createBrowser;
 /*!
     @brief Add a new window (and matching controller).
     @param window The window whose controller will be added to self.windowControllers. Must not be nil.

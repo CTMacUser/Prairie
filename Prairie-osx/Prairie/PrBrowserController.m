@@ -149,6 +149,19 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
 
 @implementation PrBrowserController
 
+#pragma mark Factory methods
+
+// See header for details.
++ (instancetype)createBrowser {
+    PrBrowserController * const  controller = [self new];
+    NSWindow * const                 window = controller.window;  // Force creation of window.
+    
+    if (window) {
+        [[NSApp delegate] registerWindow:window];
+    }
+    return controller;
+}
+
 #pragma mark Conventional overrides
 
 - (instancetype)init {

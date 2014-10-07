@@ -144,20 +144,6 @@ static void * const  PrivateKVOContext = (void *)&PrivateKVOContext;
 
 #pragma mark Public methods (besides actions)
 
-/*!
-    @brief Create a browser window (and matching controller).
-    @details If successful, the new controller is added to self.windowControllers.
-    @return The new browser window's controller (PrBrowserController), NULL if something failed.
- */
-- (id)createBrowser {
-    NSWindow * const  browserWindow = [[[PrBrowserController alloc] init] window];  // Loads window's XIB.
-
-    if (browserWindow) {
-        [self registerWindow:browserWindow];
-    }
-    return [browserWindow windowController];
-}
-
 // See header for details.
 - (void)registerWindow:(NSWindow *)window {
     [self.mutableWindowControllers addObject:window.windowController];
@@ -196,7 +182,7 @@ static void * const  PrivateKVOContext = (void *)&PrivateKVOContext;
 }
 
 - (BOOL)applicationOpenUntitledFile:(NSApplication *)sender {
-    PrBrowserController * const  browser = [self createBrowser];
+    PrBrowserController * const  browser = [PrBrowserController createBrowser];
 
     [browser showWindow:sender];
     if (self.defaults.openUntitledToDefaultPage) {
@@ -580,7 +566,7 @@ static void * const  PrivateKVOContext = (void *)&PrivateKVOContext;
  */
 - (IBAction)openLocation:(id)sender
 {
-    PrBrowserController * const  browser = [self createBrowser];
+    PrBrowserController * const  browser = [PrBrowserController createBrowser];
 
     [browser showWindow:sender];
     [browser openLocation:sender];
@@ -593,7 +579,7 @@ static void * const  PrivateKVOContext = (void *)&PrivateKVOContext;
  */
 - (IBAction)goHome:(id)sender
 {
-    PrBrowserController * const  browser = [self createBrowser];
+    PrBrowserController * const  browser = [PrBrowserController createBrowser];
     
     [browser showWindow:sender];
     [browser goHome:sender];
@@ -651,7 +637,7 @@ static void * const  PrivateKVOContext = (void *)&PrivateKVOContext;
 
 // See header for details.
 - (IBAction)revisitHistory:(id)sender {
-    PrBrowserController * const  browser = [self createBrowser];
+    PrBrowserController * const  browser = [PrBrowserController createBrowser];
     
     [browser showWindow:sender];
     [browser revisitHistory:sender];

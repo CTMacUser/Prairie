@@ -8,7 +8,6 @@
  */
 
 #import "PrFileOpener.h"
-#import "PrairieAppDelegate.h"
 #import "PrBrowserController.h"
 
 
@@ -171,7 +170,7 @@
     [notifier addObserver:self selector:@selector(notifyOnPrintSuccess:) name:PrBrowserPrintPassedNotification object:nil];
 
     for (NSURL *file in self.files) {
-        PrBrowserController * const  browser = [(PrairieAppDelegate *)[self.application delegate] createBrowser];
+        PrBrowserController * const  browser = [PrBrowserController createBrowser];
 
         if (browser) {
             [self.openSpool addObject:browser];
