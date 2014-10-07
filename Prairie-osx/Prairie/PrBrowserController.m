@@ -10,6 +10,7 @@
 #import "PrairieAppDelegate.h"
 #import "PrDocumentController.h"
 #import "PrUserDefaults.h"
+#import "PrSourceViewController.h"
 
 
 #pragma mark Declared constants
@@ -273,6 +274,10 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
         if (!self.webView.mainFrame.dataSource.data) {  // Also triggers when dataSource is nil.
             return NO;
         }
+    } else if (action == @selector(viewSource:)) {
+        id<WebDocumentRepresentation> const  representation = [self.webView.mainFrame.dataSource representation];
+
+        return representation && [representation canProvideDocumentSource];
     }
     return YES;
 }
@@ -821,6 +826,11 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
     WebHistoryItem * const  historyItem = menuItem.representedObject;
 
     [self loadPage:[NSURL URLWithString:historyItem.URLString]];
+}
+
+// See header for details.
+- (IBAction)viewSource:(id)sender {
+    return [[PrSourceViewController createViewerOfSource:self.webView.mainFrame.dataSource] showWindow:sender];
 }
 
 @end

@@ -23,6 +23,8 @@
 		F3834EEF19B4261A00ADFFF5 /* PrHistoricMenus.m in Sources */ = {isa = PBXBuildFile; fileRef = F3834EEE19B4261A00ADFFF5 /* PrHistoricMenus.m */; };
 		F3834EF219B9BED400ADFFF5 /* PrOverflowingMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = F3834EF119B9BED400ADFFF5 /* PrOverflowingMenu.m */; };
 		F397FE1A19B0F270006D5E8F /* DockMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F397FE1C19B0F270006D5E8F /* DockMenu.xib */; };
+		F39FDD6219D65219007A1693 /* PrSourceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F39FDD6019D65219007A1693 /* PrSourceViewController.m */; };
+		F39FDD6419D656AE007A1693 /* PrSourceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = F39FDD6619D656AE007A1693 /* PrSourceView.xib */; };
 		F3A8ADD019A2C36800CAE801 /* PrApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = F3A8ADCF19A2C36800CAE801 /* PrApplication.m */; };
 		F3A8ADD519A6A98B00CAE801 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3A8ADD419A6A98B00CAE801 /* CoreServices.framework */; };
 		F3A8ADD819A85B6E00CAE801 /* PrDocumentController.m in Sources */ = {isa = PBXBuildFile; fileRef = F3A8ADD719A85B6E00CAE801 /* PrDocumentController.m */; };
@@ -74,6 +76,9 @@
 		F3834EF019B9BED400ADFFF5 /* PrOverflowingMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrOverflowingMenu.h; sourceTree = "<group>"; };
 		F3834EF119B9BED400ADFFF5 /* PrOverflowingMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrOverflowingMenu.m; sourceTree = "<group>"; };
 		F397FE1B19B0F270006D5E8F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DockMenu.xib; sourceTree = "<group>"; };
+		F39FDD5F19D65219007A1693 /* PrSourceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrSourceViewController.h; sourceTree = "<group>"; };
+		F39FDD6019D65219007A1693 /* PrSourceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrSourceViewController.m; sourceTree = "<group>"; };
+		F39FDD6519D656AE007A1693 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PrSourceView.xib; sourceTree = "<group>"; };
 		F3A8ADCE19A2C36800CAE801 /* PrApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrApplication.h; sourceTree = "<group>"; };
 		F3A8ADCF19A2C36800CAE801 /* PrApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PrApplication.m; sourceTree = "<group>"; };
 		F3A8ADD419A6A98B00CAE801 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -183,6 +188,9 @@
 				F3834EF119B9BED400ADFFF5 /* PrOverflowingMenu.m */,
 				F3C4706C19C66DDA00D15853 /* PrServicesProvider.h */,
 				F3C4706D19C66DDB00D15853 /* PrServicesProvider.m */,
+				F39FDD5F19D65219007A1693 /* PrSourceViewController.h */,
+				F39FDD6019D65219007A1693 /* PrSourceViewController.m */,
+				F39FDD6619D656AE007A1693 /* PrSourceView.xib */,
 				F3C4706919C559BC00D15853 /* PrUserDefaults.h */,
 				F3C4706A19C559BC00D15853 /* PrUserDefaults.m */,
 				F3A8ADD919A876F000CAE801 /* PrWebViewShowMIMEValidator.h */,
@@ -313,6 +321,7 @@
 				F36CC95E1982AA590001EC41 /* PrBrowser.xib in Resources */,
 				F36CC9581982AA590001EC41 /* Credits.rtf in Resources */,
 				F36CC9611982AA590001EC41 /* MainMenu.xib in Resources */,
+				F39FDD6419D656AE007A1693 /* PrSourceView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,6 +347,7 @@
 				F3C4706E19C66DDB00D15853 /* PrServicesProvider.m in Sources */,
 				F3834EEF19B4261A00ADFFF5 /* PrHistoricMenus.m in Sources */,
 				F3C4706B19C559BC00D15853 /* PrUserDefaults.m in Sources */,
+				F39FDD6219D65219007A1693 /* PrSourceViewController.m in Sources */,
 				F3B5D43E19AD7C6E00F5E009 /* PrGetURLHandler.m in Sources */,
 				F36CC95B1982AA590001EC41 /* PrBrowserController.m in Sources */,
 				F36CC9541982AA590001EC41 /* main.m in Sources */,
@@ -411,6 +421,14 @@
 				F397FE1B19B0F270006D5E8F /* Base */,
 			);
 			name = DockMenu.xib;
+			sourceTree = "<group>";
+		};
+		F39FDD6619D656AE007A1693 /* PrSourceView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F39FDD6519D656AE007A1693 /* Base */,
+			);
+			name = PrSourceView.xib;
 			sourceTree = "<group>";
 		};
 		F3E0F0AB19887B2400EABE36 /* Localizable.strings */ = {

@@ -40,6 +40,12 @@ extern NSInteger const PrGoForwardSegment;
     @details Triggers the corresponding menu item's WebHistoryItem to be visited.
  */
 - (IBAction)revisitHistory:(id)sender;
+/*!
+    @brief Action to view the current page's source text.
+    @param sender The object that sent this message.
+    @details If the current page has source text, then create a source-view window and controller.
+ */
+- (IBAction)viewSource:(id)sender;
 
 /*!
     @brief Loads a new URL and possibly applies additional actions.

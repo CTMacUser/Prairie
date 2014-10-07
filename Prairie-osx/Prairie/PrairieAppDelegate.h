@@ -15,6 +15,12 @@
 
 // Other public messages
 - (id)createBrowser;
+/*!
+    @brief Add a new window (and matching controller).
+    @param window The window whose controller will be added to self.windowControllers. Must not be nil.
+    @details This class will watch for a close notification for this window, and remove its controller then.
+ */
+- (void)registerWindow:(NSWindow *)window;
 
 // Actions
 - (IBAction)openLocation:(id)sender;

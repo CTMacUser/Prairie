@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PrSourceViewController">
+            <connections>
+                <outlet property="scrollView" destination="mCF-fi-pCb" id="hVb-ab-6JB"/>
+                <outlet property="textView" destination="dwy-VE-xNf" id="Aql-ba-JtQ"/>
+                <outlet property="window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <window identifier="PrSourceView" title="Source" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" animationBehavior="default" id="F0z-JX-Cv5">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="196" y="240" width="480" height="270"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
+            <view key="contentView" id="se5-gp-TjO">
+                <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mCF-fi-pCb">
+                        <rect key="frame" x="-1" y="-1" width="482" height="272"/>
+                        <clipView key="contentView" id="EO6-nN-BG8">
+                            <rect key="frame" x="1" y="1" width="223" height="133"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <textView editable="NO" importsGraphics="NO" richText="NO" findStyle="bar" incrementalSearchingEnabled="YES" allowsUndo="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" linkDetection="YES" dataDetection="YES" id="dwy-VE-xNf">
+                                    <rect key="frame" x="0.0" y="0.0" width="223" height="270"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <size key="minSize" width="0.0" height="270"/>
+                                    <size key="maxSize" width="482" height="10000000"/>
+                                    <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <size key="minSize" width="0.0" height="270"/>
+                                    <size key="maxSize" width="482" height="10000000"/>
+                                    <connections>
+                                        <binding destination="-2" name="value" keyPath="self.sourceText" id="llZ-iZ-edg"/>
+                                    </connections>
+                                </textView>
+                            </subviews>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </clipView>
+                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="F0B-iA-lyG">
+                            <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="FZJ-Kd-Gh4">
+                            <rect key="frame" x="224" y="1" width="15" height="133"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="mCF-fi-pCb" secondAttribute="trailing" constant="-1" id="AnU-7b-DWU"/>
+                    <constraint firstAttribute="bottom" secondItem="mCF-fi-pCb" secondAttribute="bottom" constant="-1" id="JPs-Uq-Cx8"/>
+                    <constraint firstItem="mCF-fi-pCb" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="-1" id="TE0-OB-aa2"/>
+                    <constraint firstItem="mCF-fi-pCb" firstAttribute="leading" secondItem="se5-gp-TjO" secondAttribute="leading" constant="-1" id="uLu-oJ-UII"/>
+                </constraints>
+            </view>
+            <connections>
+                <binding destination="-2" name="displayPatternTitle1" keyPath="self.sourceTitle" id="V2o-1V-1d5">
+                    <dictionary key="options">
+                        <string key="NSDisplayPattern">Source of “%{title1}@”</string>
+                    </dictionary>
+                </binding>
+                <outlet property="delegate" destination="-2" id="0bl-1N-AYu"/>
+            </connections>
+        </window>
+    </objects>
+</document>

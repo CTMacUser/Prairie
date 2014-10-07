@@ -153,13 +153,15 @@ static void * const  PrivateKVOContext = (void *)&PrivateKVOContext;
     NSWindow * const  browserWindow = [[[PrBrowserController alloc] init] window];  // Loads window's XIB.
 
     if (browserWindow) {
-        id const  browser = browserWindow.windowController;
-
-        [self.mutableWindowControllers addObject:browser];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnWindowClose:) name:NSWindowWillCloseNotification object:browserWindow];
-        return browser;
+        [self registerWindow:browserWindow];
     }
-    return nil;
+    return [browserWindow windowController];
+}
+
+// See header for details.
+- (void)registerWindow:(NSWindow *)window {
+    [self.mutableWindowControllers addObject:window.windowController];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notifyOnWindowClose:) name:NSWindowWillCloseNotification object:window];
 }
 
 #pragma mark NSApplicationDelegate overrides
