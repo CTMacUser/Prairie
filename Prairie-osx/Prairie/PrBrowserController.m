@@ -268,7 +268,45 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
     }
 }
 
-#pragma mark NSWindowDelegate override
+#pragma mark NSWindowDelegate overrides
+
+- (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame {
+    NSParameterAssert(self.window == window);
+
+    // Based on the web content, get the maximum desired width and height.
+    NSView<WebDocumentView> * const  view = self.webView.mainFrame.frameView.documentView;
+    NSSize const       desiredContentSize = NSMakeSize(NSWidth(view.frame), NSHeight(view.frame) + ((CGFloat)!!self.isLoadingBarVisible * PrLoadingBarHeight) + ((CGFloat)!!self.isStatusBarVisible * PrStatusBarHeight));
+
+    // Adjust that desired size to what's actually available.
+    NSRect  frame = [window contentRectForFrameRect:newFrame];
+
+    frame.size.width = MIN(desiredContentSize.width, frame.size.width);
+    frame.size.height = MIN(desiredContentSize.height, frame.size.height);
+
+    // Adjust to the window's size bounds.
+    frame = [window frameRectForContentRect:frame];
+    frame.size.width = MAX(window.minSize.width, frame.size.width);
+    frame.size.height = MAX(window.minSize.height, frame.size.height);
+    NSAssert(frame.size.width <= newFrame.size.width, @"Standard web-browser window size too wide.");
+    NSAssert(frame.size.height <= newFrame.size.height, @"Standard web-browser window size too tall.");
+
+    // Try minimizing the amount the window moves from its current spot on the chosen screen.
+    NSRect const  oldOverlapFrame = NSIntersectionRect(window.frame, newFrame);
+
+    frame = NSOffsetRect(frame, NSMidX(oldOverlapFrame) - NSMidX(frame), NSMidY(oldOverlapFrame) - NSMidY(frame));
+    if (NSMaxX(frame) > NSMaxX(newFrame)) {
+        frame = NSOffsetRect(frame, NSMaxX(newFrame) - NSMaxX(frame), 0.0);
+    } else if (NSMinX(frame) < NSMinX(newFrame)) {
+        frame = NSOffsetRect(frame, NSMinX(newFrame) - NSMinX(frame), 0.0);
+    }
+    if (NSMaxY(frame) > NSMaxY(newFrame)) {
+        frame = NSOffsetRect(frame, 0.0, NSMaxY(newFrame) - NSMaxY(frame));
+    } else if (NSMinY(frame) < NSMinY(newFrame)) {
+        frame = NSOffsetRect(frame, 0.0, NSMinY(newFrame) - NSMinY(frame));
+    }
+
+    return frame;
+}
 
 - (void)windowWillClose:(NSNotification *)notification {
     [self finishStateRestoration];  // Assume a close during User-Interface Resume is user-initiated.
