@@ -202,7 +202,7 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
 
 + (void)restoreWindowWithIdentifier:(NSString *)identifier state:(NSCoder *)state completionHandler:(void (^)(NSWindow *, NSError *))completionHandler {
     if ([identifier isEqualToString:[self.class coreName]]) {
-        NSWindow * const  window = [[[NSApp delegate] createBrowser] window];
+        NSWindow * const  window = [[self createBrowser] window];
 
         if (window) {
             [window.windowController setRestoring:YES];
@@ -339,7 +339,7 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-    id const  browser = [[NSApp delegate] createBrowser];
+    PrBrowserController * const  browser = [PrBrowserController createBrowser];
 
     [[browser webView].mainFrame loadRequest:request];
     return [browser webView];

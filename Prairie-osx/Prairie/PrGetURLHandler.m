@@ -72,7 +72,7 @@ typedef enum : NSUInteger {
         NSAppleEventManager * const  manager = [NSAppleEventManager sharedAppleEventManager];
 
         _status = loadUnstarted;
-        if (!(_browser = [[NSApp delegate] createBrowser])) {
+        if (!(_browser = [PrBrowserController createBrowser])) {
             return nil;
         }
         if (!(_url = [NSURL URLWithString:[[[manager currentAppleEvent] paramDescriptorForKeyword:keyDirectObject] stringValue]])) {

@@ -23,7 +23,7 @@
 
         ++counter;
         if (targetURL) {
-            id const  browser = [[NSApp delegate] createBrowser];
+            id const  browser = [PrBrowserController createBrowser];
             
             if (browser) {
                 [browser showWindow:NSApp];
