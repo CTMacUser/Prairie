@@ -137,6 +137,12 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
 - (void)finishStateRestoration;
 
 - (void)performPreciseBackOrForward:(id)sender;
+/*!
+    @brief Action for menu items within the window title-bar command-click menu for non-file URLs.
+    @param sender The object that sent this message.
+    @details Checks which menu item was clicked, and instructs the associated WebView to go to that item's URL.
+ */
+- (void)goToParent:(id)sender;
 
 //! Centralized access point for user defaults.
 @property (nonatomic, readonly) PrUserDefaults *  defaults;
@@ -306,6 +312,26 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
     }
 
     return frame;
+}
+
+- (BOOL)window:(NSWindow *)window shouldPopUpDocumentPathMenu:(NSMenu *)menu {
+    // Use default behavior for file URLs and URLs not using the common Internet scheme syntax.
+    NSURL *  url = [NSURL URLWithString:self.webView.mainFrameURL];
+
+    NSParameterAssert(self.window == window);
+    if (!url || url.isFileURL || !url.host) {
+        return !!menu.numberOfItems;
+    }
+
+    // Add the current URL and each parent directory down to the server.
+    [menu removeAllItems];
+    [menu addItemWithTitle:url.absoluteString action:nil keyEquivalent:@""].state = NSOffState;
+    while (url.path && ![url.path isEqualToString:@"/"]) {
+        url = [url URLByDeletingLastPathComponent];
+        (void)[menu addItemWithTitle:url.absoluteString action:@selector(goToParent:) keyEquivalent:@""];
+    }
+
+    return YES;
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
@@ -777,6 +803,12 @@ WebHistoryItem *  CreateWebHistoryItemFromDictionary(NSDictionary *dict) {
 - (void)performPreciseBackOrForward:(id)sender
 {
     (void)[self.webView goToBackForwardItem:[self.webView.backForwardList itemAtIndex:(int)[sender tag]]];
+}
+
+// See private interface for details
+- (void)goToParent:(id)sender {
+    NSParameterAssert([sender isKindOfClass:[NSMenuItem class]]);
+    [self loadPage:[NSURL URLWithString:[sender title]]];
 }
 
 /*!

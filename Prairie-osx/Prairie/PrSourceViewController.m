@@ -9,6 +9,7 @@
 
 #import "PrSourceViewController.h"
 #import "PrairieAppDelegate.h"
+#import "PrBrowserController.h"
 
 
 #pragma mark File-local constants
@@ -39,6 +40,13 @@ static NSString * const  PrKeyPathSourceTitle = @"sourceTitle";
     @return The name of this class, minus the "Controller" part.
  */
 + (NSString *)coreName;
+
+/*!
+    @brief Action to browse to the source URL.
+    @param sender The object that sent this message.
+    @details Creates a browser window and has it fetch this instance's stored URL.
+ */
+- (void)visitSource:(id)sender;
 
 // Attributes
 //! The text source of the targeted web resource.
@@ -106,6 +114,13 @@ static NSString * const  PrKeyPathSourceTitle = @"sourceTitle";
     self.textView.font = [NSFont userFixedPitchFontOfSize:0.0];
 }
 
+#pragma mark Properties
+
+- (void)setSourceURL:(NSURL *)sourceURL {
+    // There is no Binding for 'representedURL' as of Mavericks. The attribute is needed to turn on the window's title bar pop-up menu.
+    self.window.representedURL = _sourceURL = sourceURL;
+}
+
 #pragma mark NSWindowRestoration override
 
 + (void)restoreWindowWithIdentifier:(NSString *)identifier
@@ -124,7 +139,7 @@ static NSString * const  PrKeyPathSourceTitle = @"sourceTitle";
     return [[super restorableStateKeyPaths] arrayByAddingObjectsFromArray:@[PrKeyPathSourceText, PrKeyPathSourceURL, PrKeyPathURLAlternate, PrKeyPathSourceTitle]];
 }
 
-#pragma mark NSWindowDelegate override
+#pragma mark NSWindowDelegate overrides
 
 - (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame {
     NSParameterAssert(self.window == window);
@@ -161,11 +176,30 @@ static NSString * const  PrKeyPathSourceTitle = @"sourceTitle";
     return frame;
 }
 
+- (BOOL)window:(NSWindow *)window shouldPopUpDocumentPathMenu:(NSMenu *)menu {
+    NSParameterAssert(self.window == window);
+
+    [menu removeAllItems];
+    [menu addItemWithTitle:self.sourceURL.absoluteString action:@selector(visitSource:) keyEquivalent:@""].state = NSOffState;
+    
+    return YES;
+}
+
 #pragma mark Private methods, administration
 
 // See private interface for details.
 + (NSString *)coreName {
     return [NSStringFromClass(self) stringByReplacingOccurrencesOfString:@"Controller" withString:@""];
+}
+
+#pragma mark Private methods, actions
+
+// See private interface for details.
+- (void)visitSource:(id)sender {
+    PrBrowserController * const  browser = [PrBrowserController createBrowser];
+
+    [browser showWindow:sender];
+    [browser loadPage:self.sourceURL];
 }
 
 #pragma mark Actions
