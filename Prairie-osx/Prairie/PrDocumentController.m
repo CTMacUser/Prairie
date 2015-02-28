@@ -8,6 +8,7 @@
  */
 
 #import "PrDocumentController.h"
+#import "PrairieAppDelegate.h"
 #import "PrWebViewShowMIMEValidator.h"
 
 @import ApplicationServices;
@@ -36,7 +37,7 @@
 #pragma mark Conventional overrides
 
 - (IBAction)newDocument:(id)sender {
-    (void)[[NSApp delegate] applicationOpenUntitledFile:NSApp];
+    (void)[(PrairieAppDelegate *)[NSApp delegate] applicationOpenUntitledFile:NSApp];
 }
 
 - (IBAction)openDocument:(id)sender {

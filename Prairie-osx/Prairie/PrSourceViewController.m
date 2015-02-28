@@ -70,7 +70,7 @@ static NSString * const  PrKeyPathSourceTitle = @"sourceTitle";
     NSWindow * const                    window = controller.window;  // Force creation of window.
 
     if (window) {
-        [[NSApp delegate] registerWindow:window];
+        [(PrairieAppDelegate *)[NSApp delegate] registerWindow:window];
     }
     return controller;
 }

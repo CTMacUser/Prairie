@@ -59,7 +59,7 @@ NSMenuItem *  CreateMenuItemForDay(NSCalendarDate *day, NSDateFormatter *format)
     dayItem.submenu = daySubmenu;
 
     // Attach a binding to let the menu item auto-hide when used as the Today menu item.
-    PrairieAppDelegate * const           appDelegate = [NSApp delegate];
+    PrairieAppDelegate * const           appDelegate = [NSApplication sharedApplication].delegate;
     PrObjectIdentityTransformer * const  transformer = [[PrObjectIdentityTransformer alloc] init];
 
     transformer.compared = dayItem.submenu;
